@@ -2,7 +2,18 @@ library(simmer)
 library(Rlab)
 
 set.seed(42)
-patient_pathway_choice <- function(){
+
+#' Sample a patient type
+#' 
+#' @description
+#' `sample_arrival_type` samples if a patient type is trauma or non-trauma
+#' with a given probability.
+#'
+#' @details
+#' The function uses the Bernouli distribution (Rlab) to sample
+#' if a patient is Trauma or Non-Trauma.  The return values are 
+#' 1 = Trauma, 2 = Non-trauma.
+sample_arrival_type <- function(){
   if (rbern(1, prob = 0.1) == 1) {
     return(1)
   } else{
