@@ -193,7 +193,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="patient-trajectories" class="level2">
 <h2 class="anchored" data-anchor-id="patient-trajectories">Patient Trajectories</h2>
-<p>`simmer` uses the concept of a <em>trajectory</em> to model a process for a particular patient type. In the urgent care centre example trajectories allow us to model separate trauma and non-trauma processes. Note that different trajectories can share resources.</p>
+<p>The DES package <code>simmer</code> uses the concept of a <code>trajectory</code> to model a process for a particular patient type. In the urgent care centre example trajectories allow us to model separate trauma and non-trauma processes. Note that different trajectories can share common resources.</p>
+<p>The <code>simmer</code> terminology for using resources and engaging in activities is easy to read:</p>
+<ul>
+<li><p><code>seize</code> - queue and take a resource when it is available.</p></li>
+<li><p><code>timeout</code> - a process delay (e.g.&nbsp;treatment or diagnostics)</p></li>
+<li><p><code>release</code> - release a resource.</p></li>
+</ul>
+<p><code>simmer</code> also provides a way to set an attribute of the <code>trajectory</code> using <code>set_attribute</code>. This is useful for storing timing information such as when a patient begins waiting for a resource (access via <code>now(env)</code>).</p>
+<blockquote class="blockquote">
+<p>The function <code>log_</code> is used in combination with <code>paste</code> to provide a dynamic simulation trace to the R console.</p>
+</blockquote>
 </section>
 <section id="trauma-patients" class="level2">
 <h2 class="anchored" data-anchor-id="trauma-patients">Trauma Patients</h2>
@@ -256,18 +266,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"examination_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="quarto" class="level2">
-<h2 class="anchored" data-anchor-id="quarto">Quarto</h2>
-<p>Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <a href="https://quarto.org" class="uri">https://quarto.org</a>.</p>
-</section>
-<section id="running-code" class="level2">
-<h2 class="anchored" data-anchor-id="running-code">Running Code</h2>
-<p>When you click the <strong>Render</strong> button a document will be generated that includes both content and the output of embedded code. You can embed code like this:</p>
+<section id="modelling-patient-arrivals" class="level2">
+<h2 class="anchored" data-anchor-id="modelling-patient-arrivals">Modelling patient arrivals</h2>
+<p>Patients arrive a the urgent treatment centre following a time dependent process. When patients arrive they are classified as trauma or non-trauma.</p>
+<p>To modify the classification of patients we will use a trajectory that uses the `branch` function from <code>simmer</code>.</p>
+<p>The function `sample_arrival_type` returns a 1 (trauma) or 2 (non-trauma). This is used to select the appropriate patient trajectory.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>patient_arrival <span class="ot">&lt;-</span> <span class="fu">trajectory</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">branch</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    sample_arrival_type, <span class="at">continue=</span>T,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>      trauma_pathway,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>      non_trauma_pathway</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"A patient has departed the UTC"</span>)})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>You can add options to executable code like this</p>
 <div class="cell">

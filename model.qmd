@@ -98,7 +98,19 @@ sample_arrival_type <- function(){
 
 ## Patient Trajectories
 
-\`simmer\` uses the concept of a *trajectory* to model a process for a particular patient type. In the urgent care centre example trajectories allow us to model separate trauma and non-trauma processes. Note that different trajectories can share resources.
+The DES package `simmer` uses the concept of a `trajectory` to model a process for a particular patient type. In the urgent care centre example trajectories allow us to model separate trauma and non-trauma processes. Note that different trajectories can share common resources.
+
+The `simmer` terminology for using resources and engaging in activities is easy to read:
+
+-   `seize` - queue and take a resource when it is available.
+
+-   `timeout` - a process delay (e.g. treatment or diagnostics)
+
+-   `release` - release a resource.
+
+`simmer` also provides a way to set an attribute of the `trajectory` using `set_attribute`. This is useful for storing timing information such as when a patient begins waiting for a resource (access via `now(env)`).
+
+> The function `log_` is used in combination with `paste` to provide a dynamic simulation trace to the R console.
 
 ## Trauma Patients
 
@@ -126,7 +138,7 @@ trauma_pathway <- trajectory(name="trauma_pathway") %>%
   release(resource = "trauma_treat_cubicle", amount = 1)
 ```
 
-##  Non-trauma patients
+## Non-trauma patients
 
 ```{r}
 non_trauma_pathway <- trajectory(name="non_trauma_pathway") %>%
@@ -161,16 +173,22 @@ non_trauma_pathway <- trajectory(name="non_trauma_pathway") %>%
   release(resource = "examination_room", amount = 1)
 ```
 
-## Quarto
+## Modelling patient arrivals
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+Patients arrive a the urgent treatment centre following a time dependent process. When patients arrive they are classified as trauma or non-trauma.
 
-## Running Code
+To modify the classification of patients we will use a trajectory that uses the \`branch\` function from `simmer`.
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+The function \`sample_arrival_type\` returns a 1 (trauma) or 2 (non-trauma). This is used to select the appropriate patient trajectory.
 
 ```{r}
-1 + 1
+patient_arrival <- trajectory() %>%
+  branch(
+    sample_arrival_type, continue=T,
+      trauma_pathway,
+      non_trauma_pathway
+  ) %>%
+  log_(function() {paste("A patient has departed the UTC")})
 ```
 
 You can add options to executable code like this
