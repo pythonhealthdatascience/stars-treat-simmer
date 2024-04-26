@@ -1,8 +1,86 @@
+---
+title: "Treatment Sim: an R `simmer` implementation"
+author: "Thomas Monks, Alison Harper"
+format: html
+editor: visual
+---
+
+## Imports
+
+```{r}
 library(simmer)
-library(Rlab)
+suppressMessages(library(Rlab))
+```
 
-set.seed(42)
+## Default values and constants
 
+```{r}
+# sign-in/triage parameters
+DEFAULT_TRIAGE_MEAN = 3.0
+
+# registration parameters
+DEFAULT_REG_MEAN = 5.0
+DEFAULT_REG_VAR= 2.0
+
+# examination parameters
+DEFAULT_EXAM_MEAN = 16.0
+DEFAULT_EXAM_VAR = 3.0
+
+# trauma/stabilisation
+DEFAULT_TRAUMA_MEAN = 90.0
+
+# Trauma treatment
+DEFAULT_TRAUMA_TREAT_MEAN = 30.0
+DEFAULT_TRAUMA_TREAT_VAR = 4.0
+
+# Non trauma treatment
+DEFAULT_NON_TRAUMA_TREAT_MEAN = 13.3
+DEFAULT_NON_TRAUMA_TREAT_VAR = 2.0
+
+# prob patient requires treatment given trauma
+DEFAULT_NON_TRAUMA_TREAT_P = 0.60
+
+# proportion of patients triaged as trauma
+DEFAULT_PROB_TRAUMA = 0.12
+```
+
+## Resource Counts
+
+Integer count variables representing the number of resources at each activity in the process
+
+```{r}
+DEFAULT_N_TRIAGE = 1
+DEFAULT_N_REG = 1
+DEFAULT_N_EXAM = 3
+DEFAULT_N_TRAUMA = 2
+
+# Non-trauma cubicles
+DEFAULT_NON_TRAUMA_CUBICLES = 1
+
+# trauma pathway cubicles
+DEFAULT_TRAUMA_CUBICLES = 1
+```
+
+## Simulation model run settings
+
+```{r}
+# Random seed - this will be investigated for CRN
+SEED = 42
+
+# default results collection period
+DEFAULT_RESULTS_COLLECTION_PERIOD = 60 * 19
+
+# number of replications.
+DEFAULT_N_REPS = 5
+
+# Show the a trace of simulated events
+# NOY in use at this stage.
+TRACE = TRUE
+```
+
+## Functions
+
+```{r}
 #' Sample a patient type
 #' 
 #' @description
@@ -14,14 +92,17 @@ set.seed(42)
 #' if a patient is Trauma or Non-Trauma.  The return values are 
 #' 1 = Trauma, 2 = Non-trauma.
 sample_arrival_type <- function(){
-  if (rbern(1, prob = 0.1) == 1) {
-    return(1)
-  } else{
-    return (2)
-  }
+  ifelse(rbern(1, prob = DEFAULT_PROB_TRAUMA) == 1, 1, 2)
 }
+```
 
+## Patient Trajectories
 
+\`simmer\` uses the concept of a *trajectory* to model a process for a particular patient type. In the urgent care centre example trajectories allow us to model separate trauma and non-trauma processes. Note that different trajectories can share resources.
+
+## Trauma Patients
+
+```{r}
 trauma_pathway <- trajectory(name="trauma_pathway") %>%
   log_(function() {paste("**Trauma arrival")}) %>% 
   
@@ -43,8 +124,11 @@ trauma_pathway <- trajectory(name="trauma_pathway") %>%
   seize(resource = "trauma_treat_cubicle", amount = 1) %>%
   timeout(task = rlnorm(1, meanlog=30.0, sdlog=sqrt(4.0))) %>%
   release(resource = "trauma_treat_cubicle", amount = 1)
-  
+```
 
+##  Non-trauma patients
+
+```{r}
 non_trauma_pathway <- trajectory(name="non_trauma_pathway") %>%
   log_(function() {paste("**Non-Trauma arrival")}) %>% 
   # store start of waiting time.
@@ -75,29 +159,25 @@ non_trauma_pathway <- trajectory(name="non_trauma_pathway") %>%
                          now(env) - get_attribute(env, "start_exam_wait"))}) %>%
   timeout(task = rnorm(1, 16.0, sqrt(4.0))) %>%
   release(resource = "examination_room", amount = 1)
+```
 
-  
-  
-patient_arrival <- trajectory() %>%
-  branch(
-    sample_arrival_type, continue=T,
-      trauma_pathway,
-      non_trauma_pathway
-  ) %>%
-  log_(function() {paste("EXIT************")})
-  
-  
-# script to run the model
-env <- simmer("TreatSim") %>%
-  add_resource("triage_bay", 1) %>%
-  add_resource("registration_clerk", 1) %>%
-  add_resource("examination_room", 3) %>%
-  add_resource("trauma_room", 2) %>%
-  add_resource("trauma_treat_cubicle", 1) %>%
-  add_resource("nontrauma_treat_cubicle", 1) %>%
-  add_generator("patient", patient_arrival, function() rexp(1, 10.0))
+## Quarto
 
-env %>% run(until=400) %>% invisible
-#arrivals <- get_mon_arrivals(env)
-#env %>% get_mon_resources()
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
 
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).

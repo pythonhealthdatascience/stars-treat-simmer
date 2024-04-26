@@ -1,3 +1,6 @@
+# quarto generated files.
+model_files/*
+
 # History files
 .Rhistory
 .Rapp.history
