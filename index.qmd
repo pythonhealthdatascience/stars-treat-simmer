@@ -154,7 +154,7 @@ trauma_pathway <- trajectory(name="trauma_pathway") %>%
   timeout(task = rexp(1, 3.0)) %>%
   release(resource = "triage_bay", amount = 1) %>%
   
-  log_(function() {paste("Triage wait time:",
+  log_(function() {paste("(T) Triage wait time:",
                    now(env) - get_attribute(env, "start_triage_wait"))}) %>%
   
   # request trauma room for stabilization
@@ -179,7 +179,7 @@ non_trauma_pathway <- trajectory(name="non_trauma_pathway") %>%
   # queue and use triage bay
   seize(resource = "triage_bay", amount = 1) %>%
   
-  log_(function() {paste("Triage wait time:",
+  log_(function() {paste("(NT) Triage wait time:",
                          now(env) - get_attribute(env, "start_triage_wait"))}) %>%
   
   timeout(task = rexp(1, 3.0)) %>%
@@ -219,6 +219,24 @@ patient_arrival <- trajectory() %>%
       non_trauma_pathway
   ) %>%
   log_(function() {paste("A patient has departed the UTC")})
+```
+
+## Single run of the model
+
+> Work in progress: model is still missing non-trauma logic + time dependent arrival rate via thinning.
+
+```{r}
+env <- simmer("TreatSim") %>% add_resource("triage_bay", 1) %>%
+  add_resource("registration_clerk", 1) %>%
+  add_resource("examination_room", 3) %>%
+  add_resource("trauma_room", 2) %>%
+  add_resource("trauma_treat_cubicle", 1) %>%
+  add_resource("nontrauma_treat_cubicle", 1) %>%
+  add_generator("patient", patient_arrival, function() rexp(1, 20.0))
+
+env %>% 
+  run(until=400) %>% 
+  invisible
 ```
 
 You can add options to executable code like this
