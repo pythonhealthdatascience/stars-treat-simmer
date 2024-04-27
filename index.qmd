@@ -5,14 +5,20 @@ format: html
 editor: visual
 ---
 
-## Imports
+## 1. Imports
 
 ```{r}
 library(simmer)
+library(tibble)
+library(ggplot2)
+suppressMessages(library(RCurl))
 suppressMessages(library(Rlab))
+
 ```
 
-## Default values and constants
+## 2. Default values and constants
+
+### 2.1 Distribution parameters
 
 ```{r}
 # sign-in/triage parameters
@@ -44,7 +50,31 @@ DEFAULT_NON_TRAUMA_TREAT_P = 0.60
 DEFAULT_PROB_TRAUMA = 0.12
 ```
 
-## Resource Counts
+### 2.2 Time dependent arrival rate data
+
+The data for arrival rates varies between clinic opening at 6am and closure at 12am.
+
+```{r}
+# data are held in the Github repo and loaded from there.
+NSPP_PATH = 'https://raw.githubusercontent.com/TomMonks/open-science-for-sim/main/src/notebooks/01_foss_sim/data/ed_arrivals.csv'
+
+csv_data <- getURL(NSPP_PATH)
+df <- read.csv(text=csv_data)
+
+# lock in order of time of day for bar chart display
+df$period <- factor(df$period, levels = df$period)
+
+ggplot(data=df, aes(x=period, y=arrival_rate)) +
+  geom_bar(stat="identity", fill="steelblue") + 
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, 
+                                   hjust=1)) +
+  xlab("Hour of day") + 
+  ylab("Mean arrivals (patients/hr)")
+
+```
+
+### 2.3 Resource Counts
 
 Integer count variables representing the number of resources at each activity in the process
 
@@ -61,7 +91,7 @@ DEFAULT_NON_TRAUMA_CUBICLES = 1
 DEFAULT_TRAUMA_CUBICLES = 1
 ```
 
-## Simulation model run settings
+### 2.4 Simulation model run settings
 
 ```{r}
 # Random seed - this will be investigated for CRN
@@ -78,7 +108,7 @@ DEFAULT_N_REPS = 5
 TRACE = TRUE
 ```
 
-## Functions
+## 3. Functions
 
 ```{r}
 #' Sample a patient type
@@ -96,7 +126,7 @@ sample_arrival_type <- function(){
 }
 ```
 
-## Patient Trajectories
+## 4. Patient Trajectories
 
 The DES package `simmer` uses the concept of a `trajectory` to model a process for a particular patient type. In the urgent care centre example trajectories allow us to model separate trauma and non-trauma processes. Note that different trajectories can share common resources.
 

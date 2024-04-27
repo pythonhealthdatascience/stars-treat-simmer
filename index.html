@@ -102,14 +102,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 <section id="imports" class="level2">
-<h2 class="anchored" data-anchor-id="imports">Imports</h2>
+<h2 class="anchored" data-anchor-id="imports">1. Imports</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simmer)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(Rlab))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(RCurl))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(Rlab))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="default-values-and-constants" class="level2">
-<h2 class="anchored" data-anchor-id="default-values-and-constants">Default values and constants</h2>
+<h2 class="anchored" data-anchor-id="default-values-and-constants">2. Default values and constants</h2>
+<section id="distribution-parameters" class="level3">
+<h3 class="anchored" data-anchor-id="distribution-parameters">2.1 Distribution parameters</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sign-in/triage parameters</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>DEFAULT_TRIAGE_MEAN <span class="ot">=</span> <span class="fl">3.0</span></span>
@@ -140,59 +145,85 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>DEFAULT_PROB_TRAUMA <span class="ot">=</span> <span class="fl">0.12</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="resource-counts" class="level2">
-<h2 class="anchored" data-anchor-id="resource-counts">Resource Counts</h2>
+<section id="time-dependent-arrival-rate-data" class="level3">
+<h3 class="anchored" data-anchor-id="time-dependent-arrival-rate-data">2.2 Time dependent arrival rate data</h3>
+<p>The data for arrival rates varies between clinic opening at 6am and closure at 12am.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data are held in the Github repo and loaded from there.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>NSPP_PATH <span class="ot">=</span> <span class="st">'https://raw.githubusercontent.com/TomMonks/open-science-for-sim/main/src/notebooks/01_foss_sim/data/ed_arrivals.csv'</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>csv_data <span class="ot">&lt;-</span> <span class="fu">getURL</span>(NSPP_PATH)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="at">text=</span>csv_data)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># lock in order of time of day for bar chart display</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>period <span class="ot">&lt;-</span> <span class="fu">factor</span>(df<span class="sc">$</span>period, <span class="at">levels =</span> df<span class="sc">$</span>period)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data=</span>df, <span class="fu">aes</span>(<span class="at">x=</span>period, <span class="at">y=</span>arrival_rate)) <span class="sc">+</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat=</span><span class="st">"identity"</span>, <span class="at">fill=</span><span class="st">"steelblue"</span>) <span class="sc">+</span> </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">vjust =</span> <span class="fl">0.5</span>, </span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">hjust=</span><span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Hour of day"</span>) <span class="sc">+</span> </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Mean arrivals (patients/hr)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="resource-counts" class="level3">
+<h3 class="anchored" data-anchor-id="resource-counts">2.3 Resource Counts</h3>
 <p>Integer count variables representing the number of resources at each activity in the process</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_TRIAGE <span class="ot">=</span> <span class="dv">1</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_REG <span class="ot">=</span> <span class="dv">1</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_EXAM <span class="ot">=</span> <span class="dv">3</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_TRAUMA <span class="ot">=</span> <span class="dv">2</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Non-trauma cubicles</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>DEFAULT_NON_TRAUMA_CUBICLES <span class="ot">=</span> <span class="dv">1</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># trauma pathway cubicles</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>DEFAULT_TRAUMA_CUBICLES <span class="ot">=</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_TRIAGE <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_REG <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_EXAM <span class="ot">=</span> <span class="dv">3</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_TRAUMA <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Non-trauma cubicles</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>DEFAULT_NON_TRAUMA_CUBICLES <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># trauma pathway cubicles</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>DEFAULT_TRAUMA_CUBICLES <span class="ot">=</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="simulation-model-run-settings" class="level2">
-<h2 class="anchored" data-anchor-id="simulation-model-run-settings">Simulation model run settings</h2>
+<section id="simulation-model-run-settings" class="level3">
+<h3 class="anchored" data-anchor-id="simulation-model-run-settings">2.4 Simulation model run settings</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Random seed - this will be investigated for CRN</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>SEED <span class="ot">=</span> <span class="dv">42</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># default results collection period</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>DEFAULT_RESULTS_COLLECTION_PERIOD <span class="ot">=</span> <span class="dv">60</span> <span class="sc">*</span> <span class="dv">19</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># number of replications.</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_REPS <span class="ot">=</span> <span class="dv">5</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the a trace of simulated events</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># NOY in use at this stage.</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>TRACE <span class="ot">=</span> <span class="cn">TRUE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Random seed - this will be investigated for CRN</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>SEED <span class="ot">=</span> <span class="dv">42</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># default results collection period</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>DEFAULT_RESULTS_COLLECTION_PERIOD <span class="ot">=</span> <span class="dv">60</span> <span class="sc">*</span> <span class="dv">19</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># number of replications.</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_REPS <span class="ot">=</span> <span class="dv">5</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the a trace of simulated events</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co"># NOY in use at this stage.</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>TRACE <span class="ot">=</span> <span class="cn">TRUE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
 </section>
 <section id="functions" class="level2">
-<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<h2 class="anchored" data-anchor-id="functions">3. Functions</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' Sample a patient type</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#' </span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' @description</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#' `sample_arrival_type` samples if a patient type is trauma or non-trauma</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#' with a given probability.</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#' @details</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#' The function uses the Bernouli distribution (Rlab) to sample</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#' if a patient is Trauma or Non-Trauma.  The return values are </span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#' 1 = Trauma, 2 = Non-trauma.</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>sample_arrival_type <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(<span class="fu">rbern</span>(<span class="dv">1</span>, <span class="at">prob =</span> DEFAULT_PROB_TRAUMA) <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' Sample a patient type</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#' </span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' @description</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#' `sample_arrival_type` samples if a patient type is trauma or non-trauma</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#' with a given probability.</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#' @details</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#' The function uses the Bernouli distribution (Rlab) to sample</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#' if a patient is Trauma or Non-Trauma.  The return values are </span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#' 1 = Trauma, 2 = Non-trauma.</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>sample_arrival_type <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(<span class="fu">rbern</span>(<span class="dv">1</span>, <span class="at">prob =</span> DEFAULT_PROB_TRAUMA) <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="patient-trajectories" class="level2">
-<h2 class="anchored" data-anchor-id="patient-trajectories">Patient Trajectories</h2>
+<h2 class="anchored" data-anchor-id="patient-trajectories">4. Patient Trajectories</h2>
 <p>The DES package <code>simmer</code> uses the concept of a <code>trajectory</code> to model a process for a particular patient type. In the urgent care centre example trajectories allow us to model separate trauma and non-trauma processes. Note that different trajectories can share common resources.</p>
 <p>The <code>simmer</code> terminology for using resources and engaging in activities is easy to read:</p>
 <ul>
@@ -208,62 +239,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="trauma-patients" class="level2">
 <h2 class="anchored" data-anchor-id="trauma-patients">Trauma Patients</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"**Trauma arrival"</span>)}) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># request triage bay</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_attribute</span>(<span class="st">"start_triage_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rexp</span>(<span class="dv">1</span>, <span class="fl">3.0</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"Triage wait time:"</span>,</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">now</span>(env) <span class="sc">-</span> <span class="fu">get_attribute</span>(env, <span class="st">"start_triage_wait"</span>))}) <span class="sc">%&gt;%</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># request trauma room for stabilization</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"trauma_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rexp</span>(<span class="dv">1</span>, <span class="fl">90.0</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"trauma_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># request treatment cubicle</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"trauma_treat_cubicle"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rlnorm</span>(<span class="dv">1</span>, <span class="at">meanlog=</span><span class="fl">30.0</span>, <span class="at">sdlog=</span><span class="fu">sqrt</span>(<span class="fl">4.0</span>))) <span class="sc">%&gt;%</span></span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"trauma_treat_cubicle"</span>, <span class="at">amount =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"**Trauma arrival"</span>)}) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># request triage bay</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_attribute</span>(<span class="st">"start_triage_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rexp</span>(<span class="dv">1</span>, <span class="fl">3.0</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"Triage wait time:"</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">now</span>(env) <span class="sc">-</span> <span class="fu">get_attribute</span>(env, <span class="st">"start_triage_wait"</span>))}) <span class="sc">%&gt;%</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># request trauma room for stabilization</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"trauma_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rexp</span>(<span class="dv">1</span>, <span class="fl">90.0</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"trauma_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># request treatment cubicle</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"trauma_treat_cubicle"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rlnorm</span>(<span class="dv">1</span>, <span class="at">meanlog=</span><span class="fl">30.0</span>, <span class="at">sdlog=</span><span class="fu">sqrt</span>(<span class="fl">4.0</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"trauma_treat_cubicle"</span>, <span class="at">amount =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="non-trauma-patients" class="level2">
 <h2 class="anchored" data-anchor-id="non-trauma-patients">Non-trauma patients</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>non_trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"non_trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"**Non-Trauma arrival"</span>)}) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># store start of waiting time.</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_attribute</span>(<span class="st">"start_triage_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># queue and use triage bay</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"Triage wait time:"</span>,</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">now</span>(env) <span class="sc">-</span> <span class="fu">get_attribute</span>(env, <span class="st">"start_triage_wait"</span>))}) <span class="sc">%&gt;%</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rexp</span>(<span class="dv">1</span>, <span class="fl">3.0</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># queue and use registration clerk</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_attribute</span>(<span class="st">"start_reg_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"registration_clerk"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"Reg wait time:"</span>,</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">now</span>(env) <span class="sc">-</span> <span class="fu">get_attribute</span>(env, <span class="st">"start_reg_wait"</span>))}) <span class="sc">%&gt;%</span></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rlnorm</span>(<span class="dv">1</span>, <span class="at">meanlog=</span><span class="fl">5.0</span>, <span class="at">sdlog=</span><span class="fu">sqrt</span>(<span class="fl">4.0</span>))) <span class="sc">%&gt;%</span></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"registration_clerk"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># queue and use examination room</span></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_attribute</span>(<span class="st">"start_exam_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"examination_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"Reg wait time:"</span>,</span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">now</span>(env) <span class="sc">-</span> <span class="fu">get_attribute</span>(env, <span class="st">"start_exam_wait"</span>))}) <span class="sc">%&gt;%</span></span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="fl">16.0</span>, <span class="fu">sqrt</span>(<span class="fl">4.0</span>))) <span class="sc">%&gt;%</span></span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"examination_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>non_trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"non_trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"**Non-Trauma arrival"</span>)}) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># store start of waiting time.</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_attribute</span>(<span class="st">"start_triage_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># queue and use triage bay</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"Triage wait time:"</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">now</span>(env) <span class="sc">-</span> <span class="fu">get_attribute</span>(env, <span class="st">"start_triage_wait"</span>))}) <span class="sc">%&gt;%</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rexp</span>(<span class="dv">1</span>, <span class="fl">3.0</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># queue and use registration clerk</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_attribute</span>(<span class="st">"start_reg_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"registration_clerk"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"Reg wait time:"</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">now</span>(env) <span class="sc">-</span> <span class="fu">get_attribute</span>(env, <span class="st">"start_reg_wait"</span>))}) <span class="sc">%&gt;%</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rlnorm</span>(<span class="dv">1</span>, <span class="at">meanlog=</span><span class="fl">5.0</span>, <span class="at">sdlog=</span><span class="fu">sqrt</span>(<span class="fl">4.0</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"registration_clerk"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># queue and use examination room</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_attribute</span>(<span class="st">"start_exam_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"examination_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"Reg wait time:"</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">now</span>(env) <span class="sc">-</span> <span class="fu">get_attribute</span>(env, <span class="st">"start_exam_wait"</span>))}) <span class="sc">%&gt;%</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="fl">16.0</span>, <span class="fu">sqrt</span>(<span class="fl">4.0</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"examination_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="modelling-patient-arrivals" class="level2">
@@ -272,13 +303,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>To modify the classification of patients we will use a trajectory that uses the `branch` function from <code>simmer</code>.</p>
 <p>The function `sample_arrival_type` returns a 1 (trauma) or 2 (non-trauma). This is used to select the appropriate patient trajectory.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>patient_arrival <span class="ot">&lt;-</span> <span class="fu">trajectory</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">branch</span>(</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    sample_arrival_type, <span class="at">continue=</span>T,</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>      trauma_pathway,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>      non_trauma_pathway</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"A patient has departed the UTC"</span>)})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>patient_arrival <span class="ot">&lt;-</span> <span class="fu">trajectory</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">branch</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    sample_arrival_type, <span class="at">continue=</span>T,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>      trauma_pathway,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      non_trauma_pathway</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"A patient has departed the UTC"</span>)})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>You can add options to executable code like this</p>
 <div class="cell">
