@@ -21,33 +21,56 @@ suppressMessages(library(Rlab))
 ### 2.1 Distribution parameters
 
 ```{r}
+#' Mean and Variance of the underlying Normal Distribution
+#' 
+#' @description
+#' `normal_moments_from_lognormal` calculates the mu and sigma
+#' of the normal distribution underlying a lognormal
+#' mean and standard 
+#'
+#' @details
+#' `rlnorm` from `stats` is designed to sample from the lognormal distribution. 
+#' The parameters is expects are moments of the underlying normal distribution
+#' Using sample mean and standard deviation this function calculates 
+#' the mu and sigma of the normal distribution. source: https://blogs.sas.com/content/iml/2014/06/04/simulate-lognormal-data-with-specified-mean-and-variance.html
+#' 
+#' @param mean A number. Sample mean.
+#' @param stdev A number. Sample standard deviation
+#' @returns A list 
+normal_moments_from_lognormal <- function(mean, std){
+  phi <- sqrt(std^2 + mean^2)
+  mu <- log(mean**2/phi)
+  sigma <- sqrt(log(phi^2/mean^2))
+  return(list("mu" = mu, "sigma" = sigma))
+}
+```
+
+```{r}
 # sign-in/triage parameters
-DEFAULT_TRIAGE_MEAN = 3.0
+DEFAULT_TRIAGE_MEAN <- 3.0
 
 # registration parameters
-DEFAULT_REG_MEAN = 5.0
-DEFAULT_REG_VAR= 2.0
+DEFAULT_REG_MEAN <- 5.0
+DEFAULT_REG_VAR <- 2.0
 
 # examination parameters
-DEFAULT_EXAM_MEAN = 16.0
-DEFAULT_EXAM_VAR = 3.0
+DEFAULT_EXAM_MEAN <- 16.0
+DEFAULT_EXAM_VAR <- 3.0
 
 # trauma/stabilisation
-DEFAULT_TRAUMA_MEAN = 90.0
+DEFAULT_TRAUMA_MEAN <- 90.0
 
-# Trauma treatment
-DEFAULT_TRAUMA_TREAT_MEAN = 30.0
-DEFAULT_TRAUMA_TREAT_VAR = 4.0
+# Trauma treatment (lognormal distribution)
+TRAUMA_TREATMENT_PARAMS <- normal_moments_from_lognormal(30.0, sqrt(4.0))
 
-# Non trauma treatment
-DEFAULT_NON_TRAUMA_TREAT_MEAN = 13.3
-DEFAULT_NON_TRAUMA_TREAT_VAR = 2.0
+# Non trauma treatment (lognormal distribution)
+TRAUMA_TREATMENT_PARAMS <- normal_moments_from_lognormal(13.3, sqrt(2.0))
 
 # prob patient requires treatment given trauma
-DEFAULT_NON_TRAUMA_TREAT_P = 0.60
+DEFAULT_NON_TRAUMA_TREAT_P <- 0.60
 
 # proportion of patients triaged as trauma
-DEFAULT_PROB_TRAUMA = 0.12
+DEFAULT_PROB_TRAUMA <- 0.12
 ```
 
 ### 2.2 Time dependent arrival rate data
@@ -79,33 +102,33 @@ ggplot(data=df, aes(x=period, y=arrival_rate)) +
 Integer count variables representing the number of resources at each activity in the process
 
 ```{r}
-DEFAULT_N_TRIAGE = 1
-DEFAULT_N_REG = 1
-DEFAULT_N_EXAM = 3
-DEFAULT_N_TRAUMA = 2
+DEFAULT_N_TRIAGE <- 1
+DEFAULT_N_REG <- 1
+DEFAULT_N_EXAM <- 3
+DEFAULT_N_TRAUMA <- 2
 
 # Non-trauma cubicles
-DEFAULT_NON_TRAUMA_CUBICLES = 1
+DEFAULT_NON_TRAUMA_CUBICLES <- 1
 
 # trauma pathway cubicles
-DEFAULT_TRAUMA_CUBICLES = 1
+DEFAULT_TRAUMA_CUBICLES <- 1
 ```
 
 ### 2.4 Simulation model run settings
 
 ```{r}
 # Random seed - this will be investigated for CRN
-SEED = 42
+SEED <- 42
 
 # default results collection period
-DEFAULT_RESULTS_COLLECTION_PERIOD = 60 * 19
+DEFAULT_RESULTS_COLLECTION_PERIOD <- 60 * 19
 
 # number of replications.
-DEFAULT_N_REPS = 5
+DEFAULT_N_REPS <- 5
 
 # Show the a trace of simulated events
 # NOY in use at this stage.
-TRACE = TRUE
+TRACE <- TRUE
 ```
 
 ## 3. Functions
@@ -167,7 +190,7 @@ trauma_pathway <- trajectory(name="trauma_pathway") %>%
   # request triage bay
   set_attribute("start_triage_wait", function() {now(env)}) %>%
   seize(resource = "triage_bay", amount = 1) %>%
-  timeout(task = rexp(1, 3.0)) %>%
+  timeout(task = function() rexp(1, 3.0)) %>%
   release(resource = "triage_bay", amount = 1) %>%
   
   log_(function() {paste("(T) Triage wait time:",
@@ -175,12 +198,13 @@ trauma_pathway <- trajectory(name="trauma_pathway") %>%
   
   # request trauma room for stabilization
   seize(resource = "trauma_room", amount = 1) %>%
-  timeout(task = rexp(1, 90.0)) %>%
+  timeout(task = function() rexp(1, 90.0)) %>%
   release(resource = "trauma_room", amount = 1) %>%
   
   # request treatment cubicle
   seize(resource = "trauma_treat_cubicle", amount = 1) %>%
-  timeout(task = rlnorm(1, meanlog=30.0, sdlog=sqrt(4.0))) %>%
+  timeout(task = function() rlnorm(1, TRAUMA_TREATMENT_PARAMS$mu,
+                                   TRAUMA_TREATMENT_PARAMS$sigma)) %>%
   release(resource = "trauma_treat_cubicle", amount = 1)
 ```
 
