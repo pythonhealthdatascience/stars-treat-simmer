@@ -49,9 +49,8 @@ normal_moments_from_lognormal <- function(mean, std){
 # sign-in/triage parameters
 DEFAULT_TRIAGE_MEAN <- 3.0
 
-# registration parameters
-DEFAULT_REG_MEAN <- 5.0
-DEFAULT_REG_VAR <- 2.0
+# registration parameters (lognormal distribution)
+DEFAULT_REG_PARAMS <- normal_moments_from_lognormal(5.0, sqrt(2.0))
 
 # examination parameters
 DEFAULT_EXAM_MEAN <- 16.0
@@ -179,7 +178,16 @@ The `simmer` terminology for using resources and engaging in activities is easy 
 
 `simmer` also provides a way to set an attribute of the `trajectory` using `set_attribute`. This is useful for storing timing information such as when a patient begins waiting for a resource (access via `now(env)`).
 
-> The function `log_` is used in combination with `paste` to provide a dynamic simulation trace to the R console.
+> **Important notes:**
+>
+> 1.  The function `log_` is used in combination with `function()` `paste` to provide a dynamic simulation trace to the R console.
+> 2.  Sampling code should look as follows:
+>
+> ``` r
+> timeout(task = function() rexp(1, 3.0)) %>%
+> ```
+>
+> > The keyword `function()` must be included for dynamic sampling for each patient. **Omitting** `function()` means that it is evaluated **once** at the time the `trajectory` is created.
 
 ## Trauma Patients
 
@@ -197,9 +205,12 @@ trauma_pathway <- trajectory(name="trauma_pathway") %>%
                    now(env) - get_attribute(env, "start_triage_wait"))}) %>%
   
   # request trauma room for stabilization
+  set_attribute("start_trauma_room_wait", function() {now(env)}) %>%
   seize(resource = "trauma_room", amount = 1) %>%
   timeout(task = function() rexp(1, 90.0)) %>%
   release(resource = "trauma_room", amount = 1) %>%
+  log_(function() {paste("(T) Trauma room wait time:",
+                   now(env) - get_attribute(env, "start_trauma_room_wait"))}) %>%
   
   # request treatment cubicle
   seize(resource = "trauma_treat_cubicle", amount = 1) %>%
@@ -239,7 +250,8 @@ non_trauma_pathway <- trajectory(name="non_trauma_pathway") %>%
   log_(function() {paste("Reg wait time:",
                          now(env) - get_attribute(env, "start_reg_wait"))}) %>%
   
-  timeout(task = rlnorm(1, meanlog=5.0, sdlog=sqrt(4.0))) %>%
+  timeout(task = function() rlnorm(1, DEFAULT_REG_PARAMS$mu,
+                                   DEFAULT_REG_PARAMS$sigma)) %>%
   release(resource = "registration_clerk", amount = 1) %>%
   
   # queue and use examination room
@@ -247,7 +259,7 @@ non_trauma_pathway <- trajectory(name="non_trauma_pathway") %>%
   seize(resource = "examination_room", amount = 1) %>%
   log_(function() {paste("Reg wait time:",
                          now(env) - get_attribute(env, "start_exam_wait"))}) %>%
-  timeout(task = rnorm(1, 16.0, sqrt(4.0))) %>%
+  timeout(task = function() rnorm(1, 16.0, sqrt(4.0))) %>%
   release(resource = "examination_room", amount = 1) %>% 
   
   # a Proportion of patients require treatment in a cubicle
@@ -289,7 +301,7 @@ env <- simmer("TreatSim") %>%
   add_resource("trauma_room", 2) %>%
   add_resource("trauma_treat_cubicle", 1) %>%
   add_resource("nontrauma_treat_cubicle", 1) %>%
-  add_generator("patient", patient_arrival, function() rexp(1, 20.0))
+  add_generator("patient", patient_arrival, function() rexp(1, 1.0/10.0))
 
 env %>% 
   run(until=400) %>% 
