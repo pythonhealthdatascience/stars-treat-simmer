@@ -103,13 +103,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="imports" class="level2">
 <h2 class="anchored" data-anchor-id="imports">1. Imports</h2>
+<blockquote class="blockquote">
+<p>Note: help with install of <code>simmer.plot</code> (<code>igraph</code> installation is the actual issue) on Linux based systems: <a href="https://r.igraph.org/articles/installation-troubleshooting#cannot-compile-igraph-from-sources-on-linux" class="uri">https://r.igraph.org/articles/installation-troubleshooting#cannot-compile-igraph-from-sources-on-linux</a></p>
+<blockquote class="blockquote">
+<p>If you make use of conda environments (via Anaconda/mini-conda/mini-forge/mamba), <strong>remember</strong> to <code>conda deactivate</code> before installation.</p>
+</blockquote>
+</blockquote>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simmer)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simmer.bricks)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(RCurl))</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(Rlab))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(simmer.plot))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(RCurl))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(Rlab))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="default-values-and-constants" class="level2">
@@ -260,8 +267,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
+<section id="model-parameterisation" class="level2">
+<h2 class="anchored" data-anchor-id="model-parameterisation">4. Model parameterisation</h2>
+<p>The model is setup to be created from a set of functions that return trajectories. Each function accepts a list that contains all parameters to configure the simulation model. Here we create the list and pre-populate it using default values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>create_experiment <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n_triage_bays=</span>DEFAULT_N_TRIAGE,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_reg_clerks=</span>DEFAULT_N_REG,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_exam_rooms=</span>DEFAULT_N_EXAM,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_trauma_rooms=</span>DEFAULT_N_TRAUMA,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_non_trauma_cubicles=</span>DEFAULT_NON_TRAUMA_CUBICLES,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_trauma_cubicles=</span>DEFAULT_TRAUMA_CUBICLES,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">triage_mean=</span>DEFAULT_TRIAGE_MEAN,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">stabilisation_mean=</span>DEFAULT_TRAUMA_MEAN,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                              <span class="at">trauma_treat_params=</span>DEFAULT_TRAUMA_TREATMENT_PARAMS,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>                              <span class="at">reg_params=</span>DEFAULT_REG_PARAMS,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>                              <span class="at">exam_params=</span>DEFAULT_EXAM_PARAMS,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>                              <span class="at">prob_non_trauma_treat=</span>DEFAULT_NON_TRAUMA_TREAT_P,</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>                              <span class="at">prob_trauma=</span>DEFAULT_PROB_TRAUMA,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>                              <span class="at">log_level=</span>LOG_LEVEL) {</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  experiment <span class="ot">=</span> <span class="fu">list</span>(<span class="at">n_triage_bays=</span>n_triage_bays,</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_reg_clerks=</span>n_reg_clerks,</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_exam_rooms=</span>n_exam_rooms,</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_trauma_rooms=</span>n_trauma_rooms,</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_non_trauma_cubicles=</span>n_non_trauma_cubicles,</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_trauma_cubicles=</span>n_trauma_cubicles,</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>                    <span class="at">triage_mean=</span>triage_mean,</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>                    <span class="at">stabilisation_mean=</span>stabilisation_mean,</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>                    <span class="at">trauma_treat_params=</span>trauma_treat_params,</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>                    <span class="at">reg_params=</span>reg_params,</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>                    <span class="at">exam_params=</span>exam_params,</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>                    <span class="at">prob_non_trauma_treat=</span>prob_non_trauma_treat,</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>                    <span class="at">prob_trauma=</span>prob_trauma,</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>                    <span class="at">log_level=</span>log_level)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(experiment)</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>}     </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 <section id="patient-trajectories" class="level2">
-<h2 class="anchored" data-anchor-id="patient-trajectories">4. Patient Trajectories</h2>
+<h2 class="anchored" data-anchor-id="patient-trajectories">5. Patient Trajectories</h2>
 <p>The DES package <code>simmer</code> uses the concept of a <code>trajectory</code> to model a process for a particular patient type. In the urgent care centre example trajectories allow us to model separate trauma and non-trauma processes. Note that different trajectories can share common resources.</p>
 <p>The <code>simmer</code> terminology for using resources and engaging in activities is easy to read:</p>
 <ul>
@@ -276,169 +321,135 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>The function <code>log_</code> is used in combination with <code>function()</code> <code>paste</code> to provide a dynamic simulation trace to the R console.</li>
 <li>Sampling code should look as follows:</li>
 </ol>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">timeout</span>(<span class="at">task =</span> <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, <span class="fl">3.0</span>)) <span class="sc">%&gt;%</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">timeout</span>(<span class="at">task =</span> <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, <span class="fl">3.0</span>)) <span class="sc">%&gt;%</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <blockquote class="blockquote">
 <p>The keyword <code>function()</code> must be included for dynamic sampling for each patient. <strong>Omitting</strong> <code>function()</code> means that it is evaluated <strong>once</strong> at the time the <code>trajectory</code> is created.</p>
 </blockquote>
 </blockquote>
-</section>
-<section id="trauma-patients" class="level2">
-<h2 class="anchored" data-anchor-id="trauma-patients">Trauma Patients</h2>
+<section id="trauma-patients" class="level3">
+<h3 class="anchored" data-anchor-id="trauma-patients">5.1. Trauma Patients</h3>
 <blockquote class="blockquote">
 <p>We wrap the trajectory in a function called <code>create_trauma_pathway</code>. This allows us to pass an argument <code>exp</code> that can parameterise the trajectory for use in a discrete experiment.</p>
 </blockquote>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>create_trauma_pathway <span class="ot">&lt;-</span> <span class="cf">function</span>(exp){</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># log patient arrival</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"**Trauma arrival"</span>)}, <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># triage </span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_triage_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"triage_bay"</span>, <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, exp<span class="sc">$</span>triage_mean)) <span class="sc">%&gt;%</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"(T) Triage wait time:"</span>,</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># request trauma room for stabilization</span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_trauma_room_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"trauma_room"</span>, <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, exp<span class="sc">$</span>stabilisation_mean)) <span class="sc">%&gt;%</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"(T) Trauma room wait time:"</span>,</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_trauma_room_wait"</span>))},</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># request treatment cubicle</span></span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"trauma_treat_cubicle"</span>, <span class="cf">function</span>() <span class="fu">rlnorm</span>(<span class="dv">1</span>, exp<span class="sc">$</span>trauma_treat_params<span class="sc">$</span>mu,</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>                                                    exp<span class="sc">$</span>trauma_treat_params<span class="sc">$</span>sigma)) <span class="sc">%&gt;%</span></span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(trauma_pathway)</span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>create_trauma_pathway <span class="ot">&lt;-</span> <span class="cf">function</span>(exp){</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># log patient arrival</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"**Trauma arrival"</span>)}, <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># triage </span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_triage_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"triage_bay"</span>, <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, exp<span class="sc">$</span>triage_mean)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"(T) Triage wait time:"</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># request trauma room for stabilization</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_trauma_room_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"trauma_room"</span>, <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, exp<span class="sc">$</span>stabilisation_mean)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"(T) Trauma room wait time:"</span>,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_trauma_room_wait"</span>))},</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># request treatment cubicle</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"trauma_treat_cubicle"</span>, <span class="cf">function</span>() <span class="fu">rlnorm</span>(<span class="dv">1</span>, exp<span class="sc">$</span>trauma_treat_params<span class="sc">$</span>mu,</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>                                                    exp<span class="sc">$</span>trauma_treat_params<span class="sc">$</span>sigma)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(trauma_pathway)</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="non-trauma-patients" class="level2">
-<h2 class="anchored" data-anchor-id="non-trauma-patients">Non-trauma patients</h2>
+<section id="non-trauma-patients" class="level3">
+<h3 class="anchored" data-anchor-id="non-trauma-patients">5.2 Non-trauma patients</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>nt_cubicle_treatment <span class="ot">&lt;-</span> <span class="fu">trajectory</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"NT patient requirement treatment"</span>)},</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource=</span><span class="st">"nontrauma_treat_cubicle"</span>, <span class="at">amount=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rlnorm</span>(<span class="dv">1</span>, <span class="at">meanlog=</span><span class="fl">13.3</span>, <span class="at">sdlog=</span><span class="fu">sqrt</span>(<span class="fl">2.0</span>))) <span class="sc">%&gt;%</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"nontrauma_treat_cubicle"</span>, <span class="at">amount =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>nt_cubicle_treatment <span class="ot">&lt;-</span> <span class="fu">trajectory</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"NT patient requirement treatment"</span>)},</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seize</span>(<span class="at">resource=</span><span class="st">"nontrauma_treat_cubicle"</span>, <span class="at">amount=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rlnorm</span>(<span class="dv">1</span>, <span class="at">meanlog=</span><span class="fl">13.3</span>, <span class="at">sdlog=</span><span class="fu">sqrt</span>(<span class="fl">2.0</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"nontrauma_treat_cubicle"</span>, <span class="at">amount =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>create_non_trauma_pathway <span class="ot">&lt;-</span> <span class="cf">function</span>(exp){</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># log messages</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  ARRIVAL_MSG <span class="ot">=</span> <span class="st">"**Non-Trauma arrival**"</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  TRIAGE_MSG <span class="ot">=</span> <span class="st">"(NT) Triage wait time:"</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  REG_MSG <span class="ot">=</span> <span class="st">"Reg wait time:"</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  EXAM_MSG <span class="ot">=</span> <span class="st">"Exam wait time:"</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  EXIT_MSG <span class="ot">=</span> <span class="st">"NT Total time in system:"</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  non_trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"non_trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># log non_trauma arrival</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(ARRIVAL_MSG)}, <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># store start of waiting time for log calculations</span></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_triage_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use triage bay</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"triage_bay"</span>, <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, exp<span class="sc">$</span>triage_mean)) <span class="sc">%&gt;%</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(TRIAGE_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use registration clerk</span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_reg_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"registration_clerk"</span>, <span class="cf">function</span>() <span class="fu">rlnorm</span>(<span class="dv">1</span>, exp<span class="sc">$</span>reg_params<span class="sc">$</span>mu, </span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>                                                  exp<span class="sc">$</span>reg_params<span class="sc">$</span>sigma)) <span class="sc">%&gt;%</span></span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(REG_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_reg_wait"</span>))},</span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use examination room</span></span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_exam_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"examination_room"</span>,  <span class="cf">function</span>() <span class="fu">rnorm</span>(<span class="dv">1</span>, exp<span class="sc">$</span>exam_params<span class="sc">$</span>mean, </span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>                                                <span class="fu">sqrt</span>(exp<span class="sc">$</span>exam_params<span class="sc">$</span>var))) <span class="sc">%&gt;%</span></span>
-<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(EXAM_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_exam_wait"</span>))},</span>
-<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># a Proportion of patients require treatment in a cubicle</span></span>
-<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">branch</span> (</span>
-<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>      <span class="cf">function</span>() <span class="fu">sample_nt_trauma_treatment</span>(exp<span class="sc">$</span>prob_non_trauma_treat), <span class="at">continue=</span>T,</span>
-<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>      nt_cubicle_treatment</span>
-<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(EXIT_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
-<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>)</span>
-<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(non_trauma_pathway)</span>
-<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>create_non_trauma_pathway <span class="ot">&lt;-</span> <span class="cf">function</span>(exp){</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># log messages</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  ARRIVAL_MSG <span class="ot">=</span> <span class="st">"**Non-Trauma arrival**"</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  TRIAGE_MSG <span class="ot">=</span> <span class="st">"(NT) Triage wait time:"</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  REG_MSG <span class="ot">=</span> <span class="st">"Reg wait time:"</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  EXAM_MSG <span class="ot">=</span> <span class="st">"Exam wait time:"</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  EXIT_MSG <span class="ot">=</span> <span class="st">"NT Total time in system:"</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  non_trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"non_trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># log non_trauma arrival</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(ARRIVAL_MSG)}, <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># store start of waiting time for log calculations</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_triage_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use triage bay</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"triage_bay"</span>, <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, exp<span class="sc">$</span>triage_mean)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(TRIAGE_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use registration clerk</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_reg_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"registration_clerk"</span>, <span class="cf">function</span>() <span class="fu">rlnorm</span>(<span class="dv">1</span>, exp<span class="sc">$</span>reg_params<span class="sc">$</span>mu, </span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>                                                  exp<span class="sc">$</span>reg_params<span class="sc">$</span>sigma)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(REG_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_reg_wait"</span>))},</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use examination room</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_exam_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"examination_room"</span>,  <span class="cf">function</span>() <span class="fu">rnorm</span>(<span class="dv">1</span>, exp<span class="sc">$</span>exam_params<span class="sc">$</span>mean, </span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>                                                <span class="fu">sqrt</span>(exp<span class="sc">$</span>exam_params<span class="sc">$</span>var))) <span class="sc">%&gt;%</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(EXAM_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_exam_wait"</span>))},</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># a Proportion of patients require treatment in a cubicle</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">branch</span> (</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>      <span class="cf">function</span>() <span class="fu">sample_nt_trauma_treatment</span>(exp<span class="sc">$</span>prob_non_trauma_treat), <span class="at">continue=</span>T,</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>      nt_cubicle_treatment</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(EXIT_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>)</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(non_trauma_pathway)</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
 </section>
 <section id="modelling-patient-arrivals" class="level2">
-<h2 class="anchored" data-anchor-id="modelling-patient-arrivals">Modelling patient arrivals</h2>
+<h2 class="anchored" data-anchor-id="modelling-patient-arrivals">6. Modelling patient arrivals</h2>
 <p>Patients arrive a the urgent treatment centre following a time dependent process. When patients arrive they are classified as trauma or non-trauma.</p>
 <p>To modify the classification of patients we will use a trajectory that uses the `branch` function from <code>simmer</code>.</p>
 <p>The function `sample_arrival_type` returns a 1 (trauma) or 2 (non-trauma). This is used to select the appropriate patient trajectory.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>create_arrival_generator <span class="ot">&lt;-</span> <span class="cf">function</span>(exp){</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  DEPART_MSG <span class="ot">&lt;-</span> <span class="st">"A patient has departed the UTC"</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create and parameterise the trauma pathway trajectory</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  trauma_pathway <span class="ot">&lt;-</span> <span class="fu">create_trauma_pathway</span>(exp)</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create and parameterise the non-trauma pathway trajectory</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  non_trauma_pathway <span class="ot">&lt;-</span> <span class="fu">create_non_trauma_pathway</span>(exp)</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  patient_arrival <span class="ot">&lt;-</span> <span class="fu">trajectory</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">branch</span>(</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>      <span class="cf">function</span>() <span class="fu">sample_arrival_type</span>(exp<span class="sc">$</span>prob_trauma), <span class="at">continue=</span>T,</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        trauma_pathway,</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        non_trauma_pathway</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(DEPART_MSG)},<span class="at">level=</span><span class="dv">1</span>)</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(patient_arrival)</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>create_arrival_generator <span class="ot">&lt;-</span> <span class="cf">function</span>(exp){</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  DEPART_MSG <span class="ot">&lt;-</span> <span class="st">"A patient has departed the UTC"</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create and parameterise the trauma pathway trajectory</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  trauma_pathway <span class="ot">&lt;-</span> <span class="fu">create_trauma_pathway</span>(exp)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create and parameterise the non-trauma pathway trajectory</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  non_trauma_pathway <span class="ot">&lt;-</span> <span class="fu">create_non_trauma_pathway</span>(exp)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  patient_arrival <span class="ot">&lt;-</span> <span class="fu">trajectory</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">branch</span>(</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>      <span class="cf">function</span>() <span class="fu">sample_arrival_type</span>(exp<span class="sc">$</span>prob_trauma), <span class="at">continue=</span>T,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        trauma_pathway,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        non_trauma_pathway</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(DEPART_MSG)},<span class="at">level=</span><span class="dv">1</span>)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(patient_arrival)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="single-run-of-the-model" class="level2">
-<h2 class="anchored" data-anchor-id="single-run-of-the-model">Single run of the model</h2>
+<h2 class="anchored" data-anchor-id="single-run-of-the-model">7. Single run of the model</h2>
 <blockquote class="blockquote">
 <p>Work in progress: model is still missing non-trauma logic + time dependent arrival rate via thinning.</p>
 </blockquote>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>create_experiment <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n_triage_bays=</span>DEFAULT_N_TRIAGE,</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_reg_clerks=</span>DEFAULT_N_REG,</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_exam_rooms=</span>DEFAULT_N_EXAM,</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_trauma_rooms=</span>DEFAULT_N_TRAUMA,</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_non_trauma_cubicles=</span>DEFAULT_NON_TRAUMA_CUBICLES,</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_trauma_cubicles=</span>DEFAULT_TRAUMA_CUBICLES,</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">triage_mean=</span>DEFAULT_TRIAGE_MEAN,</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">stabilisation_mean=</span>DEFAULT_TRAUMA_MEAN,</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>                              <span class="at">trauma_treat_params=</span>DEFAULT_TRAUMA_TREATMENT_PARAMS,</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>                              <span class="at">reg_params=</span>DEFAULT_REG_PARAMS,</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>                              <span class="at">exam_params=</span>DEFAULT_EXAM_PARAMS,</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>                              <span class="at">prob_non_trauma_treat=</span>DEFAULT_NON_TRAUMA_TREAT_P,</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>                              <span class="at">prob_trauma=</span>DEFAULT_PROB_TRAUMA,</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>                              <span class="at">log_level=</span>LOG_LEVEL) {</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  experiment <span class="ot">=</span> <span class="fu">list</span>(<span class="at">n_triage_bays=</span>n_triage_bays,</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_reg_clerks=</span>n_reg_clerks,</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_exam_rooms=</span>n_exam_rooms,</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_trauma_rooms=</span>n_trauma_rooms,</span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_non_trauma_cubicles=</span>n_non_trauma_cubicles,</span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_trauma_cubicles=</span>n_trauma_cubicles,</span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>                    <span class="at">triage_mean=</span>triage_mean,</span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>                    <span class="at">stabilisation_mean=</span>stabilisation_mean,</span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>                    <span class="at">trauma_treat_params=</span>trauma_treat_params,</span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>                    <span class="at">reg_params=</span>reg_params,</span>
-<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>                    <span class="at">exam_params=</span>exam_params,</span>
-<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>                    <span class="at">prob_non_trauma_treat=</span>prob_non_trauma_treat,</span>
-<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>                    <span class="at">prob_trauma=</span>prob_trauma,</span>
-<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>                    <span class="at">log_level=</span>log_level)</span>
-<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(experiment)</span>
-<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>}              </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(SEED)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -462,233 +473,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>default_experiment <span class="ot">&lt;-</span> <span class="fu">create_experiment</span>(<span class="at">log_level=</span><span class="dv">1</span>)</span>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>default_experiment <span class="ot">&lt;-</span> <span class="fu">create_experiment</span>(<span class="at">log_level=</span><span class="dv">0</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>treat_sim <span class="ot">&lt;-</span> <span class="fu">get_model</span>(default_experiment)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>treat_sim <span class="sc">%&gt;%</span> </span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">run</span>(<span class="at">until=</span><span class="dv">400</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  invisible</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>1.98337: Patient0: **Non-Trauma arrival**
-1.9961: Patient0: (NT) Triage wait time: 0.0127306327534218
-4.81828: Patient1: **Non-Trauma arrival**
-5.21548: Patient1: (NT) Triage wait time: 0.397199270099641
-7.73074: Patient0: Reg wait time: 5.73464131703432
-8.91957: Patient2: **Non-Trauma arrival**
-9.41823: Patient2: (NT) Triage wait time: 0.498658567639001
-11.7398: Patient1: Reg wait time: 6.52431076208275
-19.735: Patient3: **Non-Trauma arrival**
-19.8934: Patient3: (NT) Triage wait time: 0.158397078514099
-20.8129: Patient2: Reg wait time: 11.3946667163366
-22.8331: Patient4: **Non-Trauma arrival**
-22.9077: Patient4: (NT) Triage wait time: 0.0745190956319384
-25.3342: Patient1: Exam wait time: 13.5944227010377
-25.3342: Patient1: NT patient requirement treatment
-26.4239: Patient0: Exam wait time: 18.6931580897728
-26.4239: Patient0: NT patient requirement treatment
-26.9576: Patient3: Reg wait time: 7.06418089106501
-29.8928: Patient4: Reg wait time: 6.9851420913044
-37.6481: Patient2: Exam wait time: 16.8352030197193
-37.6481: Patient2: NT Total time in system: 28.7285283036949
-37.6481: Patient2: A patient has departed the UTC
-42.6598: Patient3: Exam wait time: 15.7022304051214
-42.6598: Patient3: NT Total time in system: 22.9248083747005
-42.6598: Patient3: A patient has departed the UTC
-47.9967: Patient4: Exam wait time: 18.1038782936354
-47.9967: Patient4: NT patient requirement treatment
-72.7928: Patient5: **Non-Trauma arrival**
-72.9826: Patient5: (NT) Triage wait time: 0.189795183793947
-75.9327: Patient5: Reg wait time: 2.95005342250865
-85.6637: Patient6: **Non-Trauma arrival**
-85.7808: Patient6: (NT) Triage wait time: 0.117071516346186
-85.952: Patient7: **Non-Trauma arrival**
-86.1707: Patient7: (NT) Triage wait time: 0.218772323491677
-87.2653: Patient8: **Non-Trauma arrival**
-87.773: Patient8: (NT) Triage wait time: 0.507709594429031
-92.7296: Patient5: Exam wait time: 16.7969119949958
-92.7296: Patient5: NT Total time in system: 19.9367606012984
-92.7296: Patient5: A patient has departed the UTC
-94.4338: Patient6: Reg wait time: 8.65300972281766
-96.8964: Patient7: Reg wait time: 10.7256348327887
-101.426: Patient9: **Non-Trauma arrival**
-101.908: Patient9: (NT) Triage wait time: 0.481878707515079
-101.991: Patient8: Reg wait time: 14.2175774799721
-102.699: Patient10: **Trauma arrival
-102.709: Patient10: (T) Triage wait time: 0.0100422198884189
-102.715: Patient10: (T) Trauma room wait time: 0.00542165880712275
-105.008: Patient11: **Non-Trauma arrival**
-105.177: Patient11: (NT) Triage wait time: 0.169415777402676
-106.168: Patient9: Reg wait time: 4.25962780903096
-110.496: Patient6: Exam wait time: 16.0625661904392
-110.496: Patient6: NT Total time in system: 24.8326474296031
-110.496: Patient6: A patient has departed the UTC
-111.1: Patient11: Reg wait time: 5.92303748697735
-111.941: Patient8: Exam wait time: 9.95010863947117
-111.941: Patient8: NT patient requirement treatment
-112.271: Patient7: Exam wait time: 15.3746304144701
-112.271: Patient7: NT patient requirement treatment
-121.567: Patient12: **Non-Trauma arrival**
-121.786: Patient12: (NT) Triage wait time: 0.219294753701732
-123.809: Patient13: **Non-Trauma arrival**
-123.956: Patient13: (NT) Triage wait time: 0.146438194904476
-125.603: Patient14: **Non-Trauma arrival**
-125.753: Patient14: (NT) Triage wait time: 0.149665066661939
-126.131: Patient12: Reg wait time: 4.34523436764131
-127.222: Patient15: **Non-Trauma arrival**
-127.436: Patient15: (NT) Triage wait time: 0.214269282606736
-128.096: Patient11: Exam wait time: 16.9960024409354
-128.096: Patient11: NT patient requirement treatment
-128.196: Patient9: Exam wait time: 22.0284596759822
-128.196: Patient9: NT Total time in system: 26.7699661925282
-128.196: Patient9: A patient has departed the UTC
-128.818: Patient16: **Non-Trauma arrival**
-129.606: Patient16: (NT) Triage wait time: 0.7878910023299
-133.037: Patient13: Reg wait time: 9.08085081129136
-133.259: Patient10: A patient has departed the UTC
-137.729: Patient14: Reg wait time: 11.9764289553168
-141.422: Patient15: Reg wait time: 13.9861379203492
-142.713: Patient12: Exam wait time: 16.5817060070371
-142.713: Patient12: NT Total time in system: 21.1462351283801
-142.713: Patient12: A patient has departed the UTC
-144.557: Patient17: **Non-Trauma arrival**
-145.743: Patient17: (NT) Triage wait time: 1.18660184619893
-147.075: Patient16: Reg wait time: 17.4688167571194
-150.117: Patient13: Exam wait time: 17.0799651360252
-150.117: Patient13: NT Total time in system: 26.307254142221
-150.117: Patient13: A patient has departed the UTC
-152.789: Patient14: Exam wait time: 15.0597929133457
-152.789: Patient14: NT patient requirement treatment
-154.395: Patient17: Reg wait time: 8.65143391076941
-158.249: Patient15: Exam wait time: 16.8271597815287
-158.249: Patient15: NT patient requirement treatment
-163.449: Patient18: **Non-Trauma arrival**
-163.896: Patient18: (NT) Triage wait time: 0.446878488472009
-164.64: Patient16: Exam wait time: 17.5654906699617
-164.64: Patient16: NT patient requirement treatment
-168.044: Patient19: **Non-Trauma arrival**
-168.105: Patient19: (NT) Triage wait time: 0.0615361616946757
-168.426: Patient18: Reg wait time: 4.52998566448966
-170.185: Patient17: Exam wait time: 15.7906010545231
-170.185: Patient17: NT patient requirement treatment
-174.469: Patient19: Reg wait time: 6.36391885315521
-174.537: Patient20: **Non-Trauma arrival**
-174.819: Patient20: (NT) Triage wait time: 0.281382063079292
-175.462: Patient21: **Non-Trauma arrival**
-176.207: Patient21: (NT) Triage wait time: 0.74516377407582
-178.608: Patient20: Reg wait time: 3.78921008769424
-181.682: Patient21: Reg wait time: 5.47489069078978
-186.837: Patient18: Exam wait time: 18.4112162931668
-186.837: Patient18: NT Total time in system: 23.3880804461285
-186.837: Patient18: A patient has departed the UTC
-189.351: Patient19: Exam wait time: 14.8817417916543
-189.351: Patient19: NT Total time in system: 21.3071968065042
-189.351: Patient19: A patient has departed the UTC
-189.652: Patient22: **Non-Trauma arrival**
-189.995: Patient22: (NT) Triage wait time: 0.343012645862558
-192.505: Patient20: Exam wait time: 13.8966949648923
-192.505: Patient20: NT patient requirement treatment
-193.993: Patient22: Reg wait time: 3.99875112070836
-204.917: Patient21: Exam wait time: 23.2357984800251
-204.917: Patient21: NT patient requirement treatment
-206.145: Patient23: **Non-Trauma arrival**
-206.195: Patient23: (NT) Triage wait time: 0.0497582228854299
-210.529: Patient23: Reg wait time: 4.33433139021014
-210.66: Patient22: Exam wait time: 16.6668140549233
-210.66: Patient22: NT patient requirement treatment
-212.92: Patient24: **Non-Trauma arrival**
-213.227: Patient24: (NT) Triage wait time: 0.307121594112033
-215.094: Patient25: **Non-Trauma arrival**
-215.647: Patient25: (NT) Triage wait time: 0.552824471738745
-216.981: Patient24: Reg wait time: 3.75365530302963
-221.154: Patient25: Reg wait time: 5.50709382234314
-226.07: Patient26: **Non-Trauma arrival**
-226.791: Patient26: (NT) Triage wait time: 0.72054354904364
-228.679: Patient23: Exam wait time: 18.1496763855399
-228.679: Patient23: NT patient requirement treatment
-231.813: Patient26: Reg wait time: 5.02211279064036
-234.795: Patient25: Exam wait time: 13.6407454817652
-234.795: Patient25: NT patient requirement treatment
-237.661: Patient24: Exam wait time: 20.6798124891103
-237.661: Patient24: NT patient requirement treatment
-239.857: Patient27: **Non-Trauma arrival**
-240.114: Patient27: (NT) Triage wait time: 0.257337297919804
-241.163: Patient28: **Non-Trauma arrival**
-241.242: Patient28: (NT) Triage wait time: 0.079301031306386
-245.029: Patient27: Reg wait time: 4.91532350020415
-248.029: Patient26: Exam wait time: 16.2159908687183
-248.029: Patient26: NT patient requirement treatment
-250.661: Patient28: Reg wait time: 9.41901425606741
-260.176: Patient27: Exam wait time: 15.1463113817453
-260.176: Patient27: NT patient requirement treatment
-264.752: Patient28: Exam wait time: 14.091277358243
-264.752: Patient28: NT Total time in system: 23.5895926456168
-264.752: Patient28: A patient has departed the UTC
-265.699: Patient29: **Trauma arrival
-265.889: Patient29: (T) Triage wait time: 0.190232961438596
-265.898: Patient29: (T) Trauma room wait time: 0.00874707395388441
-280.465: Patient30: **Non-Trauma arrival**
-281.589: Patient30: (NT) Triage wait time: 1.12304587159912
-285.35: Patient30: Reg wait time: 3.76105229165421
-289.947: Patient31: **Non-Trauma arrival**
-290.297: Patient31: (NT) Triage wait time: 0.350362505128885
-293.149: Patient31: Reg wait time: 2.85140394960291
-295.003: Patient29: A patient has departed the UTC
-300.579: Patient30: Exam wait time: 15.2297847102265
-300.579: Patient30: NT patient requirement treatment
-310.219: Patient31: Exam wait time: 17.0703825263242
-310.219: Patient31: NT patient requirement treatment
-326.564: Patient32: **Non-Trauma arrival**
-326.633: Patient32: (NT) Triage wait time: 0.0686456648011813
-330.222: Patient32: Reg wait time: 3.58909908187223
-331.705: Patient33: **Non-Trauma arrival**
-331.796: Patient33: (NT) Triage wait time: 0.0906124639147379
-335.443: Patient33: Reg wait time: 3.64646554012211
-341.737: Patient34: **Trauma arrival
-342.031: Patient34: (T) Triage wait time: 0.293510935876157
-342.034: Patient34: (T) Trauma room wait time: 0.00340484997462909
-346.152: Patient32: Exam wait time: 15.9295081732475
-346.152: Patient32: NT patient requirement treatment
-349.314: Patient35: **Non-Trauma arrival**
-349.585: Patient35: (NT) Triage wait time: 0.270791321978891
-350.569: Patient33: Exam wait time: 15.1262325798119
-350.569: Patient33: NT patient requirement treatment
-354.619: Patient35: Reg wait time: 5.03409619399145
-364.529: Patient36: **Non-Trauma arrival**
-364.546: Patient37: **Non-Trauma arrival**
-364.96: Patient36: (NT) Triage wait time: 0.430079661916579
-365.169: Patient37: (NT) Triage wait time: 0.623434275027307
-369.093: Patient36: Reg wait time: 4.13395183225157
-372.355: Patient35: Exam wait time: 17.7367990882204
-372.355: Patient35: NT patient requirement treatment
-372.415: Patient37: Reg wait time: 7.24612328554747
-373.674: Patient38: **Non-Trauma arrival**
-374.427: Patient38: (NT) Triage wait time: 0.752708754770651
-374.648: Patient34: A patient has departed the UTC
-376.725: Patient39: **Non-Trauma arrival**
-376.833: Patient39: (NT) Triage wait time: 0.108708727593466
-378.097: Patient38: Reg wait time: 3.67041021738174
-380.435: Patient40: **Non-Trauma arrival**
-380.512: Patient40: (NT) Triage wait time: 0.0772473506319216
-382.087: Patient41: **Trauma arrival
-382.368: Patient41: (T) Triage wait time: 0.281608640202307
-382.396: Patient41: (T) Trauma room wait time: 0.028124633078221
-383.115: Patient39: Reg wait time: 6.28174643398347
-384.472: Patient36: Exam wait time: 15.3781368012786
-384.472: Patient36: NT Total time in system: 19.9421682954467
-384.472: Patient36: A patient has departed the UTC
-386.51: Patient40: Reg wait time: 5.99776793134112
-391.342: Patient37: Exam wait time: 18.9262286890153
-391.342: Patient37: NT patient requirement treatment
-393.086: Patient38: Exam wait time: 14.9882935861974
-393.086: Patient38: NT patient requirement treatment
-394.619: Patient42: **Non-Trauma arrival**
-394.686: Patient42: (NT) Triage wait time: 0.0664772366483817
-399.023: Patient39: Exam wait time: 15.9079250977056
-399.023: Patient39: NT Total time in system: 22.2983802592826
-399.023: Patient39: A patient has departed the UTC</code></pre>
+</div>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">8. Results</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>resources <span class="ot">&lt;-</span> <span class="fu">get_mon_resources</span>(treat_sim)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(resources, <span class="at">metric =</span> <span class="st">"usage"</span>, <span class="fu">c</span>(<span class="st">"triage_bay"</span>, <span class="st">"trauma_room"</span>), <span class="at">items =</span> <span class="st">"server"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>Results</p>
 <p>You can add options to executable code like this</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">

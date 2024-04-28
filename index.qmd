@@ -9,12 +9,12 @@ editor: visual
 
 > Note: help with install of `simmer.plot` (`igraph` installation is the actual issue) on Linux based systems: <https://r.igraph.org/articles/installation-troubleshooting#cannot-compile-igraph-from-sources-on-linux>
 >
-> > Remember to `conda deactivate` before installation.
+> > If you make use of conda environments (via Anaconda/mini-conda/mini-forge/mamba), **remember** to `conda deactivate` before installation.
 
 ```{r}
 library(simmer)
 library(simmer.bricks)
-library(simmer.plot)
+suppressMessages(library(simmer.plot))
 library(tibble)
 library(ggplot2)
 suppressMessages(library(RCurl))
@@ -171,7 +171,46 @@ sample_nt_trauma_treatment <- function(p){
 }
 ```
 
-## 4. Patient Trajectories
+## 4. Model parameterisation
+
+The model is setup to be created from a set of functions that return trajectories. Each function accepts a list that contains all parameters to configure the simulation model. Here we create the list and pre-populate it using default values.
+
+```{r}
+create_experiment <- function(n_triage_bays=DEFAULT_N_TRIAGE,
+                              n_reg_clerks=DEFAULT_N_REG,
+                              n_exam_rooms=DEFAULT_N_EXAM,
+                              n_trauma_rooms=DEFAULT_N_TRAUMA,
+                              n_non_trauma_cubicles=DEFAULT_NON_TRAUMA_CUBICLES,
+                              n_trauma_cubicles=DEFAULT_TRAUMA_CUBICLES,
+                              triage_mean=DEFAULT_TRIAGE_MEAN,
+                              stabilisation_mean=DEFAULT_TRAUMA_MEAN,
+                              trauma_treat_params=DEFAULT_TRAUMA_TREATMENT_PARAMS,
+                              reg_params=DEFAULT_REG_PARAMS,
+                              exam_params=DEFAULT_EXAM_PARAMS,
+                              prob_non_trauma_treat=DEFAULT_NON_TRAUMA_TREAT_P,
+                              prob_trauma=DEFAULT_PROB_TRAUMA,
+                              log_level=LOG_LEVEL) {
+  
+  experiment = list(n_triage_bays=n_triage_bays,
+                    n_reg_clerks=n_reg_clerks,
+                    n_exam_rooms=n_exam_rooms,
+                    n_trauma_rooms=n_trauma_rooms,
+                    n_non_trauma_cubicles=n_non_trauma_cubicles,
+                    n_trauma_cubicles=n_trauma_cubicles,
+                    triage_mean=triage_mean,
+                    stabilisation_mean=stabilisation_mean,
+                    trauma_treat_params=trauma_treat_params,
+                    reg_params=reg_params,
+                    exam_params=exam_params,
+                    prob_non_trauma_treat=prob_non_trauma_treat,
+                    prob_trauma=prob_trauma,
+                    log_level=log_level)
+  
+  return(experiment)
+}     
+```
+
+## 5. Patient Trajectories
 
 The DES package `simmer` uses the concept of a `trajectory` to model a process for a particular patient type. In the urgent care centre example trajectories allow us to model separate trauma and non-trauma processes. Note that different trajectories can share common resources.
 
@@ -196,7 +235,7 @@ The `simmer` terminology for using resources and engaging in activities is easy 
 >
 > > The keyword `function()` must be included for dynamic sampling for each patient. **Omitting** `function()` means that it is evaluated **once** at the time the `trajectory` is created.
 
-## Trauma Patients
+### 5.1. Trauma Patients
 
 > We wrap the trajectory in a function called `create_trauma_pathway`. This allows us to pass an argument `exp` that can parameterise the trajectory for use in a discrete experiment.
 
@@ -230,7 +269,7 @@ create_trauma_pathway <- function(exp){
 }
 ```
 
-## Non-trauma patients
+### 5.2 Non-trauma patients
 
 ```{r}
 nt_cubicle_treatment <- trajectory() %>% 
@@ -288,7 +327,7 @@ create_non_trauma_pathway <- function(exp){
 }
 ```
 
-## Modelling patient arrivals
+## 6. Modelling patient arrivals
 
 Patients arrive a the urgent treatment centre following a time dependent process. When patients arrive they are classified as trauma or non-trauma.
 
@@ -320,44 +359,9 @@ create_arrival_generator <- function(exp){
 }
 ```
 
-## Single run of the model
+## 7. Single run of the model
 
 > Work in progress: model is still missing non-trauma logic + time dependent arrival rate via thinning.
-
-```{r}
-create_experiment <- function(n_triage_bays=DEFAULT_N_TRIAGE,
-                              n_reg_clerks=DEFAULT_N_REG,
-                              n_exam_rooms=DEFAULT_N_EXAM,
-                              n_trauma_rooms=DEFAULT_N_TRAUMA,
-                              n_non_trauma_cubicles=DEFAULT_NON_TRAUMA_CUBICLES,
-                              n_trauma_cubicles=DEFAULT_TRAUMA_CUBICLES,
-                              triage_mean=DEFAULT_TRIAGE_MEAN,
-                              stabilisation_mean=DEFAULT_TRAUMA_MEAN,
-                              trauma_treat_params=DEFAULT_TRAUMA_TREATMENT_PARAMS,
-                              reg_params=DEFAULT_REG_PARAMS,
-                              exam_params=DEFAULT_EXAM_PARAMS,
-                              prob_non_trauma_treat=DEFAULT_NON_TRAUMA_TREAT_P,
-                              prob_trauma=DEFAULT_PROB_TRAUMA,
-                              log_level=LOG_LEVEL) {
-  
-  experiment = list(n_triage_bays=n_triage_bays,
-                    n_reg_clerks=n_reg_clerks,
-                    n_exam_rooms=n_exam_rooms,
-                    n_trauma_rooms=n_trauma_rooms,
-                    n_non_trauma_cubicles=n_non_trauma_cubicles,
-                    n_trauma_cubicles=n_trauma_cubicles,
-                    triage_mean=triage_mean,
-                    stabilisation_mean=stabilisation_mean,
-                    trauma_treat_params=trauma_treat_params,
-                    reg_params=reg_params,
-                    exam_params=exam_params,
-                    prob_non_trauma_treat=prob_non_trauma_treat,
-                    prob_trauma=prob_trauma,
-                    log_level=log_level)
-  
-  return(experiment)
-}              
-```
 
 ```{r}
 set.seed(SEED)
@@ -391,7 +395,7 @@ treat_sim %>%
   invisible
 ```
 
-Results
+## 8. Results
 
 ```{r}
 resources <- get_mon_resources(treat_sim)
