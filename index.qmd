@@ -126,8 +126,8 @@ DEFAULT_RESULTS_COLLECTION_PERIOD <- 60 * 19
 DEFAULT_N_REPS <- 5
 
 # Show the a trace of simulated events
-# NOY in use at this stage.
-TRACE <- TRUE
+# 1 = show, 0 = do not show.
+LOG_LEVEL <- 1
 ```
 
 ## 3. Functions
@@ -176,7 +176,7 @@ The `simmer` terminology for using resources and engaging in activities is easy 
 
 -   `release` - release a resource.
 
-`simmer` also provides a way to set an attribute of the `trajectory` using `set_attribute`. This is useful for storing timing information such as when a patient begins waiting for a resource (access via `now(env)`).
+`simmer` also provides a way to set an attribute of the `trajectory` using `set_attribute`. This is useful for storing timing information to display in a log: for example when a patient begins waiting for a resource (access via `now(env)`).
 
 > **Important notes:**
 >
@@ -191,84 +191,110 @@ The `simmer` terminology for using resources and engaging in activities is easy 
 
 ## Trauma Patients
 
+> We wrap the trajectory in a function called `create_trauma_pathway`. This allows us to pass an argument `exp` that can parameterise the trajectory for use in a discrete experiment.
+
 ```{r}
-trauma_pathway <- trajectory(name="trauma_pathway") %>%
-  log_(function() {paste("**Trauma arrival")}) %>% 
+
+create_trauma_pathway <- function(exp){
+
+  trauma_pathway <- trajectory(name="trauma_pathway") %>%
+    # log patient arrival
+    log_(function() {paste("**Trauma arrival")}, level=1) %>% 
+    
+    # request triage bay
+    set_attribute("start_triage_wait", function() {now(exp$env)}) %>%
+    seize(resource = "triage_bay", amount = 1) %>%
+    timeout(task = function() rexp(1, 3.0)) %>%
+    release(resource = "triage_bay", amount = 1) %>%
+    
+    log_(function() {paste("(T) Triage wait time:",
+                     now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
+         level=1) %>%
+    
+    # request trauma room for stabilization
+    set_attribute("start_trauma_room_wait", function() {now(exp$env)}) %>%
+    seize(resource = "trauma_room", amount = 1) %>%
+    timeout(task = function() rexp(1, 90.0)) %>%
+    release(resource = "trauma_room", amount = 1) %>%
+    log_(function() {paste("(T) Trauma room wait time:",
+                     now(exp$env) - get_attribute(exp$env, "start_trauma_room_wait"))},
+         level=1) %>%
+    
+    # request treatment cubicle
+    seize(resource = "trauma_treat_cubicle", amount = 1) %>%
+    timeout(task = function() rlnorm(1, TRAUMA_TREATMENT_PARAMS$mu,
+                                     TRAUMA_TREATMENT_PARAMS$sigma)) %>%
+    release(resource = "trauma_treat_cubicle", amount = 1)
   
-  # request triage bay
-  set_attribute("start_triage_wait", function() {now(env)}) %>%
-  seize(resource = "triage_bay", amount = 1) %>%
-  timeout(task = function() rexp(1, 3.0)) %>%
-  release(resource = "triage_bay", amount = 1) %>%
-  
-  log_(function() {paste("(T) Triage wait time:",
-                   now(env) - get_attribute(env, "start_triage_wait"))}) %>%
-  
-  # request trauma room for stabilization
-  set_attribute("start_trauma_room_wait", function() {now(env)}) %>%
-  seize(resource = "trauma_room", amount = 1) %>%
-  timeout(task = function() rexp(1, 90.0)) %>%
-  release(resource = "trauma_room", amount = 1) %>%
-  log_(function() {paste("(T) Trauma room wait time:",
-                   now(env) - get_attribute(env, "start_trauma_room_wait"))}) %>%
-  
-  # request treatment cubicle
-  seize(resource = "trauma_treat_cubicle", amount = 1) %>%
-  timeout(task = function() rlnorm(1, TRAUMA_TREATMENT_PARAMS$mu,
-                                   TRAUMA_TREATMENT_PARAMS$sigma)) %>%
-  release(resource = "trauma_treat_cubicle", amount = 1)
+  return(trauma_pathway)
+}
 ```
 
 ## Non-trauma patients
 
 ```{r}
 nt_cubicle_treatment <- trajectory() %>% 
-  log_(function() {paste("NT patient requirement treatment")}) %>% 
+  log_(function() {paste("NT patient requirement treatment")},
+       level=1) %>% 
   seize(resource="nontrauma_treat_cubicle", amount=1) %>% 
   timeout(task = rlnorm(1, meanlog=13.3, sdlog=sqrt(2.0))) %>%
   release(resource = "nontrauma_treat_cubicle", amount = 1)
 ```
 
 ```{r}
-non_trauma_pathway <- trajectory(name="non_trauma_pathway") %>%
-  log_(function() {paste("**Non-Trauma arrival")}) %>% 
-  # store start of waiting time.
-  set_attribute("start_triage_wait", function() {now(env)}) %>%
+
+create_non_trauma_pathway <- function(exp){
   
-  # queue and use triage bay
-  seize(resource = "triage_bay", amount = 1) %>%
+  # log messages
+  ARRIVAL_MSG = "**Non-Trauma arrival**"
+  TRIAGE_MSG = "(NT) Triage wait time:"
+  REG_MSG = "Reg wait time:"
+  EXAM_MSG = "Exam wait time:"
+  EXIT_MSG = "NT Total time in system:"
   
-  log_(function() {paste("(NT) Triage wait time:",
-                         now(env) - get_attribute(env, "start_triage_wait"))}) %>%
+  non_trauma_pathway <- trajectory(name="non_trauma_pathway") %>%
+    # log non_trauma arrival
+    log_(function() {paste(ARRIVAL_MSG)}, level=1) %>% 
+    
+    # store start of waiting time for log calculations
+    set_attribute("start_triage_wait", function() {now(exp$env)}) %>%
+    
+    # queue and use triage bay
+    seize(resource = "triage_bay", amount = 1) %>%
+    
+    log_(function() {paste(TRIAGE_MSG, now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
+         level=1) %>%
+    
+    timeout(task = rexp(1, 3.0)) %>%
+    release(resource = "triage_bay", amount = 1) %>%
+    
+    # queue and use registration clerk
+    set_attribute("start_reg_wait", function() {now(exp$env)}) %>%
+    seize(resource = "registration_clerk", amount = 1) %>%
+    log_(function() {paste(REG_MSG, now(exp$env) - get_attribute(exp$env, "start_reg_wait"))},
+         level=1) %>%
+    
+    timeout(task = function() rlnorm(1, DEFAULT_REG_PARAMS$mu, DEFAULT_REG_PARAMS$sigma)) %>%
+    release(resource = "registration_clerk", amount = 1) %>%
+    
+    # queue and use examination room
+    set_attribute("start_exam_wait", function() {now(exp$env)}) %>%
+    seize(resource = "examination_room", amount = 1) %>%
+    log_(function() {paste(EXAM_MSG, now(exp$env) - get_attribute(exp$env, "start_exam_wait"))},
+         level=1) %>%
+    timeout(task = function() rnorm(1, 16.0, sqrt(4.0))) %>%
+    release(resource = "examination_room", amount = 1) %>% 
+    
+    # a Proportion of patients require treatment in a cubicle
+    branch (
+      sample_nt_trauma_treatment, continue=T,
+      nt_cubicle_treatment
+    ) %>% 
+    log_(function() {paste(EXIT_MSG, now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
+         level=1)
   
-  timeout(task = rexp(1, 3.0)) %>%
-  release(resource = "triage_bay", amount = 1) %>%
-  
-  # queue and use registration clerk
-  set_attribute("start_reg_wait", function() {now(env)}) %>%
-  seize(resource = "registration_clerk", amount = 1) %>%
-  log_(function() {paste("Reg wait time:",
-                         now(env) - get_attribute(env, "start_reg_wait"))}) %>%
-  
-  timeout(task = function() rlnorm(1, DEFAULT_REG_PARAMS$mu,
-                                   DEFAULT_REG_PARAMS$sigma)) %>%
-  release(resource = "registration_clerk", amount = 1) %>%
-  
-  # queue and use examination room
-  set_attribute("start_exam_wait", function() {now(env)}) %>%
-  seize(resource = "examination_room", amount = 1) %>%
-  log_(function() {paste("Reg wait time:",
-                         now(env) - get_attribute(env, "start_exam_wait"))}) %>%
-  timeout(task = function() rnorm(1, 16.0, sqrt(4.0))) %>%
-  release(resource = "examination_room", amount = 1) %>% 
-  
-  # a Proportion of patients require treatment in a cubicle
-  branch (
-    sample_nt_trauma_treatment, continue=T,
-    nt_cubicle_treatment
-  ) %>% 
-  log_(function() {paste("NT Total time in system:",
-                         now(env) - get_attribute(env, "start_triage_wait"))})
+  return(non_trauma_pathway)
+}
 ```
 
 ## Modelling patient arrivals
@@ -280,13 +306,27 @@ To modify the classification of patients we will use a trajectory that uses the 
 The function \`sample_arrival_type\` returns a 1 (trauma) or 2 (non-trauma). This is used to select the appropriate patient trajectory.
 
 ```{r}
-patient_arrival <- trajectory() %>%
-  branch(
-    sample_arrival_type, continue=T,
-      trauma_pathway,
-      non_trauma_pathway
-  ) %>%
-  log_(function() {paste("A patient has departed the UTC")})
+
+create_arrival_generator <- function(exp){
+  
+  DEPART_MSG <- "A patient has departed the UTC"
+  
+  # create and parameterise the trauma pathway trajectory
+  trauma_pathway <- create_trauma_pathway(exp)
+  
+  # create and parameterise the non-trauma pathway trajectory
+  non_trauma_pathway <- create_non_trauma_pathway(exp)
+  
+  patient_arrival <- trajectory() %>%
+    branch(
+      sample_arrival_type, continue=T,
+        trauma_pathway,
+        non_trauma_pathway
+    ) %>%
+    log_(function() {paste(DEPART_MSG)},level=1)
+  
+  return(patient_arrival)
+}
 ```
 
 ## Single run of the model
@@ -294,19 +334,60 @@ patient_arrival <- trajectory() %>%
 > Work in progress: model is still missing non-trauma logic + time dependent arrival rate via thinning.
 
 ```{r}
-env <- simmer("TreatSim") %>% 
-  add_resource("triage_bay", 1) %>%
-  add_resource("registration_clerk", 1) %>%
-  add_resource("examination_room", 3) %>%
-  add_resource("trauma_room", 2) %>%
-  add_resource("trauma_treat_cubicle", 1) %>%
-  add_resource("nontrauma_treat_cubicle", 1) %>%
-  add_generator("patient", patient_arrival, function() rexp(1, 1.0/10.0))
 
-env %>% 
-  run(until=400) %>% 
+create_experiment <- function(n_triage_bays=DEFAULT_N_TRIAGE,
+                              n_reg_clerks=DEFAULT_N_REG,
+                              n_exam_rooms=DEFAULT_N_EXAM,
+                              n_trauma_rooms=DEFAULT_N_TRAUMA,
+                              n_non_trauma_cubicles=DEFAULT_NON_TRAUMA_CUBICLES,
+                              n_trauma_cubicles=DEFAULT_TRAUMA_CUBICLES,
+                              log_level=LOG_LEVEL) {
+  
+  experiment = list(n_triage_bays=n_triage_bays,
+                    n_reg_clerks=n_reg_clerks,
+                    n_exam_rooms=n_exam_rooms,
+                    n_trauma_rooms=n_trauma_rooms,
+                    n_non_trauma_cubicles=n_non_trauma_cubicles,
+                    n_trauma_cubicles=n_trauma_cubicles,
+                    log_level=log_level)
+  
+  return(experiment)
+}              
+```
+
+```{r}
+set.seed(SEED)
+
+get_model <- function(exp){
+  
+  arrival_gen <- create_arrival_generator(exp)
+  
+  env <- simmer("TreatSim", log_level=exp$log_level) %>% 
+    add_resource("triage_bay", exp$n_triage_bays) %>%
+    add_resource("registration_clerk", exp$n_reg_clerks) %>%
+    add_resource("examination_room", exp$n_exam_rooms) %>%
+    add_resource("trauma_room", exp$n_trauma_rooms) %>%
+    add_resource("trauma_treat_cubicle", exp$n_trauma_cubicles) %>%
+    add_resource("nontrauma_treat_cubicle", exp$n_non_trauma_cubicles) %>%
+    add_generator("Patient", arrival_gen, function() rexp(1, 1.0/10.0))
+  
+  # add the simmer environment to the experiment list.
+  exp <- c(exp, env=env)
+  
+  return(env)
+}
+```
+
+```{r}
+default_experiment <- create_experiment(log_level=1)
+treat_sim <- get_model(default_experiment)
+
+treat_sim %>% 
+  run(until=DEFAULT_RESULTS_COLLECTION_PERIOD) %>% 
   invisible
 ```
+
+Results
 
 You can add options to executable code like this
 
