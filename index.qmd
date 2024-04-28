@@ -9,6 +9,7 @@ editor: visual
 
 ```{r}
 library(simmer)
+library(simmer.bricks)
 library(tibble)
 library(ggplot2)
 suppressMessages(library(RCurl))
@@ -53,17 +54,16 @@ DEFAULT_TRIAGE_MEAN <- 3.0
 DEFAULT_REG_PARAMS <- normal_moments_from_lognormal(5.0, sqrt(2.0))
 
 # examination parameters
-DEFAULT_EXAM_MEAN <- 16.0
-DEFAULT_EXAM_VAR <- 3.0
+DEFAULT_EXAM_PARAMS = list(mean=16.0, var=3.0)
 
 # trauma/stabilisation
 DEFAULT_TRAUMA_MEAN <- 90.0
 
 # Trauma treatment (lognormal distribution)
-TRAUMA_TREATMENT_PARAMS <- normal_moments_from_lognormal(30.0, sqrt(4.0))
+DEFAULT_TRAUMA_TREATMENT_PARAMS <- normal_moments_from_lognormal(30.0, sqrt(4.0))
 
 # Non trauma treatment (lognormal distribution)
-TRAUMA_TREATMENT_PARAMS <- normal_moments_from_lognormal(13.3, sqrt(2.0))
+DEFAULT_NON_TRAUMA_TREATMENT_PARAMS <- normal_moments_from_lognormal(13.3, sqrt(2.0))
 
 # prob patient requires treatment given trauma
 DEFAULT_NON_TRAUMA_TREAT_P <- 0.60
@@ -143,7 +143,8 @@ LOG_LEVEL <- 1
 #' The function uses the Bernouli distribution (Rlab) to sample
 #' if a patient is Trauma or Non-Trauma.  The return values are 
 #' 1 = Trauma, 2 = Non-trauma.
-sample_arrival_type <- function(){
+#' @param p A number: the probability a patient has trauma on arrival
+sample_arrival_type <- function(p){
   ifelse(rbern(1, prob = DEFAULT_PROB_TRAUMA) == 1, 1, 2)
 }
 ```
@@ -159,8 +160,9 @@ sample_arrival_type <- function(){
 #' The function uses the Bernouli distribution (Rlab) to sample
 #' if a patient is requires treatment or not.  The return values are 
 #' 1 = Treatment, 0 = No treatment
-sample_nt_trauma_treatment <- function(){
-  ifelse(rbern(1, prob = DEFAULT_NON_TRAUMA_TREAT_P) == 1, 1, 0)
+#' @param p A number: The probability the patient requires treatment
+sample_nt_trauma_treatment <- function(p){
+  ifelse(rbern(1, prob = p) == 1, 1, 0)
 }
 ```
 
@@ -197,34 +199,27 @@ The `simmer` terminology for using resources and engaging in activities is easy 
 
 create_trauma_pathway <- function(exp){
 
-  trauma_pathway <- trajectory(name="trauma_pathway") %>%
+    trauma_pathway <- trajectory(name="trauma_pathway") %>%
     # log patient arrival
     log_(function() {paste("**Trauma arrival")}, level=1) %>% 
     
-    # request triage bay
+    # triage 
     set_attribute("start_triage_wait", function() {now(exp$env)}) %>%
-    seize(resource = "triage_bay", amount = 1) %>%
-    timeout(task = function() rexp(1, 3.0)) %>%
-    release(resource = "triage_bay", amount = 1) %>%
-    
+    visit("triage_bay", function() rexp(1, exp$triage_mean)) %>%
     log_(function() {paste("(T) Triage wait time:",
                      now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
          level=1) %>%
     
     # request trauma room for stabilization
     set_attribute("start_trauma_room_wait", function() {now(exp$env)}) %>%
-    seize(resource = "trauma_room", amount = 1) %>%
-    timeout(task = function() rexp(1, 90.0)) %>%
-    release(resource = "trauma_room", amount = 1) %>%
+    visit("trauma_room", function() rexp(1, exp$stabilisation_mean)) %>%
     log_(function() {paste("(T) Trauma room wait time:",
                      now(exp$env) - get_attribute(exp$env, "start_trauma_room_wait"))},
          level=1) %>%
     
     # request treatment cubicle
-    seize(resource = "trauma_treat_cubicle", amount = 1) %>%
-    timeout(task = function() rlnorm(1, TRAUMA_TREATMENT_PARAMS$mu,
-                                     TRAUMA_TREATMENT_PARAMS$sigma)) %>%
-    release(resource = "trauma_treat_cubicle", amount = 1)
+    visit("trauma_treat_cubicle", function() rlnorm(1, exp$trauma_treat_params$mu,
+                                                    exp$trauma_treat_params$sigma)) %>%
   
   return(trauma_pathway)
 }
@@ -244,7 +239,6 @@ nt_cubicle_treatment <- trajectory() %>%
 ```{r}
 
 create_non_trauma_pathway <- function(exp){
-  
   # log messages
   ARRIVAL_MSG = "**Non-Trauma arrival**"
   TRIAGE_MSG = "(NT) Triage wait time:"
@@ -258,36 +252,28 @@ create_non_trauma_pathway <- function(exp){
     
     # store start of waiting time for log calculations
     set_attribute("start_triage_wait", function() {now(exp$env)}) %>%
-    
     # queue and use triage bay
-    seize(resource = "triage_bay", amount = 1) %>%
-    
+    visit("triage_bay", function() rexp(1, exp$triage_mean)) %>%
     log_(function() {paste(TRIAGE_MSG, now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
          level=1) %>%
     
-    timeout(task = rexp(1, 3.0)) %>%
-    release(resource = "triage_bay", amount = 1) %>%
-    
     # queue and use registration clerk
     set_attribute("start_reg_wait", function() {now(exp$env)}) %>%
-    seize(resource = "registration_clerk", amount = 1) %>%
+    visit("registration_clerk", function() rlnorm(1, exp$reg_params$mu, 
+                                                  exp$reg_params$sigma)) %>%
     log_(function() {paste(REG_MSG, now(exp$env) - get_attribute(exp$env, "start_reg_wait"))},
          level=1) %>%
     
-    timeout(task = function() rlnorm(1, DEFAULT_REG_PARAMS$mu, DEFAULT_REG_PARAMS$sigma)) %>%
-    release(resource = "registration_clerk", amount = 1) %>%
-    
     # queue and use examination room
     set_attribute("start_exam_wait", function() {now(exp$env)}) %>%
-    seize(resource = "examination_room", amount = 1) %>%
+    visit("examination_room",  function() rnorm(1, exp$exam_params$mean, 
+                                                sqrt(exp$exam_params$var))) %>%
     log_(function() {paste(EXAM_MSG, now(exp$env) - get_attribute(exp$env, "start_exam_wait"))},
          level=1) %>%
-    timeout(task = function() rnorm(1, 16.0, sqrt(4.0))) %>%
-    release(resource = "examination_room", amount = 1) %>% 
     
     # a Proportion of patients require treatment in a cubicle
     branch (
-      sample_nt_trauma_treatment, continue=T,
+      function() sample_nt_trauma_treatment(exp$prob_non_trauma_treat), continue=T,
       nt_cubicle_treatment
     ) %>% 
     log_(function() {paste(EXIT_MSG, now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
@@ -319,7 +305,7 @@ create_arrival_generator <- function(exp){
   
   patient_arrival <- trajectory() %>%
     branch(
-      sample_arrival_type, continue=T,
+      function() sample_arrival_type(exp$prob_trauma), continue=T,
         trauma_pathway,
         non_trauma_pathway
     ) %>%
@@ -334,13 +320,19 @@ create_arrival_generator <- function(exp){
 > Work in progress: model is still missing non-trauma logic + time dependent arrival rate via thinning.
 
 ```{r}
-
 create_experiment <- function(n_triage_bays=DEFAULT_N_TRIAGE,
                               n_reg_clerks=DEFAULT_N_REG,
                               n_exam_rooms=DEFAULT_N_EXAM,
                               n_trauma_rooms=DEFAULT_N_TRAUMA,
                               n_non_trauma_cubicles=DEFAULT_NON_TRAUMA_CUBICLES,
                               n_trauma_cubicles=DEFAULT_TRAUMA_CUBICLES,
+                              triage_mean=DEFAULT_TRIAGE_MEAN,
+                              stabilisation_mean=DEFAULT_TRAUMA_MEAN,
+                              trauma_treat_params=DEFAULT_TRAUMA_TREATMENT_PARAMS,
+                              reg_params=DEFAULT_REG_PARAMS,
+                              exam_params=DEFAULT_EXAM_PARAMS,
+                              prob_non_trauma_treat=DEFAULT_NON_TRAUMA_TREAT_P,
+                              prob_trauma=DEFAULT_PROB_TRAUMA,
                               log_level=LOG_LEVEL) {
   
   experiment = list(n_triage_bays=n_triage_bays,
@@ -349,6 +341,13 @@ create_experiment <- function(n_triage_bays=DEFAULT_N_TRIAGE,
                     n_trauma_rooms=n_trauma_rooms,
                     n_non_trauma_cubicles=n_non_trauma_cubicles,
                     n_trauma_cubicles=n_trauma_cubicles,
+                    triage_mean=triage_mean,
+                    stabilisation_mean=stabilisation_mean,
+                    trauma_treat_params=trauma_treat_params,
+                    reg_params=reg_params,
+                    exam_params=exam_params,
+                    prob_non_trauma_treat=prob_non_trauma_treat,
+                    prob_trauma=prob_trauma,
                     log_level=log_level)
   
   return(experiment)
@@ -383,7 +382,7 @@ default_experiment <- create_experiment(log_level=1)
 treat_sim <- get_model(default_experiment)
 
 treat_sim %>% 
-  run(until=DEFAULT_RESULTS_COLLECTION_PERIOD) %>% 
+  run(until=400) %>% 
   invisible
 ```
 

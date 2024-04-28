@@ -105,10 +105,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="imports">1. Imports</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simmer)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(RCurl))</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(Rlab))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simmer.bricks)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(RCurl))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(Rlab))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="default-values-and-constants" class="level2">
@@ -147,23 +148,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>DEFAULT_REG_PARAMS <span class="ot">&lt;-</span> <span class="fu">normal_moments_from_lognormal</span>(<span class="fl">5.0</span>, <span class="fu">sqrt</span>(<span class="fl">2.0</span>))</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># examination parameters</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>DEFAULT_EXAM_MEAN <span class="ot">&lt;-</span> <span class="fl">16.0</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>DEFAULT_EXAM_VAR <span class="ot">&lt;-</span> <span class="fl">3.0</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># trauma/stabilisation</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>DEFAULT_TRAUMA_MEAN <span class="ot">&lt;-</span> <span class="fl">90.0</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Trauma treatment (lognormal distribution)</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>TRAUMA_TREATMENT_PARAMS <span class="ot">&lt;-</span> <span class="fu">normal_moments_from_lognormal</span>(<span class="fl">30.0</span>, <span class="fu">sqrt</span>(<span class="fl">4.0</span>))</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Non trauma treatment (lognormal distribution)</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>TRAUMA_TREATMENT_PARAMS <span class="ot">&lt;-</span> <span class="fu">normal_moments_from_lognormal</span>(<span class="fl">13.3</span>, <span class="fu">sqrt</span>(<span class="fl">2.0</span>))</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># prob patient requires treatment given trauma</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>DEFAULT_NON_TRAUMA_TREAT_P <span class="ot">&lt;-</span> <span class="fl">0.60</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># proportion of patients triaged as trauma</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>DEFAULT_PROB_TRAUMA <span class="ot">&lt;-</span> <span class="fl">0.12</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>DEFAULT_EXAM_PARAMS <span class="ot">=</span> <span class="fu">list</span>(<span class="at">mean=</span><span class="fl">16.0</span>, <span class="at">var=</span><span class="fl">3.0</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># trauma/stabilisation</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>DEFAULT_TRAUMA_MEAN <span class="ot">&lt;-</span> <span class="fl">90.0</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Trauma treatment (lognormal distribution)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>DEFAULT_TRAUMA_TREATMENT_PARAMS <span class="ot">&lt;-</span> <span class="fu">normal_moments_from_lognormal</span>(<span class="fl">30.0</span>, <span class="fu">sqrt</span>(<span class="fl">4.0</span>))</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Non trauma treatment (lognormal distribution)</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>DEFAULT_NON_TRAUMA_TREATMENT_PARAMS <span class="ot">&lt;-</span> <span class="fu">normal_moments_from_lognormal</span>(<span class="fl">13.3</span>, <span class="fu">sqrt</span>(<span class="fl">2.0</span>))</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co"># prob patient requires treatment given trauma</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>DEFAULT_NON_TRAUMA_TREAT_P <span class="ot">&lt;-</span> <span class="fl">0.60</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co"># proportion of patients triaged as trauma</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>DEFAULT_PROB_TRAUMA <span class="ot">&lt;-</span> <span class="fl">0.12</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="time-dependent-arrival-rate-data" class="level3">
@@ -238,9 +238,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#' The function uses the Bernouli distribution (Rlab) to sample</span></span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#' if a patient is Trauma or Non-Trauma.  The return values are </span></span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#' 1 = Trauma, 2 = Non-trauma.</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>sample_arrival_type <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(<span class="fu">rbern</span>(<span class="dv">1</span>, <span class="at">prob =</span> DEFAULT_PROB_TRAUMA) <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>)</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param p A number: the probability a patient has trauma on arrival</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>sample_arrival_type <span class="ot">&lt;-</span> <span class="cf">function</span>(p){</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(<span class="fu">rbern</span>(<span class="dv">1</span>, <span class="at">prob =</span> DEFAULT_PROB_TRAUMA) <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' Sample a if a non-trauma patient requires treatment</span></span>
@@ -253,9 +254,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#' The function uses the Bernouli distribution (Rlab) to sample</span></span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#' if a patient is requires treatment or not.  The return values are </span></span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#' 1 = Treatment, 0 = No treatment</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>sample_nt_trauma_treatment <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(<span class="fu">rbern</span>(<span class="dv">1</span>, <span class="at">prob =</span> DEFAULT_NON_TRAUMA_TREAT_P) <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param p A number: The probability the patient requires treatment</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>sample_nt_trauma_treatment <span class="ot">&lt;-</span> <span class="cf">function</span>(p){</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(<span class="fu">rbern</span>(<span class="dv">1</span>, <span class="at">prob =</span> p) <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="patient-trajectories" class="level2">
@@ -288,37 +290,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>create_trauma_pathway <span class="ot">&lt;-</span> <span class="cf">function</span>(exp){</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># log patient arrival</span></span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"**Trauma arrival"</span>)}, <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># request triage bay</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># triage </span></span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_triage_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">timeout</span>(<span class="at">task =</span> <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, <span class="fl">3.0</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"(T) Triage wait time:"</span>,</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># request trauma room for stabilization</span></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_trauma_room_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"trauma_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">timeout</span>(<span class="at">task =</span> <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, <span class="fl">90.0</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"trauma_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"(T) Trauma room wait time:"</span>,</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_trauma_room_wait"</span>))},</span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># request treatment cubicle</span></span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"trauma_treat_cubicle"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">timeout</span>(<span class="at">task =</span> <span class="cf">function</span>() <span class="fu">rlnorm</span>(<span class="dv">1</span>, TRAUMA_TREATMENT_PARAMS<span class="sc">$</span>mu,</span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>                                     TRAUMA_TREATMENT_PARAMS<span class="sc">$</span>sigma)) <span class="sc">%&gt;%</span></span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"trauma_treat_cubicle"</span>, <span class="at">amount =</span> <span class="dv">1</span>)</span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(trauma_pathway)</span>
-<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"triage_bay"</span>, <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, exp<span class="sc">$</span>triage_mean)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"(T) Triage wait time:"</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># request trauma room for stabilization</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_trauma_room_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"trauma_room"</span>, <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, exp<span class="sc">$</span>stabilisation_mean)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"(T) Trauma room wait time:"</span>,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_trauma_room_wait"</span>))},</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># request treatment cubicle</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"trauma_treat_cubicle"</span>, <span class="cf">function</span>() <span class="fu">rlnorm</span>(<span class="dv">1</span>, exp<span class="sc">$</span>trauma_treat_params<span class="sc">$</span>mu,</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>                                                    exp<span class="sc">$</span>trauma_treat_params<span class="sc">$</span>sigma)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(trauma_pathway)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="non-trauma-patients" class="level2">
@@ -333,57 +328,48 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>create_non_trauma_pathway <span class="ot">&lt;-</span> <span class="cf">function</span>(exp){</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># log messages</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  ARRIVAL_MSG <span class="ot">=</span> <span class="st">"**Non-Trauma arrival**"</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  TRIAGE_MSG <span class="ot">=</span> <span class="st">"(NT) Triage wait time:"</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  REG_MSG <span class="ot">=</span> <span class="st">"Reg wait time:"</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  EXAM_MSG <span class="ot">=</span> <span class="st">"Exam wait time:"</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  EXIT_MSG <span class="ot">=</span> <span class="st">"NT Total time in system:"</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  non_trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"non_trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># log non_trauma arrival</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(ARRIVAL_MSG)}, <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># store start of waiting time for log calculations</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_triage_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use triage bay</span></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># log messages</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  ARRIVAL_MSG <span class="ot">=</span> <span class="st">"**Non-Trauma arrival**"</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  TRIAGE_MSG <span class="ot">=</span> <span class="st">"(NT) Triage wait time:"</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  REG_MSG <span class="ot">=</span> <span class="st">"Reg wait time:"</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  EXAM_MSG <span class="ot">=</span> <span class="st">"Exam wait time:"</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  EXIT_MSG <span class="ot">=</span> <span class="st">"NT Total time in system:"</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  non_trauma_pathway <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="at">name=</span><span class="st">"non_trauma_pathway"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># log non_trauma arrival</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(ARRIVAL_MSG)}, <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># store start of waiting time for log calculations</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_triage_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use triage bay</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"triage_bay"</span>, <span class="cf">function</span>() <span class="fu">rexp</span>(<span class="dv">1</span>, exp<span class="sc">$</span>triage_mean)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(TRIAGE_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(TRIAGE_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">timeout</span>(<span class="at">task =</span> <span class="fu">rexp</span>(<span class="dv">1</span>, <span class="fl">3.0</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"triage_bay"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use registration clerk</span></span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_reg_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"registration_clerk"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(REG_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_reg_wait"</span>))},</span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">timeout</span>(<span class="at">task =</span> <span class="cf">function</span>() <span class="fu">rlnorm</span>(<span class="dv">1</span>, DEFAULT_REG_PARAMS<span class="sc">$</span>mu, DEFAULT_REG_PARAMS<span class="sc">$</span>sigma)) <span class="sc">%&gt;%</span></span>
-<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"registration_clerk"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use examination room</span></span>
-<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_exam_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
-<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">seize</span>(<span class="at">resource =</span> <span class="st">"examination_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(EXAM_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_exam_wait"</span>))},</span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">timeout</span>(<span class="at">task =</span> <span class="cf">function</span>() <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="fl">16.0</span>, <span class="fu">sqrt</span>(<span class="fl">4.0</span>))) <span class="sc">%&gt;%</span></span>
-<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">release</span>(<span class="at">resource =</span> <span class="st">"examination_room"</span>, <span class="at">amount =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>    <span class="co"># a Proportion of patients require treatment in a cubicle</span></span>
-<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">branch</span> (</span>
-<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>      sample_nt_trauma_treatment, <span class="at">continue=</span>T,</span>
-<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>      nt_cubicle_treatment</span>
-<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(EXIT_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
-<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>)</span>
-<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(non_trauma_pathway)</span>
-<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use registration clerk</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_reg_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"registration_clerk"</span>, <span class="cf">function</span>() <span class="fu">rlnorm</span>(<span class="dv">1</span>, exp<span class="sc">$</span>reg_params<span class="sc">$</span>mu, </span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>                                                  exp<span class="sc">$</span>reg_params<span class="sc">$</span>sigma)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(REG_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_reg_wait"</span>))},</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># queue and use examination room</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_attribute</span>(<span class="st">"start_exam_wait"</span>, <span class="cf">function</span>() {<span class="fu">now</span>(exp<span class="sc">$</span>env)}) <span class="sc">%&gt;%</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">visit</span>(<span class="st">"examination_room"</span>,  <span class="cf">function</span>() <span class="fu">rnorm</span>(<span class="dv">1</span>, exp<span class="sc">$</span>exam_params<span class="sc">$</span>mean, </span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>                                                <span class="fu">sqrt</span>(exp<span class="sc">$</span>exam_params<span class="sc">$</span>var))) <span class="sc">%&gt;%</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(EXAM_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_exam_wait"</span>))},</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># a Proportion of patients require treatment in a cubicle</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">branch</span> (</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>      <span class="cf">function</span>() <span class="fu">sample_nt_trauma_treatment</span>(exp<span class="sc">$</span>prob_non_trauma_treat), <span class="at">continue=</span>T,</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>      nt_cubicle_treatment</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(EXIT_MSG, <span class="fu">now</span>(exp<span class="sc">$</span>env) <span class="sc">-</span> <span class="fu">get_attribute</span>(exp<span class="sc">$</span>env, <span class="st">"start_triage_wait"</span>))},</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>         <span class="at">level=</span><span class="dv">1</span>)</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(non_trauma_pathway)</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="modelling-patient-arrivals" class="level2">
@@ -404,7 +390,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  patient_arrival <span class="ot">&lt;-</span> <span class="fu">trajectory</span>() <span class="sc">%&gt;%</span></span>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">branch</span>(</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>      sample_arrival_type, <span class="at">continue=</span>T,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>      <span class="cf">function</span>() <span class="fu">sample_arrival_type</span>(exp<span class="sc">$</span>prob_trauma), <span class="at">continue=</span>T,</span>
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        trauma_pathway,</span>
 <span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        non_trauma_pathway</span>
 <span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
@@ -426,18 +412,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_trauma_rooms=</span>DEFAULT_N_TRAUMA,</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_non_trauma_cubicles=</span>DEFAULT_NON_TRAUMA_CUBICLES,</span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                              <span class="at">n_trauma_cubicles=</span>DEFAULT_TRAUMA_CUBICLES,</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">log_level=</span>LOG_LEVEL) {</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  experiment <span class="ot">=</span> <span class="fu">list</span>(<span class="at">n_triage_bays=</span>n_triage_bays,</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_reg_clerks=</span>n_reg_clerks,</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_exam_rooms=</span>n_exam_rooms,</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_trauma_rooms=</span>n_trauma_rooms,</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_non_trauma_cubicles=</span>n_non_trauma_cubicles,</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_trauma_cubicles=</span>n_trauma_cubicles,</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>                    <span class="at">log_level=</span>log_level)</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(experiment)</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>}              </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">triage_mean=</span>DEFAULT_TRIAGE_MEAN,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">stabilisation_mean=</span>DEFAULT_TRAUMA_MEAN,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>                              <span class="at">trauma_treat_params=</span>DEFAULT_TRAUMA_TREATMENT_PARAMS,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>                              <span class="at">reg_params=</span>DEFAULT_REG_PARAMS,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>                              <span class="at">exam_params=</span>DEFAULT_EXAM_PARAMS,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>                              <span class="at">prob_non_trauma_treat=</span>DEFAULT_NON_TRAUMA_TREAT_P,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>                              <span class="at">prob_trauma=</span>DEFAULT_PROB_TRAUMA,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>                              <span class="at">log_level=</span>LOG_LEVEL) {</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  experiment <span class="ot">=</span> <span class="fu">list</span>(<span class="at">n_triage_bays=</span>n_triage_bays,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_reg_clerks=</span>n_reg_clerks,</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_exam_rooms=</span>n_exam_rooms,</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_trauma_rooms=</span>n_trauma_rooms,</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_non_trauma_cubicles=</span>n_non_trauma_cubicles,</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_trauma_cubicles=</span>n_trauma_cubicles,</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>                    <span class="at">triage_mean=</span>triage_mean,</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>                    <span class="at">stabilisation_mean=</span>stabilisation_mean,</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>                    <span class="at">trauma_treat_params=</span>trauma_treat_params,</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>                    <span class="at">reg_params=</span>reg_params,</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>                    <span class="at">exam_params=</span>exam_params,</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>                    <span class="at">prob_non_trauma_treat=</span>prob_non_trauma_treat,</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>                    <span class="at">prob_trauma=</span>prob_trauma,</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>                    <span class="at">log_level=</span>log_level)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(experiment)</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>}              </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(SEED)</span>
@@ -466,525 +466,226 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>treat_sim <span class="ot">&lt;-</span> <span class="fu">get_model</span>(default_experiment)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>treat_sim <span class="sc">%&gt;%</span> </span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">run</span>(<span class="at">until=</span>DEFAULT_RESULTS_COLLECTION_PERIOD) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">run</span>(<span class="at">until=</span><span class="dv">400</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  invisible</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>6.60895: Patient0: **Non-Trauma arrival**
-6.60895: Patient0: (NT) Triage wait time: 0
-6.67506: Patient0: Reg wait time: 0
-6.99087: Patient1: **Non-Trauma arrival**
-6.99087: Patient1: (NT) Triage wait time: 0
-11.0922: Patient2: **Non-Trauma arrival**
-11.0922: Patient2: (NT) Triage wait time: 0
-12.4097: Patient0: Exam wait time: 0
-12.4097: Patient1: Reg wait time: 5.35272233443167
-15.4744: Patient3: **Trauma arrival
-15.5065: Patient3: (T) Triage wait time: 0.0320488538911103
-15.5071: Patient3: (T) Trauma room wait time: 0.000634904010766491
-17.0963: Patient1: Exam wait time: 0
-17.0963: Patient2: Reg wait time: 5.93797907396157
-22.8358: Patient2: Exam wait time: 0
-28.3473: Patient3: A patient has departed the UTC
-31.4328: Patient0: NT patient requirement treatment
-32.8296: Patient1: NT Total time in system: 25.8387443525079
-32.8296: Patient1: A patient has departed the UTC
-38.2673: Patient2: NT patient requirement treatment
-39.5613: Patient4: **Non-Trauma arrival**
-39.5613: Patient4: (NT) Triage wait time: 0
-39.6274: Patient4: Reg wait time: 0
-42.1922: Patient5: **Trauma arrival
-42.2855: Patient5: (T) Triage wait time: 0.0933191796454267
-42.288: Patient5: (T) Trauma room wait time: 0.00256793479348261
-44.2276: Patient4: Exam wait time: 0
-55.1576: Patient5: A patient has departed the UTC
-55.2771: Patient6: **Non-Trauma arrival**
-55.2771: Patient6: (NT) Triage wait time: 0
-55.3432: Patient6: Reg wait time: 0
-56.7012: Patient4: NT Total time in system: 17.1399833853127
-56.7012: Patient4: A patient has departed the UTC
-59.3718: Patient6: Exam wait time: 0
-72.8412: Patient7: **Non-Trauma arrival**
-72.8412: Patient7: (NT) Triage wait time: 0
-72.9073: Patient7: Reg wait time: 0
-74.1545: Patient8: **Non-Trauma arrival**
-74.1545: Patient8: (NT) Triage wait time: 0
-79.164: Patient7: Exam wait time: 0
-79.164: Patient8: Reg wait time: 4.94334025506448
-79.6033: Patient6: NT Total time in system: 24.3261914001524
-79.6033: Patient6: A patient has departed the UTC
-83.9067: Patient8: Exam wait time: 0
-93.0076: Patient7: NT patient requirement treatment
-95.0783: Patient8: NT patient requirement treatment
-105.637: Patient9: **Non-Trauma arrival**
-105.637: Patient9: (NT) Triage wait time: 0
-105.703: Patient9: Reg wait time: 0
-110.056: Patient9: Exam wait time: 0
-122.132: Patient10: **Non-Trauma arrival**
-122.132: Patient10: (NT) Triage wait time: 0
-122.198: Patient10: Reg wait time: 0
-125.49: Patient10: Exam wait time: 0
-127.572: Patient9: NT patient requirement treatment
-142.356: Patient10: NT Total time in system: 20.2233387974397
-142.356: Patient10: A patient has departed the UTC
-147.323: Patient11: **Trauma arrival
-147.665: Patient11: (T) Triage wait time: 0.341811704745794
-147.666: Patient11: (T) Trauma room wait time: 0.000334740662935928
-152.005: Patient12: **Non-Trauma arrival**
-152.005: Patient12: (NT) Triage wait time: 0
-152.071: Patient12: Reg wait time: 0
-159.521: Patient12: Exam wait time: 0
-161.843: Patient11: A patient has departed the UTC
-167.369: Patient13: **Non-Trauma arrival**
-167.369: Patient13: (NT) Triage wait time: 0
-167.436: Patient13: Reg wait time: 0
-172.63: Patient13: Exam wait time: 0
-176.806: Patient12: NT patient requirement treatment
-189.989: Patient13: NT patient requirement treatment
-224.459: Patient14: **Non-Trauma arrival**
-224.459: Patient14: (NT) Triage wait time: 0
-224.525: Patient14: Reg wait time: 0
-229.732: Patient14: Exam wait time: 0
-235.617: Patient15: **Non-Trauma arrival**
-235.617: Patient15: (NT) Triage wait time: 0
-235.683: Patient15: Reg wait time: 0
-237.41: Patient16: **Trauma arrival
-237.55: Patient16: (T) Triage wait time: 0.1394321201293
-237.554: Patient16: (T) Trauma room wait time: 0.00446556912680762
-239.029: Patient17: **Non-Trauma arrival**
-239.029: Patient17: (NT) Triage wait time: 0
-241.337: Patient15: Exam wait time: 0
-241.337: Patient17: Reg wait time: 2.24178811780743
-241.501: Patient18: **Non-Trauma arrival**
-241.501: Patient18: (NT) Triage wait time: 0
-244.997: Patient14: NT patient requirement treatment
-246.029: Patient17: Exam wait time: 0
-246.029: Patient18: Reg wait time: 4.46189006110947
-247.846: Patient19: **Non-Trauma arrival**
-247.846: Patient19: (NT) Triage wait time: 0
-249.634: Patient18: Exam wait time: 0
-249.634: Patient19: Reg wait time: 1.72229348324274
-252.136: Patient16: A patient has departed the UTC
-253.422: Patient20: **Non-Trauma arrival**
-253.422: Patient20: (NT) Triage wait time: 0
-255.251: Patient15: NT Total time in system: 19.6338903158534
-255.251: Patient15: A patient has departed the UTC
-255.572: Patient19: Exam wait time: 0
-255.572: Patient20: Reg wait time: 2.08359938379951
-265.099: Patient18: NT patient requirement treatment
-265.099: Patient20: Exam wait time: 4.3588557434835
-265.221: Patient17: NT patient requirement treatment
-268.142: Patient21: **Non-Trauma arrival**
-268.142: Patient21: (NT) Triage wait time: 0
-268.208: Patient21: Reg wait time: 0
-273.91: Patient21: Exam wait time: 0
-274.597: Patient19: NT patient requirement treatment
-279.265: Patient20: NT patient requirement treatment
-286.893: Patient22: **Non-Trauma arrival**
-286.893: Patient22: (NT) Triage wait time: 0
-286.959: Patient22: Reg wait time: 0
-288.739: Patient23: **Trauma arrival
-288.901: Patient23: (T) Triage wait time: 0.161510967959941
-288.906: Patient23: (T) Trauma room wait time: 0.00549691370690653
-289.476: Patient21: NT patient requirement treatment
-290.536: Patient24: **Non-Trauma arrival**
-290.536: Patient24: (NT) Triage wait time: 0
-293.003: Patient22: Exam wait time: 0
-293.003: Patient24: Reg wait time: 2.40005057121385
-296.518: Patient24: Exam wait time: 0
-304.234: Patient23: A patient has departed the UTC
-309.288: Patient24: NT patient requirement treatment
-309.974: Patient25: **Non-Trauma arrival**
-309.974: Patient25: (NT) Triage wait time: 0
-310.04: Patient25: Reg wait time: 0
-310.575: Patient22: NT Total time in system: 23.6815994977774
-310.575: Patient22: A patient has departed the UTC
-314.6: Patient26: **Non-Trauma arrival**
-314.6: Patient26: (NT) Triage wait time: 0
-316.753: Patient25: Exam wait time: 0
-316.753: Patient26: Reg wait time: 2.08723756422381
-321.513: Patient26: Exam wait time: 0
-331.093: Patient27: **Non-Trauma arrival**
-331.093: Patient27: (NT) Triage wait time: 0
-331.159: Patient27: Reg wait time: 0
-332.463: Patient25: NT Total time in system: 22.4895033886161
-332.463: Patient25: A patient has departed the UTC
-334.292: Patient27: Exam wait time: 0
-336.225: Patient26: NT patient requirement treatment
-341.481: Patient28: **Trauma arrival
-341.797: Patient28: (T) Triage wait time: 0.315960822923387
-341.805: Patient28: (T) Trauma room wait time: 0.00712254551342539
-349.603: Patient29: **Non-Trauma arrival**
-349.603: Patient29: (NT) Triage wait time: 0
-349.669: Patient29: Reg wait time: 0
-350.668: Patient27: NT Total time in system: 19.575002139126
-350.668: Patient27: A patient has departed the UTC
-352.35: Patient29: Exam wait time: 0
-354.341: Patient28: A patient has departed the UTC
-364.568: Patient30: **Non-Trauma arrival**
-364.568: Patient30: (NT) Triage wait time: 0
-364.634: Patient30: Reg wait time: 0
-365.626: Patient29: NT patient requirement treatment
-367.813: Patient30: Exam wait time: 0
-378.354: Patient31: **Non-Trauma arrival**
-378.354: Patient31: (NT) Triage wait time: 0
-378.42: Patient31: Reg wait time: 0
-382.028: Patient31: Exam wait time: 0
-382.21: Patient30: NT patient requirement treatment
-394.975: Patient32: **Non-Trauma arrival**
-394.975: Patient32: (NT) Triage wait time: 0
-395.041: Patient32: Reg wait time: 0
-395.59: Patient33: **Non-Trauma arrival**
-395.59: Patient33: (NT) Triage wait time: 0
-396.386: Patient34: **Non-Trauma arrival**
-396.386: Patient34: (NT) Triage wait time: 0
-397.785: Patient32: Exam wait time: 0
-397.785: Patient33: Reg wait time: 2.12872752571104
-398.765: Patient35: **Non-Trauma arrival**
-398.765: Patient35: (NT) Triage wait time: 0
-401.147: Patient31: NT Total time in system: 22.792372438191
-401.147: Patient31: A patient has departed the UTC
-401.981: Patient33: Exam wait time: 0
-401.981: Patient34: Reg wait time: 5.5291494963588
-408.71: Patient34: Exam wait time: 0
-408.71: Patient35: Reg wait time: 9.87947297951604
-413.446: Patient36: **Non-Trauma arrival**
-413.446: Patient36: (NT) Triage wait time: 0
-413.512: Patient36: Reg wait time: 0
-414.92: Patient32: NT patient requirement treatment
-414.92: Patient35: Exam wait time: 2.66323657440506
-416.334: Patient33: NT patient requirement treatment
-418.009: Patient36: Exam wait time: 0
-423.149: Patient37: **Non-Trauma arrival**
-423.149: Patient37: (NT) Triage wait time: 0
-423.215: Patient37: Reg wait time: 0
-426.291: Patient34: NT patient requirement treatment
-429.767: Patient37: Exam wait time: 0
-430.21: Patient38: **Non-Trauma arrival**
-430.21: Patient38: (NT) Triage wait time: 0
-430.276: Patient38: Reg wait time: 0
-430.748: Patient35: NT patient requirement treatment
-435.351: Patient39: **Non-Trauma arrival**
-435.351: Patient39: (NT) Triage wait time: 0
-435.448: Patient38: Exam wait time: 0
-435.448: Patient39: Reg wait time: 0.0314816115193821
-438.233: Patient36: NT patient requirement treatment
-439.908: Patient39: Exam wait time: 0
-442.701: Patient40: **Trauma arrival
-442.994: Patient40: (T) Triage wait time: 0.293510935876157
-442.998: Patient40: (T) Trauma room wait time: 0.00340484997462909
-445.19: Patient37: NT patient requirement treatment
-450.277: Patient41: **Non-Trauma arrival**
-450.277: Patient41: (NT) Triage wait time: 0
-450.343: Patient41: Reg wait time: 0
-453.783: Patient38: NT Total time in system: 23.5730450306269
-453.783: Patient38: A patient has departed the UTC
-454.436: Patient41: Exam wait time: 0
-454.899: Patient39: NT Total time in system: 19.5481824955571
-454.899: Patient39: A patient has departed the UTC
-458.158: Patient40: A patient has departed the UTC
-465.493: Patient42: **Non-Trauma arrival**
-465.493: Patient42: (NT) Triage wait time: 0
-465.51: Patient43: **Non-Trauma arrival**
-465.559: Patient42: Reg wait time: 0
-465.559: Patient43: (NT) Triage wait time: 0.0496284902505977
-469.016: Patient44: **Non-Trauma arrival**
-469.016: Patient44: (NT) Triage wait time: 0
-469.71: Patient41: NT patient requirement treatment
-470.305: Patient42: Exam wait time: 0
-470.305: Patient43: Reg wait time: 4.67989111853251
-475.311: Patient45: **Non-Trauma arrival**
-475.311: Patient45: (NT) Triage wait time: 0
-476.373: Patient43: Exam wait time: 0
-476.373: Patient44: Reg wait time: 7.29126133533265
-482.489: Patient44: Exam wait time: 0
-482.489: Patient45: Reg wait time: 7.11183150415934
-485.846: Patient42: NT Total time in system: 20.3525593818292
-485.846: Patient42: A patient has departed the UTC
-485.846: Patient45: Exam wait time: 0.137893588902159
-495.752: Patient43: NT Total time in system: 30.2426829952429
-495.752: Patient43: A patient has departed the UTC
-498.187: Patient44: NT patient requirement treatment
-501.724: Patient45: NT patient requirement treatment
-506.185: Patient46: **Non-Trauma arrival**
-506.185: Patient46: (NT) Triage wait time: 0
-506.251: Patient46: Reg wait time: 0
-509.235: Patient47: **Non-Trauma arrival**
-509.235: Patient47: (NT) Triage wait time: 0
-510.342: Patient46: Exam wait time: 0
-510.342: Patient47: Reg wait time: 1.04131022635545
-510.886: Patient48: **Non-Trauma arrival**
-510.886: Patient48: (NT) Triage wait time: 0
-514.795: Patient47: Exam wait time: 0
-514.795: Patient48: Reg wait time: 3.84233025307583
-520.406: Patient48: Exam wait time: 0
-520.699: Patient49: **Non-Trauma arrival**
-520.699: Patient49: (NT) Triage wait time: 0
-520.765: Patient49: Reg wait time: 0
-526.932: Patient46: NT patient requirement treatment
-526.932: Patient49: Exam wait time: 1.0734786383847
-527.294: Patient50: **Non-Trauma arrival**
-527.294: Patient50: (NT) Triage wait time: 0
-527.36: Patient50: Reg wait time: 0
-532.196: Patient47: NT patient requirement treatment
-534.733: Patient48: NT Total time in system: 23.8466769887366
-534.733: Patient48: A patient has departed the UTC
-535.276: Patient50: Exam wait time: 0
-541.767: Patient49: NT patient requirement treatment
-551.401: Patient50: NT Total time in system: 24.1072233243556
-551.401: Patient50: A patient has departed the UTC
-553.741: Patient51: **Non-Trauma arrival**
-553.741: Patient51: (NT) Triage wait time: 0
-553.807: Patient51: Reg wait time: 0
-557.038: Patient51: Exam wait time: 0
-557.562: Patient52: **Non-Trauma arrival**
-557.562: Patient52: (NT) Triage wait time: 0
-557.628: Patient52: Reg wait time: 0
-558.311: Patient53: **Non-Trauma arrival**
-558.311: Patient53: (NT) Triage wait time: 0
-561.67: Patient52: Exam wait time: 0
-561.67: Patient53: Reg wait time: 3.29336536010305
-567.619: Patient53: Exam wait time: 0
-573.105: Patient51: NT patient requirement treatment
-575.622: Patient52: NT Total time in system: 18.0593189531884
-575.622: Patient52: A patient has departed the UTC
-580.117: Patient54: **Non-Trauma arrival**
-580.117: Patient54: (NT) Triage wait time: 0
-580.183: Patient54: Reg wait time: 0
-580.51: Patient53: NT patient requirement treatment
-580.975: Patient55: **Non-Trauma arrival**
-580.975: Patient55: (NT) Triage wait time: 0
-581.258: Patient56: **Non-Trauma arrival**
-581.258: Patient56: (NT) Triage wait time: 0
-582.168: Patient57: **Non-Trauma arrival**
-582.168: Patient57: (NT) Triage wait time: 0
-583.393: Patient54: Exam wait time: 0
-583.393: Patient55: Reg wait time: 2.35207480957911
-587.923: Patient55: Exam wait time: 0
-587.923: Patient56: Reg wait time: 6.59905081428337
-593.278: Patient56: Exam wait time: 0
-593.278: Patient57: Reg wait time: 11.0433252172679
-601.356: Patient55: NT patient requirement treatment
-601.356: Patient57: Exam wait time: 3.91537765397936
-602.347: Patient54: NT patient requirement treatment
-606.384: Patient58: **Non-Trauma arrival**
-606.384: Patient58: (NT) Triage wait time: 0
-606.45: Patient58: Reg wait time: 0
-608.575: Patient56: NT patient requirement treatment
-612.002: Patient58: Exam wait time: 0
-619.095: Patient57: NT Total time in system: 36.9267144059246
-619.095: Patient57: A patient has departed the UTC
-619.19: Patient59: **Trauma arrival
-619.612: Patient59: (T) Triage wait time: 0.421584869410481
-619.638: Patient59: (T) Trauma room wait time: 0.026047224239619
-626.105: Patient60: **Non-Trauma arrival**
-626.105: Patient60: (NT) Triage wait time: 0
-626.171: Patient60: Reg wait time: 0
-626.992: Patient58: NT patient requirement treatment
-628.904: Patient61: **Non-Trauma arrival**
-628.904: Patient61: (NT) Triage wait time: 0
-630.398: Patient60: Exam wait time: 0
-630.398: Patient61: Reg wait time: 1.42797248773286
-634.262: Patient59: A patient has departed the UTC
-638.028: Patient61: Exam wait time: 0
-639.752: Patient62: **Trauma arrival
-639.943: Patient62: (T) Triage wait time: 0.190587384471087
-639.963: Patient62: (T) Trauma room wait time: 0.0198474855584436
-640.435: Patient60: NT patient requirement treatment
-651.712: Patient62: A patient has departed the UTC
-653.845: Patient61: NT Total time in system: 24.9407187631779
-653.845: Patient61: A patient has departed the UTC
-657.455: Patient63: **Non-Trauma arrival**
-657.455: Patient63: (NT) Triage wait time: 0
-657.521: Patient63: Reg wait time: 0
-660.559: Patient63: Exam wait time: 0
-676.479: Patient63: NT patient requirement treatment
-681.641: Patient64: **Non-Trauma arrival**
-681.641: Patient64: (NT) Triage wait time: 0
-681.707: Patient64: Reg wait time: 0
-687.555: Patient64: Exam wait time: 0
-700.167: Patient65: **Non-Trauma arrival**
-700.167: Patient65: (NT) Triage wait time: 0
-700.233: Patient65: Reg wait time: 0
-701.613: Patient64: NT patient requirement treatment
-705.11: Patient65: Exam wait time: 0
-718.201: Patient66: **Non-Trauma arrival**
-718.201: Patient66: (NT) Triage wait time: 0
-718.267: Patient66: Reg wait time: 0
-719.245: Patient67: **Non-Trauma arrival**
-719.245: Patient67: (NT) Triage wait time: 0
-719.616: Patient68: **Non-Trauma arrival**
-719.616: Patient68: (NT) Triage wait time: 0
-723.6: Patient65: NT patient requirement treatment
-724.165: Patient66: Exam wait time: 0
-724.165: Patient67: Reg wait time: 4.85407139253334
-730.294: Patient67: Exam wait time: 0
-730.294: Patient68: Reg wait time: 10.611950738761
-735.646: Patient68: Exam wait time: 0
-735.834: Patient69: **Non-Trauma arrival**
-735.834: Patient69: (NT) Triage wait time: 0
-735.9: Patient69: Reg wait time: 0
-739.398: Patient66: NT Total time in system: 21.1974787635925
-739.398: Patient66: A patient has departed the UTC
-742.365: Patient69: Exam wait time: 0
-743.426: Patient70: **Non-Trauma arrival**
-743.426: Patient70: (NT) Triage wait time: 0
-743.492: Patient70: Reg wait time: 0
-747.943: Patient68: NT Total time in system: 28.3268085022163
-747.943: Patient68: A patient has departed the UTC
-747.943: Patient70: Exam wait time: 0.592100281719809
-748.233: Patient67: NT patient requirement treatment
-759.118: Patient69: NT Total time in system: 23.2839940657605
-759.118: Patient69: A patient has departed the UTC
-764.035: Patient70: NT Total time in system: 20.6083796481612
-764.035: Patient70: A patient has departed the UTC
-802.512: Patient71: **Non-Trauma arrival**
-802.512: Patient71: (NT) Triage wait time: 0
-802.578: Patient71: Reg wait time: 0
-806.803: Patient71: Exam wait time: 0
-813.278: Patient72: **Non-Trauma arrival**
-813.278: Patient72: (NT) Triage wait time: 0
-813.344: Patient72: Reg wait time: 0
-817.427: Patient72: Exam wait time: 0
-821.115: Patient71: NT patient requirement treatment
-834.716: Patient73: **Non-Trauma arrival**
-834.716: Patient73: (NT) Triage wait time: 0
-834.782: Patient73: Reg wait time: 0
-834.923: Patient72: NT Total time in system: 21.6457633222435
-834.923: Patient72: A patient has departed the UTC
-838.89: Patient73: Exam wait time: 0
-853.552: Patient73: NT Total time in system: 18.835933600877
-853.552: Patient73: A patient has departed the UTC
-864.863: Patient74: **Non-Trauma arrival**
-864.863: Patient74: (NT) Triage wait time: 0
-864.929: Patient74: Reg wait time: 0
-874.448: Patient74: Exam wait time: 0
-885.041: Patient75: **Non-Trauma arrival**
-885.041: Patient75: (NT) Triage wait time: 0
-885.107: Patient75: Reg wait time: 0
-888.811: Patient74: NT Total time in system: 23.9483936850934
-888.811: Patient74: A patient has departed the UTC
-889.083: Patient75: Exam wait time: 0
-905.829: Patient75: NT patient requirement treatment
-923.653: Patient76: **Trauma arrival
-923.875: Patient76: (T) Triage wait time: 0.222458373755217
-923.889: Patient76: (T) Trauma room wait time: 0.0139076994571496
-925.847: Patient77: **Non-Trauma arrival**
-925.847: Patient77: (NT) Triage wait time: 0
-925.913: Patient77: Reg wait time: 0
-930.588: Patient77: Exam wait time: 0
-937.066: Patient76: A patient has departed the UTC
-945.439: Patient77: NT patient requirement treatment
-960.218: Patient78: **Non-Trauma arrival**
-960.218: Patient78: (NT) Triage wait time: 0
-960.284: Patient78: Reg wait time: 0
-964.904: Patient78: Exam wait time: 0
-968.286: Patient79: **Non-Trauma arrival**
-968.286: Patient79: (NT) Triage wait time: 0
-968.352: Patient79: Reg wait time: 0
-974.689: Patient79: Exam wait time: 0
-979.289: Patient80: **Non-Trauma arrival**
-979.289: Patient80: (NT) Triage wait time: 0
-979.355: Patient80: Reg wait time: 0
-980.788: Patient78: NT patient requirement treatment
-984.072: Patient80: Exam wait time: 0
-988.196: Patient79: NT Total time in system: 19.9104029351342
-988.196: Patient79: A patient has departed the UTC
-989.173: Patient81: **Non-Trauma arrival**
-989.173: Patient81: (NT) Triage wait time: 0
-989.239: Patient81: Reg wait time: 0
-993.526: Patient81: Exam wait time: 0
-999.394: Patient82: **Non-Trauma arrival**
-999.394: Patient82: (NT) Triage wait time: 0
-999.46: Patient82: Reg wait time: 0
-1001.32: Patient80: NT Total time in system: 22.0336682614297
-1001.32: Patient80: A patient has departed the UTC
-1002.87: Patient82: Exam wait time: 0
-1003.64: Patient83: **Non-Trauma arrival**
-1003.64: Patient83: (NT) Triage wait time: 0
-1003.71: Patient83: Reg wait time: 0
-1005.14: Patient84: **Non-Trauma arrival**
-1005.14: Patient84: (NT) Triage wait time: 0
-1007.96: Patient81: NT Total time in system: 18.7827990299252
-1007.96: Patient81: A patient has departed the UTC
-1009.99: Patient83: Exam wait time: 0
-1009.99: Patient84: Reg wait time: 4.77865311371033
-1013.49: Patient85: **Non-Trauma arrival**
-1013.49: Patient85: (NT) Triage wait time: 0
-1014.74: Patient84: Exam wait time: 0
-1014.74: Patient85: Reg wait time: 1.17652506553873
-1020.01: Patient82: NT Total time in system: 20.6139975771227
-1020.01: Patient82: A patient has departed the UTC
-1020.97: Patient85: Exam wait time: 0
-1022.59: Patient86: **Non-Trauma arrival**
-1022.59: Patient86: (NT) Triage wait time: 0
-1022.66: Patient86: Reg wait time: 0
-1027.02: Patient83: NT patient requirement treatment
-1027.37: Patient86: Exam wait time: 0
-1031.01: Patient87: **Non-Trauma arrival**
-1031.01: Patient87: (NT) Triage wait time: 0
-1031.08: Patient87: Reg wait time: 0
-1033.31: Patient84: NT Total time in system: 28.1676286335254
-1033.31: Patient84: A patient has departed the UTC
-1035.48: Patient87: Exam wait time: 0
-1037.27: Patient85: NT patient requirement treatment
-1042.84: Patient86: NT Total time in system: 20.2451821151235
-1042.84: Patient86: A patient has departed the UTC
-1046.78: Patient88: **Non-Trauma arrival**
-1046.78: Patient88: (NT) Triage wait time: 0
-1046.84: Patient88: Reg wait time: 0
-1052.82: Patient87: NT patient requirement treatment
-1053.48: Patient88: Exam wait time: 0
-1068.42: Patient89: **Trauma arrival
-1068.43: Patient89: (T) Triage wait time: 0.00336305300402273
-1068.45: Patient89: (T) Trauma room wait time: 0.0222964691608922
-1070.57: Patient88: NT Total time in system: 23.7883013378246
-1070.57: Patient88: A patient has departed the UTC
-1071.58: Patient90: **Non-Trauma arrival**
-1071.58: Patient90: (NT) Triage wait time: 0
-1071.65: Patient90: Reg wait time: 0
-1075.89: Patient90: Exam wait time: 0
-1080.43: Patient91: **Non-Trauma arrival**
-1080.43: Patient91: (NT) Triage wait time: 0
-1080.5: Patient91: Reg wait time: 0
-1082.51: Patient89: A patient has departed the UTC
-1085.19: Patient92: **Non-Trauma arrival**
-1085.19: Patient92: (NT) Triage wait time: 0
-1086.55: Patient91: Exam wait time: 0
-1086.55: Patient92: Reg wait time: 1.2991153215346
-1090.35: Patient92: Exam wait time: 0
-1094.04: Patient93: **Non-Trauma arrival**
-1094.04: Patient93: (NT) Triage wait time: 0
-1094.11: Patient93: Reg wait time: 0
-1094.27: Patient90: NT patient requirement treatment
-1098.49: Patient93: Exam wait time: 0
-1099.4: Patient91: NT Total time in system: 18.9679458797257
-1099.4: Patient91: A patient has departed the UTC
-1100.35: Patient94: **Trauma arrival
-1100.7: Patient94: (T) Triage wait time: 0.349896081398811
-1100.7: Patient94: (T) Trauma room wait time: 0.00385412919945338
-1100.92: Patient95: **Trauma arrival
-1100.95: Patient95: (T) Triage wait time: 0.0235127036769427
-1100.95: Patient95: (T) Trauma room wait time: 0.00316002979798213
-1102.4: Patient96: **Non-Trauma arrival**
-1102.4: Patient96: (NT) Triage wait time: 0
-1102.47: Patient96: Reg wait time: 0
-1104.18: Patient92: NT patient requirement treatment
-1107.97: Patient97: **Non-Trauma arrival**
-1107.97: Patient97: (NT) Triage wait time: 0
-1109.65: Patient96: Exam wait time: 0
-1109.65: Patient97: Reg wait time: 1.62110855826404
-1113.67: Patient97: Exam wait time: 0
-1114.43: Patient94: A patient has departed the UTC
-1115.01: Patient93: NT Total time in system: 20.9649481109434
-1115.01: Patient93: A patient has departed the UTC
-1120.54: Patient98: **Non-Trauma arrival**
-1120.54: Patient98: (NT) Triage wait time: 0
-1120.61: Patient98: Reg wait time: 0
-1123.84: Patient96: NT Total time in system: 21.4413131688962
-1123.84: Patient96: A patient has departed the UTC
-1126.12: Patient98: Exam wait time: 0
-1127.58: Patient97: NT patient requirement treatment
-1130.09: Patient95: A patient has departed the UTC</code></pre>
+<pre><code>1.98337: Patient0: **Non-Trauma arrival**
+1.9961: Patient0: (NT) Triage wait time: 0.0127306327534218
+4.81828: Patient1: **Non-Trauma arrival**
+5.21548: Patient1: (NT) Triage wait time: 0.397199270099641
+7.73074: Patient0: Reg wait time: 5.73464131703432
+8.91957: Patient2: **Non-Trauma arrival**
+9.41823: Patient2: (NT) Triage wait time: 0.498658567639001
+11.7398: Patient1: Reg wait time: 6.52431076208275
+19.735: Patient3: **Non-Trauma arrival**
+19.8934: Patient3: (NT) Triage wait time: 0.158397078514099
+20.8129: Patient2: Reg wait time: 11.3946667163366
+22.8331: Patient4: **Non-Trauma arrival**
+22.9077: Patient4: (NT) Triage wait time: 0.0745190956319384
+25.3342: Patient1: Exam wait time: 13.5944227010377
+25.3342: Patient1: NT patient requirement treatment
+26.4239: Patient0: Exam wait time: 18.6931580897728
+26.4239: Patient0: NT patient requirement treatment
+26.9576: Patient3: Reg wait time: 7.06418089106501
+29.8928: Patient4: Reg wait time: 6.9851420913044
+37.6481: Patient2: Exam wait time: 16.8352030197193
+37.6481: Patient2: NT Total time in system: 28.7285283036949
+37.6481: Patient2: A patient has departed the UTC
+42.6598: Patient3: Exam wait time: 15.7022304051214
+42.6598: Patient3: NT Total time in system: 22.9248083747005
+42.6598: Patient3: A patient has departed the UTC
+47.9967: Patient4: Exam wait time: 18.1038782936354
+47.9967: Patient4: NT patient requirement treatment
+72.7928: Patient5: **Non-Trauma arrival**
+72.9826: Patient5: (NT) Triage wait time: 0.189795183793947
+75.9327: Patient5: Reg wait time: 2.95005342250865
+85.6637: Patient6: **Non-Trauma arrival**
+85.7808: Patient6: (NT) Triage wait time: 0.117071516346186
+85.952: Patient7: **Non-Trauma arrival**
+86.1707: Patient7: (NT) Triage wait time: 0.218772323491677
+87.2653: Patient8: **Non-Trauma arrival**
+87.773: Patient8: (NT) Triage wait time: 0.507709594429031
+92.7296: Patient5: Exam wait time: 16.7969119949958
+92.7296: Patient5: NT Total time in system: 19.9367606012984
+92.7296: Patient5: A patient has departed the UTC
+94.4338: Patient6: Reg wait time: 8.65300972281766
+96.8964: Patient7: Reg wait time: 10.7256348327887
+101.426: Patient9: **Non-Trauma arrival**
+101.908: Patient9: (NT) Triage wait time: 0.481878707515079
+101.991: Patient8: Reg wait time: 14.2175774799721
+102.699: Patient10: **Trauma arrival
+102.709: Patient10: (T) Triage wait time: 0.0100422198884189
+102.715: Patient10: (T) Trauma room wait time: 0.00542165880712275
+105.008: Patient11: **Non-Trauma arrival**
+105.177: Patient11: (NT) Triage wait time: 0.169415777402676
+106.168: Patient9: Reg wait time: 4.25962780903096
+110.496: Patient6: Exam wait time: 16.0625661904392
+110.496: Patient6: NT Total time in system: 24.8326474296031
+110.496: Patient6: A patient has departed the UTC
+111.1: Patient11: Reg wait time: 5.92303748697735
+111.941: Patient8: Exam wait time: 9.95010863947117
+111.941: Patient8: NT patient requirement treatment
+112.271: Patient7: Exam wait time: 15.3746304144701
+112.271: Patient7: NT patient requirement treatment
+121.567: Patient12: **Non-Trauma arrival**
+121.786: Patient12: (NT) Triage wait time: 0.219294753701732
+123.809: Patient13: **Non-Trauma arrival**
+123.956: Patient13: (NT) Triage wait time: 0.146438194904476
+125.603: Patient14: **Non-Trauma arrival**
+125.753: Patient14: (NT) Triage wait time: 0.149665066661939
+126.131: Patient12: Reg wait time: 4.34523436764131
+127.222: Patient15: **Non-Trauma arrival**
+127.436: Patient15: (NT) Triage wait time: 0.214269282606736
+128.096: Patient11: Exam wait time: 16.9960024409354
+128.096: Patient11: NT patient requirement treatment
+128.196: Patient9: Exam wait time: 22.0284596759822
+128.196: Patient9: NT Total time in system: 26.7699661925282
+128.196: Patient9: A patient has departed the UTC
+128.818: Patient16: **Non-Trauma arrival**
+129.606: Patient16: (NT) Triage wait time: 0.7878910023299
+133.037: Patient13: Reg wait time: 9.08085081129136
+133.259: Patient10: A patient has departed the UTC
+137.729: Patient14: Reg wait time: 11.9764289553168
+141.422: Patient15: Reg wait time: 13.9861379203492
+142.713: Patient12: Exam wait time: 16.5817060070371
+142.713: Patient12: NT Total time in system: 21.1462351283801
+142.713: Patient12: A patient has departed the UTC
+144.557: Patient17: **Non-Trauma arrival**
+145.743: Patient17: (NT) Triage wait time: 1.18660184619893
+147.075: Patient16: Reg wait time: 17.4688167571194
+150.117: Patient13: Exam wait time: 17.0799651360252
+150.117: Patient13: NT Total time in system: 26.307254142221
+150.117: Patient13: A patient has departed the UTC
+152.789: Patient14: Exam wait time: 15.0597929133457
+152.789: Patient14: NT patient requirement treatment
+154.395: Patient17: Reg wait time: 8.65143391076941
+158.249: Patient15: Exam wait time: 16.8271597815287
+158.249: Patient15: NT patient requirement treatment
+163.449: Patient18: **Non-Trauma arrival**
+163.896: Patient18: (NT) Triage wait time: 0.446878488472009
+164.64: Patient16: Exam wait time: 17.5654906699617
+164.64: Patient16: NT patient requirement treatment
+168.044: Patient19: **Non-Trauma arrival**
+168.105: Patient19: (NT) Triage wait time: 0.0615361616946757
+168.426: Patient18: Reg wait time: 4.52998566448966
+170.185: Patient17: Exam wait time: 15.7906010545231
+170.185: Patient17: NT patient requirement treatment
+174.469: Patient19: Reg wait time: 6.36391885315521
+174.537: Patient20: **Non-Trauma arrival**
+174.819: Patient20: (NT) Triage wait time: 0.281382063079292
+175.462: Patient21: **Non-Trauma arrival**
+176.207: Patient21: (NT) Triage wait time: 0.74516377407582
+178.608: Patient20: Reg wait time: 3.78921008769424
+181.682: Patient21: Reg wait time: 5.47489069078978
+186.837: Patient18: Exam wait time: 18.4112162931668
+186.837: Patient18: NT Total time in system: 23.3880804461285
+186.837: Patient18: A patient has departed the UTC
+189.351: Patient19: Exam wait time: 14.8817417916543
+189.351: Patient19: NT Total time in system: 21.3071968065042
+189.351: Patient19: A patient has departed the UTC
+189.652: Patient22: **Non-Trauma arrival**
+189.995: Patient22: (NT) Triage wait time: 0.343012645862558
+192.505: Patient20: Exam wait time: 13.8966949648923
+192.505: Patient20: NT patient requirement treatment
+193.993: Patient22: Reg wait time: 3.99875112070836
+204.917: Patient21: Exam wait time: 23.2357984800251
+204.917: Patient21: NT patient requirement treatment
+206.145: Patient23: **Non-Trauma arrival**
+206.195: Patient23: (NT) Triage wait time: 0.0497582228854299
+210.529: Patient23: Reg wait time: 4.33433139021014
+210.66: Patient22: Exam wait time: 16.6668140549233
+210.66: Patient22: NT patient requirement treatment
+212.92: Patient24: **Non-Trauma arrival**
+213.227: Patient24: (NT) Triage wait time: 0.307121594112033
+215.094: Patient25: **Non-Trauma arrival**
+215.647: Patient25: (NT) Triage wait time: 0.552824471738745
+216.981: Patient24: Reg wait time: 3.75365530302963
+221.154: Patient25: Reg wait time: 5.50709382234314
+226.07: Patient26: **Non-Trauma arrival**
+226.791: Patient26: (NT) Triage wait time: 0.72054354904364
+228.679: Patient23: Exam wait time: 18.1496763855399
+228.679: Patient23: NT patient requirement treatment
+231.813: Patient26: Reg wait time: 5.02211279064036
+234.795: Patient25: Exam wait time: 13.6407454817652
+234.795: Patient25: NT patient requirement treatment
+237.661: Patient24: Exam wait time: 20.6798124891103
+237.661: Patient24: NT patient requirement treatment
+239.857: Patient27: **Non-Trauma arrival**
+240.114: Patient27: (NT) Triage wait time: 0.257337297919804
+241.163: Patient28: **Non-Trauma arrival**
+241.242: Patient28: (NT) Triage wait time: 0.079301031306386
+245.029: Patient27: Reg wait time: 4.91532350020415
+248.029: Patient26: Exam wait time: 16.2159908687183
+248.029: Patient26: NT patient requirement treatment
+250.661: Patient28: Reg wait time: 9.41901425606741
+260.176: Patient27: Exam wait time: 15.1463113817453
+260.176: Patient27: NT patient requirement treatment
+264.752: Patient28: Exam wait time: 14.091277358243
+264.752: Patient28: NT Total time in system: 23.5895926456168
+264.752: Patient28: A patient has departed the UTC
+265.699: Patient29: **Trauma arrival
+265.889: Patient29: (T) Triage wait time: 0.190232961438596
+265.898: Patient29: (T) Trauma room wait time: 0.00874707395388441
+280.465: Patient30: **Non-Trauma arrival**
+281.589: Patient30: (NT) Triage wait time: 1.12304587159912
+285.35: Patient30: Reg wait time: 3.76105229165421
+289.947: Patient31: **Non-Trauma arrival**
+290.297: Patient31: (NT) Triage wait time: 0.350362505128885
+293.149: Patient31: Reg wait time: 2.85140394960291
+295.003: Patient29: A patient has departed the UTC
+300.579: Patient30: Exam wait time: 15.2297847102265
+300.579: Patient30: NT patient requirement treatment
+310.219: Patient31: Exam wait time: 17.0703825263242
+310.219: Patient31: NT patient requirement treatment
+326.564: Patient32: **Non-Trauma arrival**
+326.633: Patient32: (NT) Triage wait time: 0.0686456648011813
+330.222: Patient32: Reg wait time: 3.58909908187223
+331.705: Patient33: **Non-Trauma arrival**
+331.796: Patient33: (NT) Triage wait time: 0.0906124639147379
+335.443: Patient33: Reg wait time: 3.64646554012211
+341.737: Patient34: **Trauma arrival
+342.031: Patient34: (T) Triage wait time: 0.293510935876157
+342.034: Patient34: (T) Trauma room wait time: 0.00340484997462909
+346.152: Patient32: Exam wait time: 15.9295081732475
+346.152: Patient32: NT patient requirement treatment
+349.314: Patient35: **Non-Trauma arrival**
+349.585: Patient35: (NT) Triage wait time: 0.270791321978891
+350.569: Patient33: Exam wait time: 15.1262325798119
+350.569: Patient33: NT patient requirement treatment
+354.619: Patient35: Reg wait time: 5.03409619399145
+364.529: Patient36: **Non-Trauma arrival**
+364.546: Patient37: **Non-Trauma arrival**
+364.96: Patient36: (NT) Triage wait time: 0.430079661916579
+365.169: Patient37: (NT) Triage wait time: 0.623434275027307
+369.093: Patient36: Reg wait time: 4.13395183225157
+372.355: Patient35: Exam wait time: 17.7367990882204
+372.355: Patient35: NT patient requirement treatment
+372.415: Patient37: Reg wait time: 7.24612328554747
+373.674: Patient38: **Non-Trauma arrival**
+374.427: Patient38: (NT) Triage wait time: 0.752708754770651
+374.648: Patient34: A patient has departed the UTC
+376.725: Patient39: **Non-Trauma arrival**
+376.833: Patient39: (NT) Triage wait time: 0.108708727593466
+378.097: Patient38: Reg wait time: 3.67041021738174
+380.435: Patient40: **Non-Trauma arrival**
+380.512: Patient40: (NT) Triage wait time: 0.0772473506319216
+382.087: Patient41: **Trauma arrival
+382.368: Patient41: (T) Triage wait time: 0.281608640202307
+382.396: Patient41: (T) Trauma room wait time: 0.028124633078221
+383.115: Patient39: Reg wait time: 6.28174643398347
+384.472: Patient36: Exam wait time: 15.3781368012786
+384.472: Patient36: NT Total time in system: 19.9421682954467
+384.472: Patient36: A patient has departed the UTC
+386.51: Patient40: Reg wait time: 5.99776793134112
+391.342: Patient37: Exam wait time: 18.9262286890153
+391.342: Patient37: NT patient requirement treatment
+393.086: Patient38: Exam wait time: 14.9882935861974
+393.086: Patient38: NT patient requirement treatment
+394.619: Patient42: **Non-Trauma arrival**
+394.686: Patient42: (NT) Triage wait time: 0.0664772366483817
+399.023: Patient39: Exam wait time: 15.9079250977056
+399.023: Patient39: NT Total time in system: 22.2983802592826
+399.023: Patient39: A patient has departed the UTC</code></pre>
 </div>
 </div>
 <p>Results</p>
