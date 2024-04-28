@@ -7,9 +7,14 @@ editor: visual
 
 ## 1. Imports
 
+> Note: help with install of `simmer.plot` (`igraph` installation is the actual issue) on Linux based systems: <https://r.igraph.org/articles/installation-troubleshooting#cannot-compile-igraph-from-sources-on-linux>
+>
+> > Remember to `conda deactivate` before installation.
+
 ```{r}
 library(simmer)
 library(simmer.bricks)
+library(simmer.plot)
 library(tibble)
 library(ggplot2)
 suppressMessages(library(RCurl))
@@ -378,7 +383,7 @@ get_model <- function(exp){
 ```
 
 ```{r}
-default_experiment <- create_experiment(log_level=1)
+default_experiment <- create_experiment(log_level=0)
 treat_sim <- get_model(default_experiment)
 
 treat_sim %>% 
@@ -387,6 +392,12 @@ treat_sim %>%
 ```
 
 Results
+
+```{r}
+resources <- get_mon_resources(treat_sim)
+plot(resources, metric = "usage", c("triage_bay", "trauma_room"), items = "server")
+
+```
 
 You can add options to executable code like this
 
