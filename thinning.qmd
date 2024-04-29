@@ -16,7 +16,7 @@ Thinning is a acceptance-rejection sampling method and is used to generate inter
 The table below is adapted from Banks et al (2013) and breaks an arrival process down into 60 minutes intervals.
 
 | t(min) | Mean time between arrivals (min) | Arrival Rate $\lambda(t)$ (arrivals/min) |
-|:------:|:--------------------------------:|:----------------------------------------:|
+|:---------------:|:-----------------------:|:----------------------------:|
 |   0    |                15                |                   1/15                   |
 |   60   |                12                |                   1/12                   |
 |  120   |                7                 |                   1/7                    |
@@ -49,6 +49,29 @@ Here $i$ is the arrival number and $\mathcal{T_i}$ is its arrival time.
 library(tibble)
 library(ggplot2)
 suppressMessages(library(RCurl))
+```
+
+## 3. Read in data
+
+Here we read in the example non-stationary data and compute the arrival rate.
+
+```{r}
+NSPP_PATH = 'https://raw.githubusercontent.com/TomMonks/treat-sim-rsimmer/main/data/nspp_example1.csv'
+
+csv_data <- getURL(NSPP_PATH)
+arrivals <- read.csv(text=csv_data)
+names(arrivals) <- c("period", "mean_iat")
+
+# lock in order of time of day for bar chart display
+arrivals$period <- factor(arrivals$period, levels = arrivals$period)
+
+# create arrival rate
+arrivals$arrival_rate = 1.0 / arrivals$mean_iat
+
+ggplot(data=arrivals, aes(x=period, y=mean_iat)) +
+  geom_bar(stat="identity", fill="steelblue") + 
+  xlab("Time of day (mins)") + 
+  ylab("Mean IAT (min)")
 ```
 
 ## Running Code
