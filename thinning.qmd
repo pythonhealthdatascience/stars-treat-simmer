@@ -83,7 +83,7 @@ nspp_thinning <- function(simulation_time, data){
   # maximum arrival rate (smallest time between arrivals)
   lambda_max <- max(data$arrival_rate)
   
-  while(True){
+  while(TRUE){
     # get time bucket (row of dataframe to use)
     t <- floor(simulation_time / interval) %% nrow(data) + 1
     lambda_t <- data$arrival_rate[t]
@@ -95,7 +95,7 @@ nspp_thinning <- function(simulation_time, data){
     inter_arrival_time <- 0.0
     
     # reject proportionate to lambda_t / lambda_max
-    while(u >= lambda_t / lambda_max){
+    while(u >= 10.0){
       # sample using max arrival rate
       inter_arrival_time <- inter_arrival_time + rexp(1, lambda_max)
       u <- runif(1, 0.0, 1.0)
@@ -103,6 +103,32 @@ nspp_thinning <- function(simulation_time, data){
     return(inter_arrival_time)
   }
 }
+```
+
+Example usage
+
+```{r}
+patient <- trajectory("patient pathway") %>% 
+  # just a simple delay
+  timeout(function() rnorm(1, 10.0, 1.0)) %>% 
+  log_(function() {paste("Exit treatment pathway")})
+  
+```
+
+Run the model with thinning
+
+```{r}
+env <- simmer("TreatSim") %>% 
+  add_generator("patient", patient, 
+                function() nspp_thinning(now(env), arrivals)) %>% 
+  run(540.0)
+```
+
+```{r}
+nspp_thinning(15, arrivals)
+```
+
+```         
 ```
 
 ## Running Code
