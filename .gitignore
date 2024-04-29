@@ -1,5 +1,6 @@
 # quarto generated files.
 index_files/*
+thinning_files/*
 
 # History files
 .Rhistory

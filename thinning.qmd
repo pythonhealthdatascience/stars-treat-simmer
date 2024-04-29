@@ -1,0 +1,69 @@
+---
+title: "Simulating time-dependent arrivals using thinning"
+author: "Thomas Monks, Alison Harper"
+format: html
+editor: visual
+---
+
+## 1. Background
+
+Thinning is a acceptance-rejection sampling method and is used to generate inter-arrival times from a NSPP.
+
+> **Motivation**: In DES we use thinning as an approach to generate time dependent arrival of patients to a health care service.
+
+### 1.1 An example NSPP
+
+The table below is adapted from Banks et al (2013) and breaks an arrival process down into 60 minutes intervals.
+
+| t(min) | Mean time between arrivals (min) | Arrival Rate $\lambda(t)$ (arrivals/min) |
+|:------:|:--------------------------------:|:----------------------------------------:|
+|   0    |                15                |                   1/15                   |
+|   60   |                12                |                   1/12                   |
+|  120   |                7                 |                   1/7                    |
+|  180   |                5                 |                   1/5                    |
+|  240   |                8                 |                   1/8                    |
+|  300   |                10                |                   1/10                   |
+|  360   |                15                |                   1/15                   |
+|  420   |                20                |                   1/20                   |
+|  480   |                20                |                   1/20                   |
+
+> **Interpretation**: In the table above the fastest arrival rate is 1/5 customers per minute or 5 minutes between patient arrivals.
+
+### **1.2 The thinning algorithm**
+
+A NSPP has arrival rate $\lambda(t)$ where $0 \leq t \leq T$
+
+Here $i$ is the arrival number and $\mathcal{T_i}$ is its arrival time.
+
+1.  Let $\lambda^* = \max_{0 \leq t \leq T}\lambda(t)$ be the maximum of the arrival rate function and set $t = 0$ and $i=1$
+
+2.  Generate $e$ from the exponential distribution with rate $\lambda^*$ and let $t = t + e$ (this is the time of the next entity will arrive)
+
+3.  Generate $u$ from the $U(0,1)$ distribution. If $u \leq \dfrac{\lambda(t)}{\lambda^*}$ then $\mathcal{T_i} =t$ and $i = i + 1$
+
+4.  Go to Step 2.
+
+## 2. Imports
+
+```{r}
+library(tibble)
+library(ggplot2)
+suppressMessages(library(RCurl))
+```
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
