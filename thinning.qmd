@@ -16,7 +16,7 @@ Thinning is a acceptance-rejection sampling method and is used to generate inter
 The table below is adapted from Banks et al (2013) and breaks an arrival process down into 60 minutes intervals.
 
 | t(min) | Mean time between arrivals (min) | Arrival Rate $\lambda(t)$ (arrivals/min) |
-|:---------------:|:-----------------------:|:----------------------------:|
+|:----------------:|:-----------------------:|:---------------------------:|
 |   0    |                15                |                   1/15                   |
 |   60   |                12                |                   1/12                   |
 |  120   |                7                 |                   1/7                    |
@@ -46,6 +46,7 @@ Here $i$ is the arrival number and $\mathcal{T_i}$ is its arrival time.
 ## 2. Imports
 
 ```{r}
+library(simmer)
 library(tibble)
 library(ggplot2)
 suppressMessages(library(RCurl))
@@ -62,9 +63,6 @@ csv_data <- getURL(NSPP_PATH)
 arrivals <- read.csv(text=csv_data)
 names(arrivals) <- c("period", "mean_iat")
 
-# lock in order of time of day for bar chart display
-arrivals$period <- factor(arrivals$period, levels = arrivals$period)
-
 # create arrival rate
 arrivals$arrival_rate = 1.0 / arrivals$mean_iat
 
@@ -72,6 +70,39 @@ ggplot(data=arrivals, aes(x=period, y=mean_iat)) +
   geom_bar(stat="identity", fill="steelblue") + 
   xlab("Time of day (mins)") + 
   ylab("Mean IAT (min)")
+```
+
+Algorithm implementation
+
+```{r}
+nspp_thinning <- function(simulation_time, data){
+  
+  # calc time interval: assumes intervals are of equal length
+  interval <- data$period[2] - data$period[2]
+  
+  # maximum arrival rate (smallest time between arrivals)
+  lambda_max <- max(data$arrival_rate)
+  
+  while(True){
+    # get time bucket (row of dataframe to use)
+    t <- floor(simulation_time / interval) %% nrow(data) + 1
+    lambda_t <- data$arrival_rate[t]
+    
+    # set to a large number so that at least 1 sample is taken
+    u <- Inf
+    
+    # running total of time until next arrival
+    inter_arrival_time <- 0.0
+    
+    # reject proportionate to lambda_t / lambda_max
+    while(u >= lambda_t / lambda_max){
+      # sample using max arrival rate
+      inter_arrival_time <- inter_arrival_time + rexp(1, lambda_max)
+      u <- runif(1, 0.0, 1.0)
+    }
+    return(inter_arrival_time)
+  }
+}
 ```
 
 ## Running Code
