@@ -211,51 +211,252 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># create arrival rate</span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>arrivals<span class="sc">$</span>arrival_rate <span class="ot">=</span> <span class="fl">1.0</span> <span class="sc">/</span> arrivals<span class="sc">$</span>mean_iat</span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data=</span>arrivals, <span class="fu">aes</span>(<span class="at">x=</span>period, <span class="at">y=</span>mean_iat)) <span class="sc">+</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat=</span><span class="st">"identity"</span>, <span class="at">fill=</span><span class="st">"steelblue"</span>) <span class="sc">+</span> </span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Time of day (mins)"</span>) <span class="sc">+</span> </span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Mean IAT (min)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="thinning_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>arrivals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  period mean_iat arrival_rate
+1      0       15   0.06666667
+2     60       12   0.08333333
+3    120        7   0.14285714
+4    180        5   0.20000000
+5    240        8   0.12500000
+6    300       10   0.10000000
+7    360       15   0.06666667
+8    420       20   0.05000000
+9    480       20   0.05000000</code></pre>
 </div>
 </div>
-<p>Algorithm implementation</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>nspp_thinning <span class="ot">&lt;-</span> <span class="cf">function</span>(simulation_time, data){</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calc time interval: assumes intervals are of equal length</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  interval <span class="ot">&lt;-</span> data<span class="sc">$</span>period[<span class="dv">2</span>] <span class="sc">-</span> data<span class="sc">$</span>period[<span class="dv">2</span>]</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># maximum arrival rate (smallest time between arrivals)</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  lambda_max <span class="ot">&lt;-</span> <span class="fu">max</span>(data<span class="sc">$</span>arrival_rate)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(True){</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># get time bucket (row of dataframe to use)</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">&lt;-</span> <span class="fu">floor</span>(simulation_time <span class="sc">/</span> interval) <span class="sc">%%</span> <span class="fu">nrow</span>(data) <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    lambda_t <span class="ot">&lt;-</span> data<span class="sc">$</span>arrival_rate[t]</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># set to a large number so that at least 1 sample is taken</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    u <span class="ot">&lt;-</span> <span class="cn">Inf</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># running total of time until next arrival</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    inter_arrival_time <span class="ot">&lt;-</span> <span class="fl">0.0</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># reject proportionate to lambda_t / lambda_max</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span>(u <span class="sc">&gt;=</span> lambda_t <span class="sc">/</span> lambda_max){</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>      <span class="co"># sample using max arrival rate</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>      inter_arrival_time <span class="ot">&lt;-</span> inter_arrival_time <span class="sc">+</span> <span class="fu">rexp</span>(<span class="dv">1</span>, lambda_max)</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>      u <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>)</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(inter_arrival_time)</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data=</span>arrivals, <span class="fu">aes</span>(<span class="at">x=</span>period, <span class="at">y=</span>mean_iat)) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat=</span><span class="st">"identity"</span>, <span class="at">fill=</span><span class="st">"steelblue"</span>) <span class="sc">+</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Time of day (mins)"</span>) <span class="sc">+</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Mean IAT (min)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="thinning_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
+</div>
+</section>
+<section id="algorithm-implementation" class="level2">
+<h2 class="anchored" data-anchor-id="algorithm-implementation">4. Algorithm implementation</h2>
+<section id="nspp-sampling-function" class="level3">
+<h3 class="anchored" data-anchor-id="nspp-sampling-function">4.1 NSPP sampling function</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>nspp_thinning <span class="ot">&lt;-</span> <span class="cf">function</span>(simulation_time, data, <span class="at">debug=</span><span class="cn">FALSE</span>){</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calc time interval: assumes intervals are of equal length</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  interval <span class="ot">&lt;-</span> data<span class="sc">$</span>period[<span class="dv">2</span>] <span class="sc">-</span> data<span class="sc">$</span>period[<span class="dv">1</span>]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># maximum arrival rate (smallest time between arrivals)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  lambda_max <span class="ot">&lt;-</span> <span class="fu">max</span>(data<span class="sc">$</span>arrival_rate)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(<span class="cn">TRUE</span>){</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># get time bucket (row of dataframe to use)</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">&lt;-</span> <span class="fu">floor</span>(simulation_time <span class="sc">/</span> interval) <span class="sc">%%</span> <span class="fu">nrow</span>(data) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    lambda_t <span class="ot">&lt;-</span> data<span class="sc">$</span>arrival_rate[t]</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># set to a large number so that at least 1 sample is taken</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    u <span class="ot">&lt;-</span> <span class="cn">Inf</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    rejects <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># running total of time until next arrival</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    inter_arrival_time <span class="ot">&lt;-</span> <span class="fl">0.0</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># reject proportionate to lambda_t / lambda_max</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    ratio <span class="ot">&lt;-</span> lambda_t <span class="sc">/</span> lambda_max</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span>(u <span class="sc">&gt;=</span> ratio){</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>      rejects <span class="ot">&lt;-</span> rejects <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>      <span class="co"># sample using max arrival rate</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>      inter_arrival_time <span class="ot">&lt;-</span> inter_arrival_time <span class="sc">+</span> <span class="fu">rexp</span>(<span class="dv">1</span>, lambda_max)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>      u <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(debug){</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>      <span class="fu">print</span>({<span class="fu">paste</span>(<span class="st">"Time:"</span>, <span class="fu">now</span>(env), </span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>                   <span class="st">" Rejections:"</span>, rejects, </span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>                   <span class="st">" t:"</span>, t, </span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>                   <span class="st">" lambda_t:"</span>, lambda_t, </span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>                   <span class="st">" IAT:"</span>, inter_arrival_time)})</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(inter_arrival_time)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="example-usage" class="level3">
+<h3 class="anchored" data-anchor-id="example-usage">4.2 Example usage</h3>
+<p>The function can be used in the same way as <code>rexp</code> to generate new patients. To illustrate its use we first create a simple patient pathway trajectory that prints out some event and acts as a delay.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>patient <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="st">"patient pathway"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># just a simple delay</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"Patient arrival"</span>)}, <span class="at">level =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">timeout</span>(<span class="cf">function</span>() <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="fl">10.0</span>, <span class="fl">1.0</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"Exit treatment pathway"</span>)}, <span class="at">level =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We then run the model with a generator that uses the <code>nspp_thinning</code> sampling function. Note that the function accepts the current simulation time <code>now(env)</code> and the dataframe containing the arrivals <code>arrivals</code>.</p>
+<blockquote class="blockquote">
+<p>Important learning point: we need to detach <code>run</code> from the creation of the simulation environment. This will allow <code>now(env)</code> to run correctly. If we ignore this rule and include <code>run</code> in the creation pipe the same time will be passed to the thinning function and it will under/over sample arrivals. See https://r-simmer.org/articles/simmer-03-trajectories.html</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>env <span class="ot">&lt;-</span> <span class="fu">simmer</span>(<span class="st">"TreatSim"</span>, <span class="at">log_level=</span><span class="dv">0</span>) </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>env <span class="sc">%&gt;%</span> </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_generator</span>(<span class="st">"patient"</span>, patient, </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                <span class="cf">function</span>() <span class="fu">nspp_thinning</span>(<span class="fu">now</span>(env), arrivals, <span class="at">debug=</span><span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">run</span>(<span class="at">until=</span><span class="fl">540.0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Time: 0  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 6.80395305601365"
+[1] "Time: 6.80395305601365  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 5.31377108280963"
+[1] "Time: 12.1177241388233  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 12.5101129651536"
+[1] "Time: 24.6278371039769  Rejections: 2  t: 1  lambda_t: 0.0666666666666667  IAT: 17.6903429225305"
+[1] "Time: 42.3181800265074  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 18.9794680281522"
+[1] "Time: 61.2976480546596  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 5.19268528537309"
+[1] "Time: 66.4903333400327  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 1.60041078200527"
+[1] "Time: 68.090744122038  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 7.1529944696439"
+[1] "Time: 75.2437385916819  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 4.78581620121014"
+[1] "Time: 80.029554792892  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 1.09874747502586"
+[1] "Time: 81.1283022679179  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 0.245428503850297"
+[1] "Time: 81.3737307717682  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 2.2710215463303"
+[1] "Time: 83.6447523180985  Rejections: 1  t: 2  lambda_t: 0.0833333333333333  IAT: 4.20329733566692"
+[1] "Time: 87.8480496537654  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 3.05559385335073"
+[1] "Time: 90.9036435071161  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 7.27964731822622"
+[1] "Time: 98.1832908253423  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 6.7144673548401"
+[1] "Time: 104.897758180182  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 4.76655017563558"
+[1] "Time: 109.664308355818  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 8.88135331098445"
+[1] "Time: 118.545661666802  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 10.5056622897493"
+[1] "Time: 129.051323956552  Rejections: 2  t: 3  lambda_t: 0.142857142857143  IAT: 20.874171025681"
+[1] "Time: 149.925494982233  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 2.35715847229585"
+[1] "Time: 152.282653454529  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 0.939294632989913"
+[1] "Time: 153.221948087519  Rejections: 1  t: 3  lambda_t: 0.142857142857143  IAT: 8.56414676312031"
+[1] "Time: 161.786094850639  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 5.84401018564594"
+[1] "Time: 167.630105036285  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 1.90660336287692"
+[1] "Time: 169.536708399162  Rejections: 1  t: 3  lambda_t: 0.142857142857143  IAT: 6.11304138533256"
+[1] "Time: 175.649749784494  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 0.0870124529190792"
+[1] "Time: 175.736762237413  Rejections: 1  t: 3  lambda_t: 0.142857142857143  IAT: 17.5756649332025"
+[1] "Time: 193.312427170616  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 11.1172258568214"
+[1] "Time: 204.429653027437  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 2.61298801749945"
+[1] "Time: 207.042641044937  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 2.75919805746526"
+[1] "Time: 209.801839102402  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.75821489470653"
+[1] "Time: 211.560053997108  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 8.33474923814547"
+[1] "Time: 219.894803235254  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.59395149443299"
+[1] "Time: 221.488754729687  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 2.35573427053168"
+[1] "Time: 223.844489000219  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 7.30263891344977"
+[1] "Time: 231.147127913668  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.66308572748676"
+[1] "Time: 232.810213641155  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 13.6164918442475"
+[1] "Time: 246.426705485403  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 7.52654943849114"
+[1] "Time: 253.953254923894  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 1.12488935284618"
+[1] "Time: 255.07814427674  Rejections: 2  t: 5  lambda_t: 0.125  IAT: 10.3375247994711"
+[1] "Time: 265.415669076211  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 4.29545039290047"
+[1] "Time: 269.711119469111  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 2.41770385531709"
+[1] "Time: 272.128823324429  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 0.955368494391517"
+[1] "Time: 273.08419181882  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 2.21591625209627"
+[1] "Time: 275.300108070916  Rejections: 5  t: 5  lambda_t: 0.125  IAT: 16.5449531352331"
+[1] "Time: 291.845061206149  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 3.24295062571764"
+[1] "Time: 295.088011831867  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 0.595468583051115"
+[1] "Time: 295.683480414918  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 5.60149019563055"
+[1] "Time: 301.284970610549  Rejections: 1  t: 6  lambda_t: 0.1  IAT: 2.4573302292265"
+[1] "Time: 303.742300839775  Rejections: 3  t: 6  lambda_t: 0.1  IAT: 12.3124963221074"
+[1] "Time: 316.054797161883  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 2.3955684620887"
+[1] "Time: 318.450365623971  Rejections: 2  t: 6  lambda_t: 0.1  IAT: 10.3629351554562"
+[1] "Time: 328.813300779428  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 5.42347358518696"
+[1] "Time: 334.236774364615  Rejections: 4  t: 6  lambda_t: 0.1  IAT: 10.7646438897326"
+[1] "Time: 345.001418254347  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 5.66407009006894"
+[1] "Time: 350.665488344416  Rejections: 2  t: 6  lambda_t: 0.1  IAT: 4.82323635369539"
+[1] "Time: 355.488724698111  Rejections: 2  t: 6  lambda_t: 0.1  IAT: 19.0863999239803"
+[1] "Time: 374.575124622092  Rejections: 1  t: 7  lambda_t: 0.0666666666666667  IAT: 10.5338878413187"
+[1] "Time: 385.109012463411  Rejections: 0  t: 7  lambda_t: 0.0666666666666667  IAT: 27.1396508146275"
+[1] "Time: 412.248663278038  Rejections: 2  t: 7  lambda_t: 0.0666666666666667  IAT: 22.9284494522701"
+[1] "Time: 435.177112730308  Rejections: 1  t: 8  lambda_t: 0.05  IAT: 16.2623779003726"
+[1] "Time: 451.439490630681  Rejections: 1  t: 8  lambda_t: 0.05  IAT: 0.411359558347613"
+[1] "Time: 451.850850189028  Rejections: 11  t: 8  lambda_t: 0.05  IAT: 74.5542141283709"
+[1] "Time: 526.405064317399  Rejections: 4  t: 9  lambda_t: 0.05  IAT: 17.9010892736693"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>simmer environment: TreatSim | now: 540 | next: 544.306153591069
+{ Monitor: in memory }
+{ Source: patient | monitored: 1 | n_generated: 65 }</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="validation" class="level2">
+<h2 class="anchored" data-anchor-id="validation">5. Validation</h2>
+<blockquote class="blockquote">
+<p>The total number of arrivals in 540 minutes</p>
+</blockquote>
+<p>Here we will repeat the same 10,000 times and then explore the distribution of the number of arrivals. If all has gone to plan this should be a Poisson distribution with mean ~53.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># expected arrivals from data.</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sum</span>(arrivals<span class="sc">$</span>arrival_rate <span class="sc">*</span> <span class="dv">60</span>), <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 53.07</code></pre>
+</div>
+</div>
+<p>We can use the <code>simmer</code> function <code>get_n_generated</code> to return the number of patients generated.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>arrivals_by_replication <span class="ot">&lt;-</span> <span class="cf">function</span>(envs){</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  results <span class="ot">&lt;-</span> <span class="fu">vector</span>()</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(env <span class="cf">in</span> envs){</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> <span class="fu">c</span>(results, <span class="fu">get_n_generated</span>(env, <span class="st">"patient"</span>))</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">data.frame</span>(results))</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>single_run <span class="ot">&lt;-</span> <span class="cf">function</span>(env, rep_number, run_length, <span class="at">debug_arrivals=</span><span class="cn">FALSE</span>){</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  env <span class="sc">%&gt;%</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_generator</span>(<span class="st">"patient"</span>, patient, </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                  <span class="cf">function</span>() <span class="fu">nspp_thinning</span>(<span class="fu">now</span>(env), arrivals, <span class="at">debug=</span>debug_arrivals)) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">run</span>(<span class="at">until=</span><span class="fl">540.0</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(env)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>RUN_LENGTH <span class="ot">&lt;-</span> <span class="fl">540.0</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>N_REPS <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>SEED <span class="ot">&lt;-</span> <span class="dv">42</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(SEED)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>patient <span class="ot">&lt;-</span> <span class="fu">trajectory</span>(<span class="st">"patient pathway"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># just a simple delay</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log_</span>(<span class="cf">function</span>() {<span class="fu">paste</span>(<span class="st">"Exit treatment pathway"</span>)}, <span class="at">level =</span> <span class="dv">1</span>)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># note unlike in simmer documentation we use a traditional for loop</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co"># instead of lapply. This allows us to separeate env creation</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co"># from run and preserve the environment interaction between NSPP </span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co"># and current sim time.</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>envs <span class="ot">=</span> <span class="fu">vector</span>()</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(rep <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>N_REPS){</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  env <span class="ot">&lt;-</span> <span class="fu">simmer</span>(<span class="st">"TreatSim"</span>, <span class="at">log_level=</span><span class="dv">0</span>) </span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">single_run</span>(env, i, RUN_LENGTH)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  envs <span class="ot">&lt;-</span> <span class="fu">c</span>(envs, env)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co"># # get the number of arrivals generated</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">arrivals_by_replication</span>(envs)</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="co"># show mean number of arrivals. Should be close to 53</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(results<span class="sc">$</span>results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 53.552</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(results, <span class="fu">aes</span>(<span class="at">x=</span>results)) <span class="sc">+</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth=</span><span class="dv">1</span>, <span class="at">fill=</span><span class="st">"steelblue"</span>) <span class="sc">+</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Patient arrivals in 540 minutes"</span>) <span class="sc">+</span> </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Replications"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="thinning_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<pre><code></code></pre>
 </section>
 <section id="running-code" class="level2">
 <h2 class="anchored" data-anchor-id="running-code">Running Code</h2>
 <p>When you click the <strong>Render</strong> button a document will be generated that includes both content and the output of embedded code. You can embed code like this:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2</code></pre>
 </div>

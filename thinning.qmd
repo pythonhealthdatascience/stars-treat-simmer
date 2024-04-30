@@ -66,23 +66,29 @@ names(arrivals) <- c("period", "mean_iat")
 # create arrival rate
 arrivals$arrival_rate = 1.0 / arrivals$mean_iat
 
+arrivals
+```
+
+```{r}
 ggplot(data=arrivals, aes(x=period, y=mean_iat)) +
   geom_bar(stat="identity", fill="steelblue") + 
   xlab("Time of day (mins)") + 
   ylab("Mean IAT (min)")
 ```
 
-Algorithm implementation
+## 4. Algorithm implementation
+
+### 4.1 NSPP sampling function
 
 ```{r}
-nspp_thinning <- function(simulation_time, data){
+nspp_thinning <- function(simulation_time, data, debug=FALSE){
   
   # calc time interval: assumes intervals are of equal length
-  interval <- data$period[2] - data$period[2]
+  interval <- data$period[2] - data$period[1]
   
   # maximum arrival rate (smallest time between arrivals)
   lambda_max <- max(data$arrival_rate)
-  
+
   while(TRUE){
     # get time bucket (row of dataframe to use)
     t <- floor(simulation_time / interval) %% nrow(data) + 1
@@ -90,42 +96,129 @@ nspp_thinning <- function(simulation_time, data){
     
     # set to a large number so that at least 1 sample is taken
     u <- Inf
+    rejects <- -1
     
     # running total of time until next arrival
     inter_arrival_time <- 0.0
     
     # reject proportionate to lambda_t / lambda_max
-    while(u >= 10.0){
+    ratio <- lambda_t / lambda_max
+    while(u >= ratio){
+      rejects <- rejects + 1
       # sample using max arrival rate
       inter_arrival_time <- inter_arrival_time + rexp(1, lambda_max)
       u <- runif(1, 0.0, 1.0)
     }
+    
+    if(debug){
+      print({paste("Time:", now(env), 
+                   " Rejections:", rejects, 
+                   " t:", t, 
+                   " lambda_t:", lambda_t, 
+                   " IAT:", inter_arrival_time)})
+    }
+      
     return(inter_arrival_time)
   }
 }
 ```
 
-Example usage
+### 4.2 Example usage
+
+The function can be used in the same way as `rexp` to generate new patients. To illustrate its use we first create a simple patient pathway trajectory that prints out some event and acts as a delay.
 
 ```{r}
 patient <- trajectory("patient pathway") %>% 
   # just a simple delay
+  log_(function() {paste("Patient arrival")}, level = 1) %>% 
   timeout(function() rnorm(1, 10.0, 1.0)) %>% 
-  log_(function() {paste("Exit treatment pathway")})
+  log_(function() {paste("Exit treatment pathway")}, level = 1)
   
 ```
 
-Run the model with thinning
+We then run the model with a generator that uses the `nspp_thinning` sampling function. Note that the function accepts the current simulation time `now(env)` and the dataframe containing the arrivals `arrivals`.
+
+> Important learning point: we need to detach `run` from the creation of the simulation environment. This will allow `now(env)` to run correctly. If we ignore this rule and include `run` in the creation pipe the same time will be passed to the thinning function and it will under/over sample arrivals. See https://r-simmer.org/articles/simmer-03-trajectories.html
 
 ```{r}
-env <- simmer("TreatSim") %>% 
+env <- simmer("TreatSim", log_level=0) 
+
+env %>% 
   add_generator("patient", patient, 
-                function() nspp_thinning(now(env), arrivals)) %>% 
-  run(540.0)
+                function() nspp_thinning(now(env), arrivals, debug=TRUE)) %>% 
+  run(until=540.0)
+  
+```
+
+## 5. Validation
+
+> The total number of arrivals in 540 minutes
+
+Here we will repeat the same 10,000 times and then explore the distribution of the number of arrivals. If all has gone to plan this should be a Poisson distribution with mean \~53.
+
+```{r}
+# expected arrivals from data.
+round(sum(arrivals$arrival_rate * 60), 2)
+```
+
+We can use the `simmer` function `get_n_generated` to return the number of patients generated.
+
+```{r}
+arrivals_by_replication <- function(envs){
+  results <- vector()
+  for(env in envs){
+    results <- c(results, get_n_generated(env, "patient"))
+  }
+  return(data.frame(results))
+}
 ```
 
 ```{r}
-nspp_thinning(15, arrivals)
+single_run <- function(env, rep_number, run_length, debug_arrivals=FALSE){
+  env %>% 
+    add_generator("patient", patient, 
+                  function() nspp_thinning(now(env), arrivals, debug=debug_arrivals)) %>% 
+    run(until=540.0)
+  return(env)
+}
+```
+
+```{r}
+RUN_LENGTH <- 540.0
+N_REPS <- 500
+SEED <- 42
+
+set.seed(SEED)
+
+patient <- trajectory("patient pathway") %>% 
+  # just a simple delay
+  log_(function() {paste("Exit treatment pathway")}, level = 1)
+
+# note unlike in simmer documentation we use a traditional for loop
+# instead of lapply. This allows us to separeate env creation
+# from run and preserve the environment interaction between NSPP 
+# and current sim time.
+envs = vector()
+for(rep in 1:N_REPS){
+  env <- simmer("TreatSim", log_level=0) 
+  single_run(env, i, RUN_LENGTH)
+  envs <- c(envs, env)
+}
+
+# # get the number of arrivals generated
+results <- arrivals_by_replication(envs)
+
+# show mean number of arrivals. Should be close to 53
+mean(results$results)
+```
+
+```{r}
+ggplot(results, aes(x=results)) + 
+  geom_histogram(binwidth=1, fill="steelblue") + 
+  xlab("Patient arrivals in 540 minutes") + 
+  ylab("Replications")
+
+
 ```
 
 ```         
