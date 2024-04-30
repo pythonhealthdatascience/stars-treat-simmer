@@ -111,7 +111,7 @@ nspp_thinning <- function(simulation_time, data, debug=FALSE){
     }
     
     if(debug){
-      print({paste("Time:", now(env), 
+      print({paste("Time:", simulation_time, 
                    " Rejections:", rejects, 
                    " t:", t, 
                    " lambda_t:", lambda_t, 
