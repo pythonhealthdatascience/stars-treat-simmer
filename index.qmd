@@ -484,7 +484,7 @@ Script to conduct single run of the model
 
 ```{r}
 set.seed(SEED)
-exp <- create_experiment(log_level=1)
+exp <- create_experiment(log_level=0)
 treat_sim <- simmer("TreatSim", log_level=exp$log_level)
 treat_sim <- single_run(treat_sim, exp)
 print("Simulation Complete.")
@@ -552,15 +552,44 @@ resources <- get_mon_resources(reps)
 #                                     "trauma_treat_cubicle",
 #                                     "nontrauma_treat_cubicle"), items = "server")
 
-plot(resources, metric = "usage", c("trauma_treat_cubicle",
-                                    "nontrauma_treat_cubicle"), items = "server")
+plot(resources, metric = "usage", c("trauma_treat_cubicle"), 
+     items = "server")
 
-```
-
-```         
 ```
 
 ```{r}
+arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
+
+get_resource_counts <- function(exp) {
+  resource = c("triage_bay", 
+                "registration_clerk", 
+                "examination_room",
+                "trauma_room",
+                "trauma_treat_cubicle",
+                "nontrauma_treat_cubicle")
+  
+  resource_counts = c(exp$n_triage_bays,
+                      exp$n_reg_clerks,
+                      exp$n_exam_rooms,
+                      exp$n_trauma_rooms,
+                      exp$n_trauma_cubicles,
+                      exp$n_non_trauma_cubicles)
+  
+  df_resource <- data.frame(resource)
+  df_resource$count <- resource_counts
+  return(df_resource)
+}
+
+#merge all data frames in list
+merge(arrivals, get_resource_counts(exp), by="resource", all=TRUE)
+```
+
+"
+
+```{r}
+
+
+
 # get results dataframe broken down by resource and replication.
 arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
 
@@ -569,7 +598,8 @@ arrivals$waiting_time <-arrivals$end_time - arrivals$start_time - arrivals$activ
 # arrivals$waiting_time <- round(arrivals$waiting_time, 2)
 
 cols <- c("resource", "replication")
-summary <- arrivals %>%
+summary_wait <- arrivals %>%
+  merge( get_resource_counts(exp), by="resource", all=TRUE)
   # mean waiting time in each replication
   group_by(across(all_of(cols))) %>%
   summarise(rep_waiting_time=mean(waiting_time)) %>% 
@@ -586,8 +616,60 @@ summary <- arrivals %>%
   arrange(resource)
 
 
+# utilisation calculation
+summary_util <- arrivals %>%
+  # merge the resource count
+  merge(resource_counts)
+  # mean waiting time in each replication
+  group_by(across(all_of(cols))) %>%
+  summarise(in_use=sum(activity_time)) %>% 
+  
+  group_by(resource) %>% 
+  # mean across all replications
+  summarise(mean=mean(in_use)) %>% 
+  arrange(resource)
 
-print(summary)
+# print(summary_wait)
+# print(summary_util)
+
+
+
+resource_counts
+```
+
+```{r}
+# get results dataframe broken down by resource and replication.
+resources <- get_mon_resources(reps)
+resources
+# # calculate waiting time
+# arrivals$waiting_time <-arrivals$end_time - arrivals$start_time - arrivals$activity_time
+# # arrivals$waiting_time <- round(arrivals$waiting_time, 2)
+# 
+# cols <- c("resource", "replication")
+# summary <- arrivals %>%
+#   # mean waiting time in each replication
+#   group_by(across(all_of(cols))) %>%
+#   summarise(rep_waiting_time=mean(waiting_time)) %>% 
+#   # mean waiting time across replications
+#   group_by(resource) %>% 
+#   summarise(mean=mean(rep_waiting_time)) %>% 
+#   mutate(resource=recode(resource,  
+#                        'triage_bay'='01a_triage_wait', 
+#                        'registration_clerk'='02a_registration_wait',
+#                        'examination_room'='03a_examination_wait',
+#                        'nontrauma_treat_cubicle'='04a_treatment_wait(non_trauma)',
+#                        'trauma_room'='06a_stabilisation_wait',
+#                        'trauma_treat_cubicle'='07a_treatment_wait(trauma)')) %>% 
+#   arrange(resource)
+# 
+# 
+# 
+# print(summary)
+```
+
+```{r}
+arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
+arrivals
 ```
 
 To do:
