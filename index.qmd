@@ -20,6 +20,8 @@ library(ggplot2)
 suppressMessages(library(RCurl))
 suppressMessages(library(Rlab))
 suppressMessages(library(dplyr))
+
+options(dplyr.summarise.inform = FALSE)
 ```
 
 ## 2. Default values and constants
@@ -558,8 +560,6 @@ plot(resources, metric = "usage", c("trauma_treat_cubicle"),
 ```
 
 ```{r}
-arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
-
 get_resource_counts <- function(exp) {
   resource = c("triage_bay", 
                 "registration_clerk", 
@@ -579,12 +579,11 @@ get_resource_counts <- function(exp) {
   df_resource$count <- resource_counts
   return(df_resource)
 }
-
-#merge all data frames in list
-merge(arrivals, get_resource_counts(exp), by="resource", all=TRUE)
 ```
 
 "
+
+summary_util
 
 ```{r}
 
@@ -593,13 +592,13 @@ merge(arrivals, get_resource_counts(exp), by="resource", all=TRUE)
 # get results dataframe broken down by resource and replication.
 arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
 
+
 # calculate waiting time
 arrivals$waiting_time <-arrivals$end_time - arrivals$start_time - arrivals$activity_time
 # arrivals$waiting_time <- round(arrivals$waiting_time, 2)
 
 cols <- c("resource", "replication")
 summary_wait <- arrivals %>%
-  merge( get_resource_counts(exp), by="resource", all=TRUE)
   # mean waiting time in each replication
   group_by(across(all_of(cols))) %>%
   summarise(rep_waiting_time=mean(waiting_time)) %>% 
@@ -618,65 +617,29 @@ summary_wait <- arrivals %>%
 
 # utilisation calculation
 summary_util <- arrivals %>%
-  # merge the resource count
-  merge(resource_counts)
   # mean waiting time in each replication
   group_by(across(all_of(cols))) %>%
   summarise(in_use=sum(activity_time)) %>% 
-  
-  group_by(resource) %>% 
-  # mean across all replications
-  summarise(mean=mean(in_use)) %>% 
   arrange(resource)
 
-# print(summary_wait)
-# print(summary_util)
+summary_util <- merge(summary_util, get_resource_counts(exp), by="resource", all=TRUE)
+summary_util$util = summary_util$in_use / (DEFAULT_RESULTS_COLLECTION_PERIOD * summary_util$count)  
 
+summary_util <- summary_util %>%
+  # mean waiting time in each replication
+  group_by(resource) %>%
+  summarise(mean=mean(util)) %>% 
+  mutate(resource=recode(resource,  
+                       'triage_bay'='01b_triage_util', 
+                       'registration_clerk'='02b_registration_util',
+                       'examination_room'='03b_examination_util',
+                       'nontrauma_treat_cubicle'='04b_treatment_util(non_trauma)',
+                       'trauma_room'='06b_stabilisation_util',
+                       'trauma_treat_cubicle'='07b_treatment_util(trauma)')) %>% 
+  arrange(resource)
 
+overall <- bind_rows(summary_wait, summary_util) %>% 
+  arrange(resource)
 
-resource_counts
-```
-
-```{r}
-# get results dataframe broken down by resource and replication.
-resources <- get_mon_resources(reps)
-resources
-# # calculate waiting time
-# arrivals$waiting_time <-arrivals$end_time - arrivals$start_time - arrivals$activity_time
-# # arrivals$waiting_time <- round(arrivals$waiting_time, 2)
-# 
-# cols <- c("resource", "replication")
-# summary <- arrivals %>%
-#   # mean waiting time in each replication
-#   group_by(across(all_of(cols))) %>%
-#   summarise(rep_waiting_time=mean(waiting_time)) %>% 
-#   # mean waiting time across replications
-#   group_by(resource) %>% 
-#   summarise(mean=mean(rep_waiting_time)) %>% 
-#   mutate(resource=recode(resource,  
-#                        'triage_bay'='01a_triage_wait', 
-#                        'registration_clerk'='02a_registration_wait',
-#                        'examination_room'='03a_examination_wait',
-#                        'nontrauma_treat_cubicle'='04a_treatment_wait(non_trauma)',
-#                        'trauma_room'='06a_stabilisation_wait',
-#                        'trauma_treat_cubicle'='07a_treatment_wait(trauma)')) %>% 
-#   arrange(resource)
-# 
-# 
-# 
-# print(summary)
-```
-
-```{r}
-arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
-arrivals
-```
-
-To do:
-
-Note some of these figures are different from simpy results. Note 07a_treatment_wait in simpy is 168 mins! What is going on here?
-
-```{r}
-arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
-arrivals
+print(overall)
 ```
