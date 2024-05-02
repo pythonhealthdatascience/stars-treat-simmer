@@ -315,33 +315,38 @@ The `simmer` terminology for using resources and engaging in activities is easy 
 ```{r}
 
 create_trauma_pathway <- function(exp){
-
+    
     trauma_pathway <- trajectory(name="trauma_pathway") %>%
-    # log patient arrival
-    log_(function() {paste("**Trauma arrival")}, level=1) %>% 
+      set_attribute("patient_type", 1) %>%
+      # log patient arrival
+      log_(function() {paste("**Trauma arrival")}, level=1) %>% 
+      
+      # triage 
+      set_attribute("start_triage_wait", function() {now(exp$env)}) %>%
+      visit("triage_bay", function() rexp(1, 1/exp$triage_mean)) %>%
+      log_(function() {paste("(T) Triage wait time:",
+                       now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
+           level=1) %>%
+      
+      # request trauma room for stabilization
+      set_attribute("start_trauma_room_wait", function() {now(exp$env)}) %>%
+      visit("trauma_room", function() rexp(1, 1/exp$stabilisation_mean)) %>%
+      log_(function() {paste("(T) Trauma room wait time:",
+                       now(exp$env) - get_attribute(exp$env, "start_trauma_room_wait"))},
+           level=1) %>%
+      
+      # request treatment cubicle
+      set_attribute("start_trauma_treat_wait", function() {now(exp$env)}) %>%
+      visit("trauma_treat_cubicle", function() rlnorm(1, exp$trauma_treat_params$mu,
+                                                      exp$trauma_treat_params$sigma)) %>%
+      log_(function() {paste("********************(T) Trauma treatment cubicle wait time:",
+                       now(exp$env) - get_attribute(exp$env, "start_trauma_treat_wait"))},
+           level=1) %>% 
     
-    # triage 
-    set_attribute("start_triage_wait", function() {now(exp$env)}) %>%
-    visit("triage_bay", function() rexp(1, 1/exp$triage_mean)) %>%
-    log_(function() {paste("(T) Triage wait time:",
-                     now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
-         level=1) %>%
+      # store the total time in system 
+      set_attribute("total_time", 
+                    function() {now(exp$env) - get_attribute(exp$env, "start_triage_wait")})
     
-    # request trauma room for stabilization
-    set_attribute("start_trauma_room_wait", function() {now(exp$env)}) %>%
-    visit("trauma_room", function() rexp(1, 1/exp$stabilisation_mean)) %>%
-    log_(function() {paste("(T) Trauma room wait time:",
-                     now(exp$env) - get_attribute(exp$env, "start_trauma_room_wait"))},
-         level=1) %>%
-    
-    # request treatment cubicle
-    set_attribute("start_trauma_treat_wait", function() {now(exp$env)}) %>%
-    visit("trauma_treat_cubicle", function() rlnorm(1, exp$trauma_treat_params$mu,
-                                                    exp$trauma_treat_params$sigma)) %>%
-    log_(function() {paste("********************(T) Trauma treatment cubicle wait time:",
-                     now(exp$env) - get_attribute(exp$env, "start_trauma_treat_wait"))},
-         level=1)
-  
   return(trauma_pathway)
 }
 ```
@@ -472,7 +477,8 @@ single_run <- function(env, exp,
     add_resource("nontrauma_treat_cubicle", exp$n_non_trauma_cubicles) %>%
     add_generator("Patient", arrival_gen, 
                   function() nspp_thinning(now(env), exp$arrival_data, 
-                                           debug=debug_arrivals)) %>% 
+                                           debug=debug_arrivals),
+                  mon=2) %>% 
     run(until=run_length)
   
   # return environment and all of its results.
@@ -546,20 +552,6 @@ plot(resources, metric = "utilization",
 ```
 
 ```{r}
-resources <- get_mon_resources(reps)
-# plot(resources, metric = "usage", c("triage_bay", 
-#                                     "registration_clerk",
-#                                     "examination_room",
-#                                     "trauma_room",
-#                                     "trauma_treat_cubicle",
-#                                     "nontrauma_treat_cubicle"), items = "server")
-
-plot(resources, metric = "usage", c("trauma_treat_cubicle"), 
-     items = "server")
-
-```
-
-```{r}
 get_resource_counts <- function(exp) {
   resource = c("triage_bay", 
                 "registration_clerk", 
@@ -581,65 +573,90 @@ get_resource_counts <- function(exp) {
 }
 ```
 
-"
+```{r}
+create_summary_table <- function(reps, exp, dp=2){
 
-summary_util
+  # mean number of arrivals
+  arrival_counts <- arrivals_by_replication(reps)
+  mean_arrivals <- mean(arrival_counts$results)
+  arrival_df <- data.frame("00_arrivals", mean_arrivals)
+  names(arrival_df)<-c("kpi","mean")
+
+  
+  # get results dataframe broken down by resource and replication.
+  arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
+  
+  # calculate waiting time
+  arrivals$waiting_time <-arrivals$end_time - arrivals$start_time - arrivals$activity_time
+  # arrivals$waiting_time <- round(arrivals$waiting_time, 2)
+  
+  cols <- c("resource", "replication")
+  summary_wait <- arrivals %>%
+    # mean waiting time in each replication
+    group_by(across(all_of(cols))) %>%
+    summarise(rep_waiting_time=mean(waiting_time)) %>% 
+    # mean waiting time across replications
+    group_by(resource) %>% 
+    summarise(mean=mean(rep_waiting_time)) %>% 
+    mutate(resource=recode(resource,  
+                         'triage_bay'='01a_triage_wait', 
+                         'registration_clerk'='02a_registration_wait',
+                         'examination_room'='03a_examination_wait',
+                         'nontrauma_treat_cubicle'='04a_treatment_wait(non_trauma)',
+                         'trauma_room'='06a_stabilisation_wait',
+                         'trauma_treat_cubicle'='07a_treatment_wait(trauma)')) %>% 
+    arrange(resource)
+  
+  
+  names(summary_wait)<-c("kpi","mean")
+  
+  # utilisation calculation:
+  # simple calculation of total busy time / total scheduled resource time.
+  # where total scheduled time = n_resource * results collection period.
+  summary_util <- arrivals %>%
+    # mean waiting time in each replication
+    group_by(across(all_of(cols))) %>%
+    summarise(in_use=sum(activity_time)) %>% 
+    arrange(resource)
+  
+  # add resource counts to table for calc
+  summary_util <- merge(summary_util, get_resource_counts(exp), 
+                        by="resource", all=TRUE)
+  
+  # total in use / total scheduled time
+  summary_util$util = summary_util$in_use / (DEFAULT_RESULTS_COLLECTION_PERIOD * summary_util$count)  
+  
+  summary_util <- summary_util %>%
+    # mean waiting time in each replication
+    group_by(resource) %>%
+    summarise(mean=mean(util)) %>% 
+    mutate(resource=recode(resource,  
+                         'triage_bay'='01b_triage_util', 
+                         'registration_clerk'='02b_registration_util',
+                         'examination_room'='03b_examination_util',
+                         'nontrauma_treat_cubicle'='04b_treatment_util(non_trauma)',
+                         'trauma_room'='06b_stabilisation_util',
+                         'trauma_treat_cubicle'='07b_treatment_util(trauma)')) %>% 
+    arrange(resource)
+
+  names(summary_util) <- c("kpi","mean")
+  
+  overall <- bind_rows(arrival_df, summary_wait, summary_util) %>% 
+    arrange(kpi) 
+  
+  overall$mean <- round(overall$mean, dp)
+  
+  return(overall)
+}
+```
 
 ```{r}
+df <- create_summary_table(reps, exp)
+df
+```
 
-
-
-# get results dataframe broken down by resource and replication.
-arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
-
-
-# calculate waiting time
-arrivals$waiting_time <-arrivals$end_time - arrivals$start_time - arrivals$activity_time
-# arrivals$waiting_time <- round(arrivals$waiting_time, 2)
-
-cols <- c("resource", "replication")
-summary_wait <- arrivals %>%
-  # mean waiting time in each replication
-  group_by(across(all_of(cols))) %>%
-  summarise(rep_waiting_time=mean(waiting_time)) %>% 
-  # mean waiting time across replications
-  group_by(resource) %>% 
-  summarise(mean=mean(rep_waiting_time)) %>% 
-  mutate(resource=recode(resource,  
-                       'triage_bay'='01a_triage_wait', 
-                       'registration_clerk'='02a_registration_wait',
-                       'examination_room'='03a_examination_wait',
-                       'nontrauma_treat_cubicle'='04a_treatment_wait(non_trauma)',
-                       'trauma_room'='06a_stabilisation_wait',
-                       'trauma_treat_cubicle'='07a_treatment_wait(trauma)')) %>% 
-  arrange(resource)
-
-
-# utilisation calculation
-summary_util <- arrivals %>%
-  # mean waiting time in each replication
-  group_by(across(all_of(cols))) %>%
-  summarise(in_use=sum(activity_time)) %>% 
-  arrange(resource)
-
-summary_util <- merge(summary_util, get_resource_counts(exp), by="resource", all=TRUE)
-summary_util$util = summary_util$in_use / (DEFAULT_RESULTS_COLLECTION_PERIOD * summary_util$count)  
-
-summary_util <- summary_util %>%
-  # mean waiting time in each replication
-  group_by(resource) %>%
-  summarise(mean=mean(util)) %>% 
-  mutate(resource=recode(resource,  
-                       'triage_bay'='01b_triage_util', 
-                       'registration_clerk'='02b_registration_util',
-                       'examination_room'='03b_examination_util',
-                       'nontrauma_treat_cubicle'='04b_treatment_util(non_trauma)',
-                       'trauma_room'='06b_stabilisation_util',
-                       'trauma_treat_cubicle'='07b_treatment_util(trauma)')) %>% 
-  arrange(resource)
-
-overall <- bind_rows(summary_wait, summary_util) %>% 
-  arrange(resource)
-
-print(overall)
+```{r}
+att <- get_mon_attributes(reps)
+#tt[att$Key == 'patient_type']
+att
 ```
