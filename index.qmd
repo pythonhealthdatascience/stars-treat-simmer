@@ -20,6 +20,7 @@ library(ggplot2)
 suppressMessages(library(RCurl))
 suppressMessages(library(Rlab))
 suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
 
 options(dplyr.summarise.inform = FALSE)
 ```
@@ -384,6 +385,7 @@ create_non_trauma_pathway <- function(exp){
   nt_cubicle_treatment <- create_nt_cubicle_treatment(exp)
   
   non_trauma_pathway <- trajectory(name="non_trauma_pathway") %>%
+    set_attribute("patient_type", 2) %>%
     # log non_trauma arrival
     log_(function() {paste(ARRIVAL_MSG)}, level=1) %>% 
     
@@ -414,7 +416,10 @@ create_non_trauma_pathway <- function(exp){
       nt_cubicle_treatment
     ) %>% 
     log_(function() {paste(EXIT_MSG, now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
-         level=1)
+         level=1) %>% 
+    # store the total time in system 
+    set_attribute("total_time", 
+                    function() {now(exp$env) - get_attribute(exp$env, "start_triage_wait")})
   
   return(non_trauma_pathway)
 }
@@ -656,7 +661,31 @@ df
 ```
 
 ```{r}
-att <- get_mon_attributes(reps)
-#tt[att$Key == 'patient_type']
-att
+# mean time in the system
+mean_time_in_system_for_rep <- function(rep, patient_type){
+  att <- get_mon_attributes(reps)
+  rep_att <- subset(att[att$replication == rep,], select = c(name, key, value))
+  rep_att
+  data_wide <- spread(rep_att, key, value)
+  # take the mean and ignore patients still in pathway
+  mean_time = mean(data_wide[data_wide$patient_type == patient_type,]$total_time, na.rm = TRUE)
+  return(mean_time)
+}
+```
+
+```{r}
+# faster to do the pivot for each replication individually.
+for(patient_type in 1:2){
+  results = vector()
+  for(rep in 1:N_REPS){
+    results = c(results, mean_time_in_system_for_rep(rep, patient_type))
+  }
+  print(mean(results))
+}
+
+
+```
+
+```{r}
+results
 ```
