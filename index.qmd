@@ -7,7 +7,7 @@ editor: visual
 
 ## 1. Imports
 
-> Note: we are calculating KPIs uses our own code here, but you can also use `simmer.plot`. Help with install of `simmer.plot` (`igraph` installation is the actual issue) on Linux based systems: <https://r.igraph.org/articles/installation-troubleshooting#cannot-compile-igraph-from-sources-on-linux>
+> Note: we are calculating KPIs using our own code here, but you can also use `simmer.plot`. Help with install of `simmer.plot` (`igraph` installation is the actual issue) on Linux based systems: <https://r.igraph.org/articles/installation-troubleshooting#cannot-compile-igraph-from-sources-on-linux>
 >
 > > If you make use of conda environments (via Anaconda/mini-conda/mini-forge/mamba), **remember** to `conda deactivate` before installation.
 
@@ -572,10 +572,6 @@ get_resource_counts <- function(exp) {
 Functions to calculate KPIs from custom attributes
 
 ```{r}
-get_throughput <- function(data_wide){
-  return(sum(data_wide$departed, na.rm=TRUE))
-}
-
 # mean time in the system and throughput
 calc_kpi_from_attributes_for_rep <- function(rep){
   
@@ -595,16 +591,12 @@ calc_kpi_from_attributes_for_rep <- function(rep){
   mean_time_2 = mean(data_wide[data_wide$patient_type == 2,]$total_time, na.rm = TRUE)
   
   # Throughput - discharges during opening hours.
-  throughput <- get_throughput(data_wide)
+  throughput <- sum(data_wide$departed, na.rm=TRUE)
   
-  # store results in list
-  # rep_results = list("total_time_nt" = mean_time_1, "total_time_t" = mean_time_2, 
-  #                    "throughput"=throughput)
-  
+  # store and return data.frame of results
   rep_results <- data.frame("05_total_time(non-trauma)" = mean_time_1,
                             "08_total_time(trauma)" = mean_time_2, 
                             "09_throughput"= throughput)
-  # return list
   return(rep_results)
 }
 
