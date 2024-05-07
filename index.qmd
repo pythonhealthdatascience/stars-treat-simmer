@@ -675,17 +675,18 @@ mean_time_in_system_for_rep <- function(rep, patient_type){
 
 ```{r}
 # faster to do the pivot for each replication individually.
+mean_results <- vector()
 for(patient_type in 1:2){
   results = vector()
   for(rep in 1:N_REPS){
     results = c(results, mean_time_in_system_for_rep(rep, patient_type))
   }
-  print(mean(results))
+  # print(mean(results))
+  mean_results <- c(mean_results, mean(results))
 }
 
-
-```
-
-```{r}
-results
+df %>% 
+  add_row(kpi="05_total_time(non-trauma)", mean=mean_results[1]) %>% 
+  add_row(kpi="08_total_time(trauma)", mean=mean_results[2]) %>% 
+  arrange(kpi)
 ```
