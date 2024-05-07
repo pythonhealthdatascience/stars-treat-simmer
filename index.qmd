@@ -582,11 +582,11 @@ calc_kpi_from_attributes_for_rep <- function(rep){
   # long to wide format...
   data_wide <- spread(rep_att, key, value)
   
-  # Patient type 1:
+  # Patient type 1: trauma
   # take the mean and ignore patients still in pathway
   mean_time_1 = mean(data_wide[data_wide$patient_type == 1,]$total_time, na.rm = TRUE)
   
-  # Patient type 2:
+  # Patient type 2: non_trauma
   # take the mean and ignore patients still in pathway
   mean_time_2 = mean(data_wide[data_wide$patient_type == 2,]$total_time, na.rm = TRUE)
   
@@ -594,8 +594,8 @@ calc_kpi_from_attributes_for_rep <- function(rep){
   throughput <- sum(data_wide$departed, na.rm=TRUE)
   
   # store and return data.frame of results
-  rep_results <- data.frame("05_total_time(non-trauma)" = mean_time_1,
-                            "08_total_time(trauma)" = mean_time_2, 
+  rep_results <- data.frame("05_total_time(non-trauma)" = mean_time_2,
+                            "08_total_time(trauma)" = mean_time_1, 
                             "09_throughput"= throughput)
   return(rep_results)
 }
