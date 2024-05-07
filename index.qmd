@@ -7,7 +7,7 @@ editor: visual
 
 ## 1. Imports
 
-> Note: help with install of `simmer.plot` (`igraph` installation is the actual issue) on Linux based systems: <https://r.igraph.org/articles/installation-troubleshooting#cannot-compile-igraph-from-sources-on-linux>
+> Note: we are calculating KPIs uses our own code here, but you can also use `simmer.plot`. Help with install of `simmer.plot` (`igraph` installation is the actual issue) on Linux based systems: <https://r.igraph.org/articles/installation-troubleshooting#cannot-compile-igraph-from-sources-on-linux>
 >
 > > If you make use of conda environments (via Anaconda/mini-conda/mini-forge/mamba), **remember** to `conda deactivate` before installation.
 
@@ -451,7 +451,8 @@ create_arrival_generator <- function(exp){
         trauma_pathway,
         non_trauma_pathway
     ) %>%
-    log_(function() {paste(DEPART_MSG)},level=1)
+    log_(function() {paste(DEPART_MSG)},level=1) %>% 
+    set_attribute("departed", 1)
   
   return(patient_arrival)
 }
@@ -528,6 +529,14 @@ print("Complete.")
 
 ## 9. Results analysis
 
+Analysis of `simmer` results is achieved using a mix of statistics collected automatically and custom attributes set by the modeller during the run.
+
+In general, we follow a typical strategy in a simulation study. We calculate the mean Key Performance Indicator (KPI) seen during an individual replication of the model (e.g. waiting time for triage and utilisation of the the triage rooms). This is repeated for all replications and the distribution of results can be visualised or we use a summary measure such as the mean.
+
+Below we construct a summary table of results providing the mean of 16 KPIs.
+
+> Code quality is a work in progress. 😃
+
 ```{r}
 arrivals_by_replication <- function(envs){
   results <- vector()
@@ -536,24 +545,6 @@ arrivals_by_replication <- function(envs){
   }
   return(data.frame(results))
 }
-```
-
-```{r}
-results <- arrivals_by_replication(reps)
-mean(results$results)
-```
-
-```{r}
-sum(exp$arrival_data$arrival_rate)
-```
-
-```{r}
-resources <- get_mon_resources(reps)
-plot(resources, metric = "utilization", 
-     c("triage_bay", 
-        "trauma_room",
-        "trauma_treat_cubicle",
-        "nontrauma_treat_cubicle"))
 ```
 
 ```{r}
@@ -575,6 +566,62 @@ get_resource_counts <- function(exp) {
   df_resource <- data.frame(resource)
   df_resource$count <- resource_counts
   return(df_resource)
+}
+```
+
+Functions to calculate KPIs from custom attributes
+
+```{r}
+get_throughput <- function(data_wide){
+  return(sum(data_wide$departed, na.rm=TRUE))
+}
+
+# mean time in the system and throughput
+calc_kpi_from_attributes_for_rep <- function(rep){
+  
+  # get attributes
+  att <- get_mon_attributes(reps)
+  # for speed - limit to replication number.
+  rep_att <- subset(att[att$replication == rep,], select = c(name, key, value))
+  # long to wide format...
+  data_wide <- spread(rep_att, key, value)
+  
+  # Patient type 1:
+  # take the mean and ignore patients still in pathway
+  mean_time_1 = mean(data_wide[data_wide$patient_type == 1,]$total_time, na.rm = TRUE)
+  
+  # Patient type 2:
+  # take the mean and ignore patients still in pathway
+  mean_time_2 = mean(data_wide[data_wide$patient_type == 2,]$total_time, na.rm = TRUE)
+  
+  # Throughput - discharges during opening hours.
+  throughput <- get_throughput(data_wide)
+  
+  # store results in list
+  # rep_results = list("total_time_nt" = mean_time_1, "total_time_t" = mean_time_2, 
+  #                    "throughput"=throughput)
+  
+  rep_results <- data.frame("05_total_time(non-trauma)" = mean_time_1,
+                            "08_total_time(trauma)" = mean_time_2, 
+                            "09_throughput"= throughput)
+  # return list
+  return(rep_results)
+}
+
+calc_kpi_from_attributes <- function(){
+  # calcs total time by patient type and total throughput
+  
+  # empty dataframe for attribute calculations.
+  att_results <- data.frame(matrix(ncol = 3, nrow = 0))
+  colnames(att_results) <- c("05_total_time(non-trauma)", "08_total_time(trauma)", "09_throughput")
+
+  # add each rep separately as this works faster with pivot
+  for(rep in 1:N_REPS){
+    att_results <- rbind(att_results, calc_kpi_from_attributes_for_rep(rep))
+  }
+
+  # return the KPIs by replications
+  return(att_results)
 }
 ```
 
@@ -649,44 +696,24 @@ create_summary_table <- function(reps, exp, dp=2){
   overall <- bind_rows(arrival_df, summary_wait, summary_util) %>% 
     arrange(kpi) 
   
-  overall$mean <- round(overall$mean, dp)
+  ## KPIs calculated from attributes
+  # empty dataframe for attribute calculations.
+  att_results <- calc_kpi_from_attributes()
+  mean_att_results <- colMeans(att_results)
+
+  overall <- overall %>%
+    add_row(kpi="05_total_time(non-trauma)", mean=mean_att_results[1]) %>%
+    add_row(kpi="08_total_time(trauma)", mean=mean_att_results[2]) %>%
+    add_row(kpi="09_throughput", mean=mean_att_results[3]) %>%
+    arrange(kpi)
   
+  # round and return
+  overall$mean <- round(overall$mean, dp)
   return(overall)
 }
 ```
 
 ```{r}
-df <- create_summary_table(reps, exp)
-df
-```
-
-```{r}
-# mean time in the system
-mean_time_in_system_for_rep <- function(rep, patient_type){
-  att <- get_mon_attributes(reps)
-  rep_att <- subset(att[att$replication == rep,], select = c(name, key, value))
-  rep_att
-  data_wide <- spread(rep_att, key, value)
-  # take the mean and ignore patients still in pathway
-  mean_time = mean(data_wide[data_wide$patient_type == patient_type,]$total_time, na.rm = TRUE)
-  return(mean_time)
-}
-```
-
-```{r}
-# faster to do the pivot for each replication individually.
-mean_results <- vector()
-for(patient_type in 1:2){
-  results = vector()
-  for(rep in 1:N_REPS){
-    results = c(results, mean_time_in_system_for_rep(rep, patient_type))
-  }
-  # print(mean(results))
-  mean_results <- c(mean_results, mean(results))
-}
-
-df %>% 
-  add_row(kpi="05_total_time(non-trauma)", mean=mean_results[1]) %>% 
-  add_row(kpi="08_total_time(trauma)", mean=mean_results[2]) %>% 
-  arrange(kpi)
+results_summary <- create_summary_table(reps, exp)
+results_summary
 ```
