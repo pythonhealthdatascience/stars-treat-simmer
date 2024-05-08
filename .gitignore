@@ -2,6 +2,10 @@
 index_files/*
 thinning_files/*
 
+mysite/.quarto/
+mysite/_site/
+
+
 # History files
 .Rhistory
 .Rapp.history
