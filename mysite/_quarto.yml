@@ -1,0 +1,42 @@
+project:
+  type: website
+  render:
+    - index.qmd
+    - preface.qmd
+    - 02_model/01_model.qmd
+    - 02_model/02_thinning.qmd
+
+# theme:
+#   light: flatly
+#   dark: darkly 
+    
+website:
+  title: "S.T.A.R.S"
+  repo-url: https://github.com/TomMonks/treat-sim-rsimmer
+  repo-actions: [edit, issue]
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - section: "Introduction"
+        contents:
+          - preface.qmd
+      - section: "`simmer` code"
+        contents:
+          - 02_model/01_model.qmd
+          - 02_model/02_thinning.qmd
+    tools:
+      - icon: github
+        menu:
+          - text: Source Code
+            url:  https://github.com/TomMonks/treat-sim-rsimmer
+          - text: Report a Bug
+            url:  https://github.com/TomMonks/treat-sim-rsimmer/issues
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+
+

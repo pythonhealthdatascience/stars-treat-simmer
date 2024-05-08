@@ -1,0 +1,712 @@
+---
+title: "Treatment Sim: an R `simmer` implementation"
+author: "Thomas Monks, Alison Harper"
+format: html
+editor: visual
+---
+
+## 1. Imports
+
+> Note: we are calculating KPIs using our own code here, but you can also use `simmer.plot`. Help with install of `simmer.plot` (`igraph` installation is the actual issue) on Linux based systems: <https://r.igraph.org/articles/installation-troubleshooting#cannot-compile-igraph-from-sources-on-linux>
+>
+> > If you make use of conda environments (via Anaconda/mini-conda/mini-forge/mamba), **remember** to `conda deactivate` before installation.
+
+```{r}
+library(simmer)
+library(simmer.bricks)
+suppressMessages(library(simmer.plot))
+library(tibble)
+library(ggplot2)
+suppressMessages(library(RCurl))
+suppressMessages(library(Rlab))
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
+
+options(dplyr.summarise.inform = FALSE)
+```
+
+## 2. Default values and constants
+
+### 2.1 Distribution parameters
+
+```{r}
+#' Mean and Variance of the underlying Normal Distribution
+#' 
+#' @description
+#' `normal_moments_from_lognormal` calculates the mu and sigma
+#' of the normal distribution underlying a lognormal
+#' mean and standard 
+#'
+#' @details
+#' `rlnorm` from `stats` is designed to sample from the lognormal distribution. 
+#' The parameters is expects are moments of the underlying normal distribution
+#' Using sample mean and standard deviation this function calculates 
+#' the mu and sigma of the normal distribution. source: https://blogs.sas.com/content/iml/2014/06/04/simulate-lognormal-data-with-specified-mean-and-variance.html
+#' 
+#' @param mean A number. Sample mean.
+#' @param stdev A number. Sample standard deviation
+#' @returns A list 
+normal_moments_from_lognormal <- function(mean, std){
+  phi <- sqrt(std^2 + mean^2)
+  mu <- log(mean**2/phi)
+  sigma <- sqrt(log(phi^2/mean^2))
+  return(list("mu" = mu, "sigma" = sigma))
+}
+```
+
+```{r}
+# sign-in/triage parameters
+DEFAULT_TRIAGE_MEAN <- 3.0
+
+# registration parameters (lognormal distribution)
+DEFAULT_REG_PARAMS <- normal_moments_from_lognormal(5.0, sqrt(2.0))
+
+# examination parameters
+DEFAULT_EXAM_PARAMS = list(mean=16.0, var=3.0)
+
+# trauma/stabilisation
+DEFAULT_TRAUMA_MEAN <- 90.0
+
+# Trauma treatment (lognormal distribution)
+DEFAULT_TRAUMA_TREATMENT_PARAMS <- normal_moments_from_lognormal(30.0, sqrt(4.0))
+
+# Non trauma treatment (lognormal distribution)
+DEFAULT_NON_TRAUMA_TREATMENT_PARAMS <- normal_moments_from_lognormal(13.3, sqrt(2.0))
+
+# prob patient requires treatment given trauma
+DEFAULT_NON_TRAUMA_TREAT_P <- 0.60
+
+# proportion of patients triaged as trauma
+DEFAULT_PROB_TRAUMA <- 0.12
+```
+
+### 2.2 Time dependent arrival rate data
+
+The data for arrival rates varies between clinic opening at 6am and closure at 12am.
+
+```{r}
+# data are held in the Github repo and loaded from there.
+NSPP_PATH = 'https://raw.githubusercontent.com/TomMonks/open-science-for-sim/main/src/notebooks/01_foss_sim/data/ed_arrivals.csv'
+
+csv_data <- getURL(NSPP_PATH)
+df <- read.csv(text=csv_data)
+
+# lock in order of time of day for bar chart display
+df$period <- factor(df$period, levels = df$period)
+
+ggplot(data=df, aes(x=period, y=arrival_rate)) +
+  geom_bar(stat="identity", fill="steelblue") + 
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, 
+                                   hjust=1)) +
+  xlab("Hour of day") + 
+  ylab("Mean arrivals (patients/hr)")
+
+```
+
+### 2.3 Resource Counts
+
+Integer count variables representing the number of resources at each activity in the process
+
+```{r}
+DEFAULT_N_TRIAGE <- 1
+DEFAULT_N_REG <- 1
+DEFAULT_N_EXAM <- 3
+
+# stabilisation rooms
+DEFAULT_N_TRAUMA <- 10000
+
+# Non-trauma cubicles
+DEFAULT_NON_TRAUMA_CUBICLES <- 1
+
+# trauma pathway cubicles
+DEFAULT_TRAUMA_CUBICLES <- 1
+```
+
+### 2.4 Simulation model run settings
+
+```{r}
+# Random seed - this will be investigated for CRN
+SEED <- 42
+
+# default results collection period
+DEFAULT_RESULTS_COLLECTION_PERIOD <- 60 * 19
+
+# number of replications.
+DEFAULT_N_REPS <- 5
+
+# Show the a trace of simulated events
+# 1 = show, 0 = do not show.
+LOG_LEVEL <- 1
+```
+
+## 3. Functions
+
+Load and format data
+
+```{r}
+load_arrival_data <- function(path=NSPP_PATH){
+  csv_data <- getURL(NSPP_PATH)
+  df <- read.csv(text=csv_data)
+  
+  # arrivals per minute...
+  df$arrival_rate2 <- df$arrival_rate/60.0
+  
+  # create 60 minute increments for period
+  df$period = seq(0, (nrow(df)-1)*60, by=60)
+  return(df)
+}
+```
+
+```{r}
+#' Sample a patient type
+#' 
+#' @description
+#' `sample_arrival_type` samples if a patient type is trauma or non-trauma
+#' with a given probability.
+#'
+#' @details
+#' The function uses the Bernouli distribution (Rlab) to sample
+#' if a patient is Trauma or Non-Trauma.  The return values are 
+#' 1 = Trauma, 2 = Non-trauma.
+#' @param p A number: the probability a patient has trauma on arrival
+sample_arrival_type <- function(p, n=1){
+  ifelse(rbern(n, prob = DEFAULT_PROB_TRAUMA) == 1, 1, 2)
+}
+```
+
+```{r}
+#' Sample a if a non-trauma patient requires treatment
+#' 
+#' @description
+#' `sample_nt_trauma_treatment` samples if a non-trauma patient
+#' requires cubicle treatment
+#'
+#' @details
+#' The function uses the Bernouli distribution (Rlab) to sample
+#' if a patient is requires treatment or not.  The return values are 
+#' 1 = Treatment, 0 = No treatment
+#' @param p A number: The probability the patient requires treatment
+sample_nt_trauma_treatment <- function(p){
+  ifelse(rbern(1, prob = p) == 1, 1, 0)
+}
+```
+
+Sampling from a non-stationary poisson process using thinning
+
+```{r}
+nspp_thinning <- function(simulation_time, data, debug=FALSE){
+  
+  # calc time interval: assumes intervals are of equal length
+  interval <- data$period[2] - data$period[1]
+  
+  # maximum arrival rate (smallest time between arrivals)
+  lambda_max <- max(data$arrival_rate2)
+
+  while(TRUE){
+    # get time bucket (row of dataframe to use)
+    t <- floor(simulation_time / interval) %% nrow(data) + 1
+    lambda_t <- data$arrival_rate2[t]
+    
+    # set to a large number so that at least 1 sample is taken
+    u <- Inf
+    rejects <- -1
+    
+    # running total of time until next arrival
+    inter_arrival_time <- 0.0
+    
+    # reject proportionate to lambda_t / lambda_max
+    ratio <- lambda_t / lambda_max
+    while(u >= ratio){
+      rejects <- rejects + 1
+      # sample using max arrival rate
+      inter_arrival_time <- inter_arrival_time + rexp(1, lambda_max)
+      u <- runif(1, 0.0, 1.0)
+    }
+    
+    if(debug){
+      print({paste("Time:", simulation_time, 
+                   " Rejections:", rejects, 
+                   " t:", t, 
+                   " lambda_t:", lambda_t, 
+                   " IAT:", inter_arrival_time)})
+    }
+      
+    return(inter_arrival_time)
+  }
+}
+```
+
+## 4. Model parameterisation
+
+The model is setup to be created from a set of functions that return trajectories. Each function accepts a list that contains all parameters to configure the simulation model. Here we create the list and pre-populate it using default values.
+
+```{r}
+create_experiment <- function(n_triage_bays=DEFAULT_N_TRIAGE,
+                              n_reg_clerks=DEFAULT_N_REG,
+                              n_exam_rooms=DEFAULT_N_EXAM,
+                              n_trauma_rooms=DEFAULT_N_TRAUMA,
+                              n_non_trauma_cubicles=DEFAULT_NON_TRAUMA_CUBICLES,
+                              n_trauma_cubicles=DEFAULT_TRAUMA_CUBICLES,
+                              triage_mean=DEFAULT_TRIAGE_MEAN,
+                              stabilisation_mean=DEFAULT_TRAUMA_MEAN,
+                              trauma_treat_params=DEFAULT_TRAUMA_TREATMENT_PARAMS,
+                              reg_params=DEFAULT_REG_PARAMS,
+                              exam_params=DEFAULT_EXAM_PARAMS,
+                              prob_non_trauma_treat=DEFAULT_NON_TRAUMA_TREAT_P,
+                              nontrauma_treat_params=DEFAULT_NON_TRAUMA_TREATMENT_PARAMS,
+                              prob_trauma=DEFAULT_PROB_TRAUMA,
+                              arrival_data_path=NSPP_PATH,
+                              log_level=LOG_LEVEL) {
+  
+  # load arrival data
+  arrival_data <- load_arrival_data(path=arrival_data_path)
+  
+  # create list of parameters
+  experiment <- list(n_triage_bays=n_triage_bays,
+                    n_reg_clerks=n_reg_clerks,
+                    n_exam_rooms=n_exam_rooms,
+                    n_trauma_rooms=n_trauma_rooms,
+                    n_non_trauma_cubicles=n_non_trauma_cubicles,
+                    n_trauma_cubicles=n_trauma_cubicles,
+                    triage_mean=triage_mean,
+                    stabilisation_mean=stabilisation_mean,
+                    trauma_treat_params=trauma_treat_params,
+                    reg_params=reg_params,
+                    exam_params=exam_params,
+                    prob_non_trauma_treat=prob_non_trauma_treat,
+                    nontrauma_treat_params=nontrauma_treat_params,
+                    prob_trauma=prob_trauma,
+                    arrival_data=arrival_data,
+                    log_level=log_level)
+  
+  return(experiment)
+}     
+```
+
+## 5. Patient Trajectories
+
+The DES package `simmer` uses the concept of a `trajectory` to model a process for a particular patient type. In the urgent care centre example trajectories allow us to model separate trauma and non-trauma processes. Note that different trajectories can share common resources.
+
+The `simmer` terminology for using resources and engaging in activities is easy to read:
+
+-   `seize` - queue and take a resource when it is available.
+
+-   `timeout` - a process delay (e.g. treatment or diagnostics)
+
+-   `release` - release a resource.
+
+`simmer` also provides a way to set an attribute of the `trajectory` using `set_attribute`. This is useful for storing timing information to display in a log: for example when a patient begins waiting for a resource (access via `now(env)`).
+
+> **Important notes:**
+>
+> 1.  The function `log_` is used in combination with `function()` `paste` to provide a dynamic simulation trace to the R console.
+> 2.  Sampling code should look as follows:
+>
+> ``` r
+> timeout(task = function() rexp(1, 3.0)) %>%
+> ```
+>
+> > The keyword `function()` must be included for dynamic sampling for each patient. **Omitting** `function()` means that it is evaluated **once** at the time the `trajectory` is created.
+
+### 5.1. Trauma Patients
+
+> We wrap the trajectory in a function called `create_trauma_pathway`. This allows us to pass an argument `exp` that can parameterise the trajectory for use in a discrete experiment.
+
+```{r}
+
+create_trauma_pathway <- function(exp){
+    
+    trauma_pathway <- trajectory(name="trauma_pathway") %>%
+      set_attribute("patient_type", 1) %>%
+      # log patient arrival
+      log_(function() {paste("**Trauma arrival")}, level=1) %>% 
+      
+      # triage 
+      set_attribute("start_triage_wait", function() {now(exp$env)}) %>%
+      visit("triage_bay", function() rexp(1, 1/exp$triage_mean)) %>%
+      log_(function() {paste("(T) Triage wait time:",
+                       now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
+           level=1) %>%
+      
+      # request trauma room for stabilization
+      set_attribute("start_trauma_room_wait", function() {now(exp$env)}) %>%
+      visit("trauma_room", function() rexp(1, 1/exp$stabilisation_mean)) %>%
+      log_(function() {paste("(T) Trauma room wait time:",
+                       now(exp$env) - get_attribute(exp$env, "start_trauma_room_wait"))},
+           level=1) %>%
+      
+      # request treatment cubicle
+      set_attribute("start_trauma_treat_wait", function() {now(exp$env)}) %>%
+      visit("trauma_treat_cubicle", function() rlnorm(1, exp$trauma_treat_params$mu,
+                                                      exp$trauma_treat_params$sigma)) %>%
+      log_(function() {paste("********************(T) Trauma treatment cubicle wait time:",
+                       now(exp$env) - get_attribute(exp$env, "start_trauma_treat_wait"))},
+           level=1) %>% 
+    
+      # store the total time in system 
+      set_attribute("total_time", 
+                    function() {now(exp$env) - get_attribute(exp$env, "start_triage_wait")})
+    
+  return(trauma_pathway)
+}
+```
+
+### 5.2 Non-trauma patients
+
+```{r}
+
+create_nt_cubicle_treatment <- function(exp){
+
+  nt_cubicle_treatment <- trajectory() %>% 
+    log_(function() {paste("NT patient requirement treatment")},
+         level=1) %>% 
+    seize(resource="nontrauma_treat_cubicle", amount=1) %>% 
+    
+    timeout(task = function() rlnorm(1, exp$nontrauma_treat_params$mu,                                                     exp$nontrauma_treat_params$sigma)) %>%
+    release(resource = "nontrauma_treat_cubicle", amount = 1) %>% 
+    log_(function() {paste("NT treatment complete")},
+     level=1) %>% 
+  return(nt_cubicle_treatment)
+}
+```
+
+```{r}
+
+create_non_trauma_pathway <- function(exp){
+  # log messages
+  ARRIVAL_MSG = "**Non-Trauma arrival**"
+  TRIAGE_MSG = "(NT) Triage wait time:"
+  REG_MSG = "Reg wait time:"
+  EXAM_MSG = "Exam wait time:"
+  EXIT_MSG = "NT Total time in system:"
+  
+  # optional trajectory for proportion of patients that requirement treatment
+  nt_cubicle_treatment <- create_nt_cubicle_treatment(exp)
+  
+  non_trauma_pathway <- trajectory(name="non_trauma_pathway") %>%
+    set_attribute("patient_type", 2) %>%
+    # log non_trauma arrival
+    log_(function() {paste(ARRIVAL_MSG)}, level=1) %>% 
+    
+    # store start of waiting time for log calculations
+    set_attribute("start_triage_wait", function() {now(exp$env)}) %>%
+    # queue and use triage bay
+    visit("triage_bay", function() rexp(1, 1/exp$triage_mean)) %>%
+    log_(function() {paste(TRIAGE_MSG, now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
+         level=1) %>%
+    
+    # queue and use registration clerk
+    set_attribute("start_reg_wait", function() {now(exp$env)}) %>%
+    visit("registration_clerk", function() rlnorm(1, exp$reg_params$mu, 
+                                                  exp$reg_params$sigma)) %>%
+    log_(function() {paste(REG_MSG, now(exp$env) - get_attribute(exp$env, "start_reg_wait"))},
+         level=1) %>%
+    
+    # queue and use examination room
+    set_attribute("start_exam_wait", function() {now(exp$env)}) %>%
+    visit("examination_room",  function() rnorm(1, exp$exam_params$mean, 
+                                                sqrt(exp$exam_params$var))) %>%
+    log_(function() {paste(EXAM_MSG, now(exp$env) - get_attribute(exp$env, "start_exam_wait"))},
+         level=1) %>%
+    
+    # a Proportion of patients require treatment in a cubicle
+    branch (
+      function() sample_nt_trauma_treatment(exp$prob_non_trauma_treat), continue=T,
+      nt_cubicle_treatment
+    ) %>% 
+    log_(function() {paste(EXIT_MSG, now(exp$env) - get_attribute(exp$env, "start_triage_wait"))},
+         level=1) %>% 
+    # store the total time in system 
+    set_attribute("total_time", 
+                    function() {now(exp$env) - get_attribute(exp$env, "start_triage_wait")})
+  
+  return(non_trauma_pathway)
+}
+```
+
+## 6. Modelling patient arrivals
+
+Patients arrive a the urgent treatment centre following a time dependent process. When patients arrive they are classified as trauma or non-trauma.
+
+To modify the classification of patients we will use a trajectory that uses the \`branch\` function from `simmer`.
+
+The function \`sample_arrival_type\` returns a 1 (trauma) or 2 (non-trauma). This is used to select the appropriate patient trajectory.
+
+```{r}
+
+create_arrival_generator <- function(exp){
+  
+  DEPART_MSG <- "A patient has departed the UTC"
+  
+  # create and parameterise the trauma pathway trajectory
+  trauma_pathway <- create_trauma_pathway(exp)
+  
+  # create and parameterise the non-trauma pathway trajectory
+  non_trauma_pathway <- create_non_trauma_pathway(exp)
+  
+  patient_arrival <- trajectory() %>%
+    branch(
+      function() sample_arrival_type(exp$prob_trauma), continue=T,
+        trauma_pathway,
+        non_trauma_pathway
+    ) %>%
+    log_(function() {paste(DEPART_MSG)},level=1) %>% 
+    set_attribute("departed", 1)
+  
+  return(patient_arrival)
+}
+```
+
+## 7. Single run of the model
+
+> Work in progress
+
+```{r}
+single_run <- function(env, exp, 
+                       rep_number=1, 
+                       run_length=DEFAULT_RESULTS_COLLECTION_PERIOD, 
+                       debug_arrivals=FALSE){
+  # add the simmer environment to the experiment list.
+  exp <- c(exp, env=env) 
+  
+  # Create the arrivals generator
+  arrival_gen <- create_arrival_generator(exp)
+  
+  # create model and run.
+  env %>% 
+    add_resource("triage_bay", exp$n_triage_bays) %>%
+    add_resource("registration_clerk", exp$n_reg_clerks) %>%
+    add_resource("examination_room", exp$n_exam_rooms) %>%
+    add_resource("trauma_room", exp$n_trauma_rooms) %>%
+    add_resource("trauma_treat_cubicle", exp$n_trauma_cubicles) %>%
+    add_resource("nontrauma_treat_cubicle", exp$n_non_trauma_cubicles) %>%
+    add_generator("Patient", arrival_gen, 
+                  function() nspp_thinning(now(env), exp$arrival_data, 
+                                           debug=debug_arrivals),
+                  mon=2) %>% 
+    run(until=run_length)
+  
+  # return environment and all of its results.
+  return(env)
+}
+```
+
+Script to conduct single run of the model
+
+> Note that the environment is created outside of the `single_run` function. This is to separate the creation of the environment from the `run` function call. The reason is so that the `now(env)` function will work correctly in the `nspp_thinning` sampling function (if we do not separate then the same time is always passed to the function).
+
+```{r}
+set.seed(SEED)
+exp <- create_experiment(log_level=0)
+treat_sim <- simmer("TreatSim", log_level=exp$log_level)
+treat_sim <- single_run(treat_sim, exp)
+print("Simulation Complete.")
+```
+
+## 8. Multiple replications
+
+```{r}
+N_REPS <- 50
+
+set.seed(42)
+
+# note unlike in simmer documentation we use a traditional for loop
+# instead of lapply. This allows us to separate env creation
+# from run and preserve the environment interaction between NSPP 
+# and current sim time.
+# TO DO: look again -> can treat_sim be created inside single_run()
+print("running replications...")
+reps = vector()
+for(rep in 1:N_REPS){
+  exp <- create_experiment(log_level=0)
+  treat_sim <- simmer("TreatSim", log_level=exp$log_level)
+  treat_sim <- single_run(treat_sim, exp)
+  # store the latest simulation enviornment and its results.
+  reps <- c(reps, treat_sim)
+}
+print("Complete.")
+```
+
+## 9. Results analysis
+
+Analysis of `simmer` results is achieved using a mix of statistics collected automatically and custom attributes set by the modeller during the run.
+
+In general, we follow a typical strategy in a simulation study. We calculate the mean Key Performance Indicator (KPI) seen during an individual replication of the model (e.g. waiting time for triage and utilisation of the the triage rooms). This is repeated for all replications and the distribution of results can be visualised or we use a summary measure such as the mean.
+
+Below we construct a summary table of results providing the mean of 16 KPIs.
+
+> Code quality is a work in progress. 😃
+
+```{r}
+arrivals_by_replication <- function(envs){
+  results <- vector()
+  for(env in envs){
+    results <- c(results, get_n_generated(env, "Patient"))
+  }
+  return(data.frame(results))
+}
+```
+
+```{r}
+get_resource_counts <- function(exp) {
+  resource = c("triage_bay", 
+                "registration_clerk", 
+                "examination_room",
+                "trauma_room",
+                "trauma_treat_cubicle",
+                "nontrauma_treat_cubicle")
+  
+  resource_counts = c(exp$n_triage_bays,
+                      exp$n_reg_clerks,
+                      exp$n_exam_rooms,
+                      exp$n_trauma_rooms,
+                      exp$n_trauma_cubicles,
+                      exp$n_non_trauma_cubicles)
+  
+  df_resource <- data.frame(resource)
+  df_resource$count <- resource_counts
+  return(df_resource)
+}
+```
+
+Functions to calculate KPIs from custom attributes
+
+```{r}
+# mean time in the system and throughput
+calc_kpi_from_attributes_for_rep <- function(rep){
+  
+  # get attributes
+  att <- get_mon_attributes(reps)
+  # for speed - limit to replication number.
+  rep_att <- subset(att[att$replication == rep,], select = c(name, key, value))
+  # long to wide format...
+  data_wide <- spread(rep_att, key, value)
+  
+  # Patient type 1: trauma
+  # take the mean and ignore patients still in pathway
+  mean_time_1 = mean(data_wide[data_wide$patient_type == 1,]$total_time, na.rm = TRUE)
+  
+  # Patient type 2: non_trauma
+  # take the mean and ignore patients still in pathway
+  mean_time_2 = mean(data_wide[data_wide$patient_type == 2,]$total_time, na.rm = TRUE)
+  
+  # Throughput - discharges during opening hours.
+  throughput <- sum(data_wide$departed, na.rm=TRUE)
+  
+  # store and return data.frame of results
+  rep_results <- data.frame("05_total_time(non-trauma)" = mean_time_2,
+                            "08_total_time(trauma)" = mean_time_1, 
+                            "09_throughput"= throughput)
+  return(rep_results)
+}
+
+calc_kpi_from_attributes <- function(){
+  # calcs total time by patient type and total throughput
+  
+  # empty dataframe for attribute calculations.
+  att_results <- data.frame(matrix(ncol = 3, nrow = 0))
+  colnames(att_results) <- c("05_total_time(non-trauma)", "08_total_time(trauma)", "09_throughput")
+
+  # add each rep separately as this works faster with pivot
+  for(rep in 1:N_REPS){
+    att_results <- rbind(att_results, calc_kpi_from_attributes_for_rep(rep))
+  }
+
+  # return the KPIs by replications
+  return(att_results)
+}
+```
+
+```{r}
+create_summary_table <- function(reps, exp, dp=2){
+
+  # mean number of arrivals
+  arrival_counts <- arrivals_by_replication(reps)
+  mean_arrivals <- mean(arrival_counts$results)
+  arrival_df <- data.frame("00_arrivals", mean_arrivals)
+  names(arrival_df)<-c("kpi","mean")
+
+  
+  # get results dataframe broken down by resource and replication.
+  arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
+  
+  # calculate waiting time
+  arrivals$waiting_time <-arrivals$end_time - arrivals$start_time - arrivals$activity_time
+  # arrivals$waiting_time <- round(arrivals$waiting_time, 2)
+  
+  cols <- c("resource", "replication")
+  summary_wait <- arrivals %>%
+    # mean waiting time in each replication
+    group_by(across(all_of(cols))) %>%
+    summarise(rep_waiting_time=mean(waiting_time)) %>% 
+    # mean waiting time across replications
+    group_by(resource) %>% 
+    summarise(mean=mean(rep_waiting_time)) %>% 
+    mutate(resource=recode(resource,  
+                         'triage_bay'='01a_triage_wait', 
+                         'registration_clerk'='02a_registration_wait',
+                         'examination_room'='03a_examination_wait',
+                         'nontrauma_treat_cubicle'='04a_treatment_wait(non_trauma)',
+                         'trauma_room'='06a_stabilisation_wait',
+                         'trauma_treat_cubicle'='07a_treatment_wait(trauma)')) %>% 
+    arrange(resource)
+  
+  
+  names(summary_wait)<-c("kpi","mean")
+  
+  # utilisation calculation:
+  # simple calculation of total busy time / total scheduled resource time.
+  # where total scheduled time = n_resource * results collection period.
+  summary_util <- arrivals %>%
+    # mean waiting time in each replication
+    group_by(across(all_of(cols))) %>%
+    summarise(in_use=sum(activity_time)) %>% 
+    arrange(resource)
+  
+  # add resource counts to table for calc
+  summary_util <- merge(summary_util, get_resource_counts(exp), 
+                        by="resource", all=TRUE)
+  
+  # total in use / total scheduled time
+  summary_util$util = summary_util$in_use / (DEFAULT_RESULTS_COLLECTION_PERIOD * summary_util$count)  
+  
+  summary_util <- summary_util %>%
+    # mean waiting time in each replication
+    group_by(resource) %>%
+    summarise(mean=mean(util)) %>% 
+    mutate(resource=recode(resource,  
+                         'triage_bay'='01b_triage_util', 
+                         'registration_clerk'='02b_registration_util',
+                         'examination_room'='03b_examination_util',
+                         'nontrauma_treat_cubicle'='04b_treatment_util(non_trauma)',
+                         'trauma_room'='06b_stabilisation_util',
+                         'trauma_treat_cubicle'='07b_treatment_util(trauma)')) %>% 
+    arrange(resource)
+
+  names(summary_util) <- c("kpi","mean")
+  
+  overall <- bind_rows(arrival_df, summary_wait, summary_util) %>% 
+    arrange(kpi) 
+  
+  ## KPIs calculated from attributes
+  # empty dataframe for attribute calculations.
+  att_results <- calc_kpi_from_attributes()
+  mean_att_results <- colMeans(att_results)
+
+  overall <- overall %>%
+    add_row(kpi="05_total_time(non-trauma)", mean=mean_att_results[1]) %>%
+    add_row(kpi="08_total_time(trauma)", mean=mean_att_results[2]) %>%
+    add_row(kpi="09_throughput", mean=mean_att_results[3]) %>%
+    arrange(kpi)
+  
+  # round and return
+  overall$mean <- round(overall$mean, dp)
+  return(overall)
+}
+```
+
+```{r}
+results_summary <- create_summary_table(reps, exp)
+results_summary
+```

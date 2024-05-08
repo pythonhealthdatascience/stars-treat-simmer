@@ -1,0 +1,25 @@
+---
+title: "Abstract"
+title-block-banner: false
+toc: true
+format:
+  html:
+    code-fold: true
+---
+##   Towards Sharing Tools, Artifacts, and Reproducible Simulation: a `simmer` model examplar
+
+[![ORCID: Harper](https://img.shields.io/badge/ORCID-0000--0001--5274--5037-brightgreen)](https://orcid.org/0000-0001-5274-5037)
+[![ORCID: Monks](https://img.shields.io/badge/ORCID-0000--0003--2631--4481-brightgreen)](https://orcid.org/0000-0003-2631-4481)
+
+The materials and methods in this documentation support work towards developing the S.T.A.R.S healthcare framework (**S**haring **T**ools and **A**rtifacts for **R**eproducible **S**imulations in healthcare).  Long term S.T.A.R.S aims to support researchers share open simulation models regardless of language choice, improve the quality of sharing, and reduce the workload required to meet high standards of open science for the modelling and simulation community.
+
+The code and written materials here demonstrate the application of S.T.A.R.S' version 1 to sharing a `ciw` discrete-event simuilation model and associated research artifacts.  
+
+* All artifacts in this repository are linked to study researchers via ORCIDs;
+* Model code is made available under a GNU Public License version 3;
+* Python dependencies are managed through `conda`;`
+* The code builds a Shiny for Python web application that can be used to run the model (web app);
+* The python code itself can be viewed and executed in Jupyter notebooks via [Binder](https://mybinder.org); 
+* The model is documented and explained in a quarto website served up by GitHub pages;
+* The materials are deposited and made citatable using Zenodo;
+* The models are sharable with other researchers and the NHS without the need to install software.
