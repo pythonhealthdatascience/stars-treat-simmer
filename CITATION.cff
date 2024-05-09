@@ -1,0 +1,79 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Towards Sharing Tools, and Artifacts, for Reusable
+  Simulation: a minimal model example
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Thomas
+    family-names: Monks
+    affiliation: University of Exeter
+    orcid: 'https://orcid.org/0000-0003-2631-4481'
+  - given-names: Alison
+    family-names: Harper
+    affiliation: University of Exeter
+    orcid: 'https://orcid.org/0000-0001-5274-5037'
+  - given-names: Amy
+    family-names: Heather
+    affiliation: University of Exeter
+    orcid: 'https://orcid.org/0000-0002-6596-3479'
+  - given-names: Navonil
+    family-names: Mustafee
+    affiliation: University of Exeter
+    orcid: 'https://orcid.org/0000-0002-2204-8924'
+repository-code: 'https://github.com/TomMonks/treat-sim-rsimmer'
+abstract: >
+
+  The materials and methods in this documentation support
+  work towards developing the S.T.A.R.S healthcare framework
+  (Sharing Tools and Artifacts for Reproducible Simulations
+  in healthcare). Long term S.T.A.R.S aims to support
+  researchers share open simulation models regardless of
+  language choice, improve the quality of sharing, and
+  reduce the workload required to meet high standards of
+  open science for the modelling and simulation community.
+
+
+  The code and written materials are a work in progress
+  towards STARS version 2.0. It demonstrates the application
+  of sharing a discrete-event simulation model and
+  associated research artifacts.
+keywords:
+  - Free and Open Source Software
+  - Model Reuse
+  - Discrete-event simulation
+  - Open Science
+  - Simmer
+  - R
+license: GPL-3.0
+references:
+  - type: article
+    title: Towards sharing tools and artefacts for reusable simulations in healthcare
+    authors:
+      - given-names: Thomas
+        family-names: Monks
+      - given-names: Alison
+        family-names: Harper
+      - given-names: Navonil
+        family-names: Mustafee
+    doi: 10.1080/17477778.2024.2347882
+    journal: Journal of Simulation
+    publisher:
+      name: Taylor & Francis
+    month: 5
+    year: 2024
+  - type: book
+    title: Foundations and Methods of Stochastic Simulation
+    authors:
+      - given-names: Barry L.
+        family-names: Nelson
+    publisher:
+      name: Springer New York
+    year: 2013
+    doi: 10.1007/978-1-4614-6160-9
+    edition: 1st edition
