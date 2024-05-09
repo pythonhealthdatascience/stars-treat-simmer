@@ -6,7 +6,7 @@ format:
   html:
     code-fold: true
 ---
-## 💫  Towards Sharing Tools, Artifacts, and Reproducible Simulation: a `simmer` model examplar
+## 💫  Towards Sharing Tools, Artifacts, and Reproducible Simulation: a `simmer` model example
 
 [![ORCID: Harper](https://img.shields.io/badge/ORCID-0000--0001--5274--5037-brightgreen)](https://orcid.org/0000-0001-5274-5037)
 [![ORCID: Monks](https://img.shields.io/badge/ORCID-0000--0003--2631--4481-brightgreen)](https://orcid.org/0000-0003-2631-4481)
