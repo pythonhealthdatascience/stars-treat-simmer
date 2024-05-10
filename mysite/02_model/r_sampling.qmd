@@ -1,0 +1,50 @@
+# Sampling in R
+
+By default R offers less control over random sampling than python. It uses a single random number stream for all sampling and does not allow you to create individual random number streams for each sampling distribution.
+
+To illustrate the impact of this design consider the example below. Imagine we are going to simulate 5 patients length of stay (LoS) in an acute hospital followed by rehabilitation. Acute LoS is exponentially distribution while rehabilitation LoS follows a uniform distribution (the choice of distribution does not matter).
+
+> IMPORTANT: To make the results "repeatable" we will set a random seed.
+
+## Constants
+
+```{r}
+SEED <- 42
+ACUTE_MEAN <- 32.0
+REHAB_MIN <- 15.0
+REHAM_MAX <- 80.0
+```
+
+## Experiment 1
+
+```{r}
+n_patients <- 5
+
+set.seed(SEED)
+acute_los <- rexp(n=n_patients, rate=1.0/ACUTE_MEAN)
+rehab_los <- runif(n=n_patients, min=REHAB_MIN, max=REHAM_MAX)
+
+print(acute_los)
+print(rehab_los)
+```
+
+## Experiment 2
+
+```{r}
+n_patients <- 2
+
+set.seed(SEED)
+acute_los <- rexp(n=n_patients, rate=1.0/ACUTE_MEAN)
+rehab_los <- runif(n=n_patients, min=REHAB_MIN, max=REHAM_MAX)
+
+print(acute_los)
+print(rehab_los)
+```
+
+```{r}
+n_patients <- 5
+
+set.seed(SEED)
+acute_los <- rexp(n=1, rate=1.0/ACUTE_MEAN)
+rehab_los <- runif(n=1, min=REHAB_MIN, max=REHAM_MAX)
+```
