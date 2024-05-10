@@ -30,6 +30,24 @@ print(rehab_los)
 
 ## Experiment 2
 
+We will now reset the random stream using the same seed and limit the number of patients simulated to 2.
+
+When we re-run the code we might expect to get
+
+> Acute Los:
+>
+> ```         
+> 6.346778 21.148648
+> ```
+>
+> Rehab Los:
+>
+> ```         
+> 23.75333 57.70450
+> ```
+
+But we will see that this does not happen. This is because all sampling makes use of a pseudo random number stream that generates uniformly distribution numbers $U$'s between 0 and 1. When only 1 stream is used for all sampling we can end up with lots of noise between experiments simply because different $U$'s are used for the same patients.
+
 ```{r}
 n_patients <- 2
 
@@ -45,6 +63,25 @@ print(rehab_los)
 n_patients <- 5
 
 set.seed(SEED)
-acute_los <- rexp(n=1, rate=1.0/ACUTE_MEAN)
-rehab_los <- runif(n=1, min=REHAB_MIN, max=REHAM_MAX)
+
+for (patient_i in 1:n_patients) {
+    print(paste("Patient ", patient_i))
+    print(paste("Acute ", rexp(n=1, rate=1.0/ACUTE_MEAN)))
+    print(paste("Rehab ", runif(n=1, min=REHAB_MIN, max=REHAM_MAX)))
+}
+
+
+```
+
+```{r}
+n_patients <- 2
+
+set.seed(SEED)
+
+for (patient_i in 1:n_patients) {
+    print(paste("Patient ", patient_i))
+    print(paste("Acute ", rexp(n=1, rate=1.0/ACUTE_MEAN)))
+    print(paste("Rehab ", runif(n=1, min=REHAB_MIN, max=REHAM_MAX)))
+}
+
 ```
