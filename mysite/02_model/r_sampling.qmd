@@ -1,10 +1,19 @@
 # Sampling in R
 
-By default R offers less control over random sampling than python. It uses a single random number stream for all sampling and does not allow you to create individual random number streams for each sampling distribution.
+By default R offers less control over random sampling than python and commercial simulation software. It uses a single random number stream for all sampling and does not allow you to create individual random number streams (each with its own seed) for each sampling distribution.
+
+> This is not ideal for DES, and has a range of impacts. The one you will likely experience is additional noise between experiments due to this lack of control.
 
 To illustrate the impact of this design consider the example below. Imagine we are going to simulate 5 patients length of stay (LoS) in an acute hospital followed by rehabilitation. Acute LoS is exponentially distribution while rehabilitation LoS follows a uniform distribution (the choice of distribution does not matter).
 
-> IMPORTANT: To make the results "repeatable" we will set a random seed.
+> **IMPORTANT**: To make the results "repeatable" as possible we will set a random seed. With a single random stream we will see that this does not guarantee repeatable samples for patients between **experiments**.
+
+## Imports
+
+```{r}
+library(simmer)
+library(simmer.bricks)
+```
 
 ## Constants
 
@@ -12,7 +21,7 @@ To illustrate the impact of this design consider the example below. Imagine we a
 SEED <- 42
 ACUTE_MEAN <- 32.0
 REHAB_MIN <- 15.0
-REHAM_MAX <- 80.0
+REHAB_MAX <- 80.0
 ```
 
 ## Experiment 1
@@ -22,7 +31,7 @@ n_patients <- 5
 
 set.seed(SEED)
 acute_los <- rexp(n=n_patients, rate=1.0/ACUTE_MEAN)
-rehab_los <- runif(n=n_patients, min=REHAB_MIN, max=REHAM_MAX)
+rehab_los <- runif(n=n_patients, min=REHAB_MIN, max=REHAB_MAX)
 
 print(acute_los)
 print(rehab_los)
@@ -53,25 +62,33 @@ n_patients <- 2
 
 set.seed(SEED)
 acute_los <- rexp(n=n_patients, rate=1.0/ACUTE_MEAN)
-rehab_los <- runif(n=n_patients, min=REHAB_MIN, max=REHAM_MAX)
+rehab_los <- runif(n=n_patients, min=REHAB_MIN, max=REHAB_MAX)
 
 print(acute_los)
 print(rehab_los)
 ```
 
+## Force the order of sampling
+
+To force the order of sampling within a single random number stream each patient must do their sampling upfront and in order.
+
+### A Return to Experiment 1
+
 ```{r}
-n_patients <- 5
+n_patients <- 3
 
 set.seed(SEED)
 
 for (patient_i in 1:n_patients) {
     print(paste("Patient ", patient_i))
     print(paste("Acute ", rexp(n=1, rate=1.0/ACUTE_MEAN)))
-    print(paste("Rehab ", runif(n=1, min=REHAB_MIN, max=REHAM_MAX)))
+    print(paste("Rehab ", runif(n=1, min=REHAB_MIN, max=REHAB_MAX)))
 }
 
 
 ```
+
+### A Return to Experiment 2
 
 ```{r}
 n_patients <- 2
@@ -81,7 +98,7 @@ set.seed(SEED)
 for (patient_i in 1:n_patients) {
     print(paste("Patient ", patient_i))
     print(paste("Acute ", rexp(n=1, rate=1.0/ACUTE_MEAN)))
-    print(paste("Rehab ", runif(n=1, min=REHAB_MIN, max=REHAM_MAX)))
+    print(paste("Rehab ", runif(n=1, min=REHAB_MIN, max=REHAB_MAX)))
 }
 
 ```

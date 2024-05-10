@@ -4,7 +4,7 @@ thinning_files/*
 
 mysite/.quarto/
 mysite/_site/
-
+mysite/02_model/r_sampling_files/
 
 # History files
 .Rhistory
