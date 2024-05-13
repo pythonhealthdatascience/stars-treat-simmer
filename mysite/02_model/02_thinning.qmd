@@ -7,6 +7,8 @@ editor: visual
 
 ## 1. Background
 
+The treatment simulation model has a time-dependent arrival profile for patients. To simulated these arrivals correctly in DES we need to use one of several algorithms. Here we make use of the **thinning algorithm**.
+
 Thinning is a acceptance-rejection sampling method and is used to generate inter-arrival times from a NSPP.
 
 > **Motivation**: In DES we use thinning as an approach to generate time dependent arrival of patients to a health care service.
