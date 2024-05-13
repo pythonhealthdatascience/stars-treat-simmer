@@ -108,13 +108,13 @@ for (patient_i in 1:n_patients) {
 
 ```
 
-## What happens in practice when combined with `simmer`
+## A `simmer` model
 
 By default `simmer` **will be** affected by the single random stream for all sampling. This is because in a DES sampling will not occur in process order like we saw above. The numbers generated will vary depending on when events are scheduled to take place.
 
-We will first consider this in experiments where we control the exact number of arrivals.
+We will first consider this in experiments where we control the exact number of arrivals. In these experiments we will not use resources. This means that there is no impact on the model due to queuing if we increase or decrease the number of arrivals to the model.
 
-> To simplify display we show the time patients **exit** acute and rehab activities.
+> To simplify output we display the time patients **exit** acute and rehab activities.
 
 ### A return to Experiment 1 (again)
 
@@ -169,7 +169,8 @@ env <- simmer("Experiment_2")
 patient <- trajectory("patient_pathway") %>% 
   timeout(function() rexp(1, rate=1.0/ACUTE_MEAN)) %>% 
   log_(function() {paste("Acute Los complete ", now(env))}) %>% 
-  timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% log_(function() {paste("Rehab Los complete ", now(env))})
+  timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% 
+  log_(function() {paste("Rehab Los complete ", now(env))})
 
 env %>% 
   # now limit to 3 patients.
@@ -179,16 +180,45 @@ env %>%run() %>%
   invisible
 ```
 
-### Experiment 3: increased arrivals
+## `simmer` and random arrivals
 
-Note that this also occurs when arrivals rates are increased. In experiment 3, there are 12 initial arrivals. Due to random sampling patient 0 now exits rehab at 30.4
+Finally we demonstrate that the effect is still observed across two arrivals that vary exponentially distributed inter-arrival times. We will run two new experiments. In the first IAT is 10 minutes. The second experiment increases the intensity of arrivals to an IAT of 9.0 minutes.
+
+Follow patient 0 through the system. You should see that the time rehabilitation ends is different. As a single stream of random numbers was used, we were unable to control the order in which these were used to generate samples from the distributions.
+
+### IAT \~ Exponential(10.0)
 
 ```{r}
 # reset the seed
 set.seed(SEED)
 
 # create simmer environment
-env <- simmer("Experiment_3") 
+env <- simmer("Experiment_1") 
+
+# setup simple patient trajectory
+patient <- trajectory("patient_pathway") %>% 
+  timeout(function() rexp(1, rate=1.0/ACUTE_MEAN)) %>% 
+  log_(function() {paste("Acute Los complete ", now(env))}) %>% 
+  timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% 
+  log_(function() {paste("Rehab Los complete ", now(env))})
+
+env %>% 
+  # expontially distr arrivals mean IAT = 10.0
+  add_generator("patient", patient, function() rexp(1, rate=1.0/10.0))
+ 
+env %>%
+  run(80) %>% 
+  invisible
+```
+
+### IAT \~ Exponential(9.0)
+
+```{r}
+# reset the seed
+set.seed(SEED)
+
+# create simmer environment
+env <- simmer("Experiment_4") 
 
 # setup simple patient trajectory
 patient <- trajectory("patient_pathway") %>% 
@@ -197,10 +227,10 @@ patient <- trajectory("patient_pathway") %>%
   timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% log_(function() {paste("Rehab Los complete ", now(env))})
 
 env %>% 
-  # now limit to 3 patients.
-  add_generator("patient", patient, at(0, 0, 0, 0, 0, 0,
-                                       0, 0, 0, 0, 0, 0))
+  # expontially distr arrivals mean IAT = 9.0
+  add_generator("patient", patient, function() rexp(1, rate=1.0/9.0))
  
-env %>%run() %>% 
+env %>%
+  run(80) %>% 
   invisible
 ```
