@@ -8,7 +8,7 @@
 
 <meta name="author" content="Thomas Monks, Alison Harper">
 
-<title>S.T.A.R.S - Simulating time-dependent arrivals using thinning</title>
+<title>S.T.A.R.S - Time-dependent arrivals</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -110,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../02_model/01_model.html"><code>simmer</code> code</a></li><li class="breadcrumb-item"><a href="../02_model/02_thinning.html">Simulating time-dependent arrivals using thinning</a></li></ol></nav>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../02_model/01_model.html"><code>simmer</code> code</a></li><li class="breadcrumb-item"><a href="../02_model/02_thinning.html">Time-dependent arrivals</a></li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -181,13 +181,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../02_model/01_model.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Treatment Sim: an R <code>simmer</code> implementation</span></a>
+ <span class="menu-text">Model code</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../02_model/02_thinning.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Simulating time-dependent arrivals using thinning</span></a>
+ <span class="menu-text">Time-dependent arrivals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../02_model/03_r_sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling in R</span></a>
   </div>
 </li>
       </ul>
@@ -224,7 +230,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Simulating time-dependent arrivals using thinning</h1>
+<h1 class="title">Time-dependent arrivals</h1>
 </div>
 
 
@@ -247,6 +253,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="background" class="level2">
 <h2 class="anchored" data-anchor-id="background">1. Background</h2>
+<p>The treatment simulation model has a time-dependent arrival profile for patients. To simulated these arrivals correctly in DES we need to use one of several algorithms. Here we make use of the <strong>thinning algorithm</strong>.</p>
 <p>Thinning is a acceptance-rejection sampling method and is used to generate inter-arrival times from a NSPP.</p>
 <blockquote class="blockquote">
 <p><strong>Motivation</strong>: In DES we use thinning as an approach to generate time dependent arrival of patients to a health care service.</p>
@@ -446,71 +453,75 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                <span class="cf">function</span>() <span class="fu">nspp_thinning</span>(<span class="fu">now</span>(env), arrivals, <span class="at">debug=</span><span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">run</span>(<span class="at">until=</span><span class="fl">540.0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Time: 0  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 3.76578976358814"
-[1] "Time: 3.76578976358814  Rejections: 2  t: 1  lambda_t: 0.0666666666666667  IAT: 8.77300580011165"
-[1] "Time: 12.5387955636998  Rejections: 3  t: 1  lambda_t: 0.0666666666666667  IAT: 4.28684175027315"
-[1] "Time: 16.8256373139729  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 4.29691788904072"
-[1] "Time: 21.1225552030137  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 0.977053523529321"
-[1] "Time: 22.099608726543  Rejections: 3  t: 1  lambda_t: 0.0666666666666667  IAT: 18.9426554942873"
-[1] "Time: 41.0422642208303  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 4.46571987774181"
-[1] "Time: 45.5079840985721  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 3.01859689779066"
-[1] "Time: 48.5265809963628  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 15.1711776387569"
-[1] "Time: 63.6977586351197  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 6.32943107259876"
-[1] "Time: 70.0271897077184  Rejections: 1  t: 2  lambda_t: 0.0833333333333333  IAT: 8.1247376101658"
-[1] "Time: 78.1519273178843  Rejections: 2  t: 2  lambda_t: 0.0833333333333333  IAT: 17.1277398191823"
-[1] "Time: 95.2796671370666  Rejections: 2  t: 2  lambda_t: 0.0833333333333333  IAT: 11.0189668625515"
-[1] "Time: 106.298633999618  Rejections: 4  t: 2  lambda_t: 0.0833333333333333  IAT: 29.4468570307807"
-[1] "Time: 135.745491030399  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 4.62095872012383"
-[1] "Time: 140.366449750523  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 3.51823921760029"
-[1] "Time: 143.884688968123  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 9.63292795191419"
-[1] "Time: 153.517616920037  Rejections: 1  t: 3  lambda_t: 0.142857142857143  IAT: 13.0159630631919"
-[1] "Time: 166.533579983229  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 1.34748264681548"
-[1] "Time: 167.881062630045  Rejections: 1  t: 3  lambda_t: 0.142857142857143  IAT: 17.6783432058039"
-[1] "Time: 185.559405835848  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 5.31185572014606"
-[1] "Time: 190.871261555995  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.962201000656933"
-[1] "Time: 191.833462556651  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 3.55364936848587"
-[1] "Time: 195.387111925137  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.16904162010178"
-[1] "Time: 195.556153545239  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.628217428456992"
-[1] "Time: 196.184370973696  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 3.19707098882645"
-[1] "Time: 199.381441962523  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 11.3105767969791"
-[1] "Time: 210.692018759502  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 11.2065692092508"
-[1] "Time: 221.898587968752  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 6.82710609377778"
-[1] "Time: 228.72569406253  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 6.70787511372423"
-[1] "Time: 235.433569176255  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.59553146317181"
-[1] "Time: 237.029100639426  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 11.4393470585904"
-[1] "Time: 248.468447698017  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 5.01644089468712"
-[1] "Time: 253.484888592704  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 0.649605868643447"
-[1] "Time: 254.134494461347  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 4.66810554131665"
-[1] "Time: 258.802600002664  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 2.31485183583573"
-[1] "Time: 261.1174518385  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 9.35887915971589"
-[1] "Time: 270.476330998216  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 2.05824714852497"
-[1] "Time: 272.534578146741  Rejections: 1  t: 5  lambda_t: 0.125  IAT: 4.02758108219132"
-[1] "Time: 276.562159228932  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 0.84484807215631"
-[1] "Time: 277.407007301088  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 2.94980774167925"
-[1] "Time: 280.356815042767  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 3.85646283139891"
-[1] "Time: 284.213277874166  Rejections: 3  t: 5  lambda_t: 0.125  IAT: 19.7837783098657"
-[1] "Time: 303.997056184032  Rejections: 3  t: 6  lambda_t: 0.1  IAT: 9.31223217376736"
-[1] "Time: 313.309288357799  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 0.805431655608118"
-[1] "Time: 314.114720013408  Rejections: 1  t: 6  lambda_t: 0.1  IAT: 3.66342705896501"
-[1] "Time: 317.778147072373  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 8.32235796413776"
-[1] "Time: 326.10050503651  Rejections: 1  t: 6  lambda_t: 0.1  IAT: 6.2989120785973"
-[1] "Time: 332.399417115108  Rejections: 1  t: 6  lambda_t: 0.1  IAT: 1.83348922990263"
-[1] "Time: 334.23290634501  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 2.6950060762465"
-[1] "Time: 336.927912421257  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 11.6237345630202"
-[1] "Time: 348.551646984277  Rejections: 3  t: 6  lambda_t: 0.1  IAT: 26.0107733944295"
-[1] "Time: 374.562420378706  Rejections: 11  t: 7  lambda_t: 0.0666666666666667  IAT: 77.000257809194"
-[1] "Time: 451.5626781879  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 16.4108510383565"
-[1] "Time: 467.973529226257  Rejections: 4  t: 8  lambda_t: 0.05  IAT: 36.6029639213631"
-[1] "Time: 504.57649314762  Rejections: 2  t: 9  lambda_t: 0.05  IAT: 6.85376229442141"
-[1] "Time: 511.430255442041  Rejections: 0  t: 9  lambda_t: 0.05  IAT: 2.00198200764135"
-[1] "Time: 513.432237449683  Rejections: 1  t: 9  lambda_t: 0.05  IAT: 2.35749176004902"
-[1] "Time: 515.789729209732  Rejections: 0  t: 9  lambda_t: 0.05  IAT: 6.15918674019581"
-[1] "Time: 521.948915949927  Rejections: 2  t: 9  lambda_t: 0.05  IAT: 18.6613871532886"</code></pre>
+<pre><code>[1] "Time: 0  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 0.783412652574236"
+[1] "Time: 0.783412652574236  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 24.959008617929"
+[1] "Time: 25.7424212705032  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 9.64792472268355"
+[1] "Time: 35.3903459931868  Rejections: 5  t: 1  lambda_t: 0.0666666666666667  IAT: 26.9955873095843"
+[1] "Time: 62.3859333027711  Rejections: 5  t: 2  lambda_t: 0.0833333333333333  IAT: 13.2531918258651"
+[1] "Time: 75.6391251286362  Rejections: 1  t: 2  lambda_t: 0.0833333333333333  IAT: 1.55188468206356"
+[1] "Time: 77.1910098106998  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 0.85081564017805"
+[1] "Time: 78.0418254508778  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 1.59268388393671"
+[1] "Time: 79.6345093348146  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 0.862160124816"
+[1] "Time: 80.4966694596306  Rejections: 2  t: 2  lambda_t: 0.0833333333333333  IAT: 21.4331835265014"
+[1] "Time: 101.929852986132  Rejections: 1  t: 2  lambda_t: 0.0833333333333333  IAT: 7.90322707712135"
+[1] "Time: 109.833080063253  Rejections: 2  t: 2  lambda_t: 0.0833333333333333  IAT: 11.4822709317109"
+[1] "Time: 121.315350994964  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 4.33196910170323"
+[1] "Time: 125.647320096667  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 9.91665207738888"
+[1] "Time: 135.563972174056  Rejections: 1  t: 3  lambda_t: 0.142857142857143  IAT: 2.55863748025149"
+[1] "Time: 138.122609654308  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 1.79052524967119"
+[1] "Time: 139.913134903979  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 1.87351693211346"
+[1] "Time: 141.786651836092  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 21.3676320935104"
+[1] "Time: 163.154283929603  Rejections: 1  t: 3  lambda_t: 0.142857142857143  IAT: 15.9335681580092"
+[1] "Time: 179.087852087612  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 0.453290224540979"
+[1] "Time: 179.541142312153  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 12.8973254275726"
+[1] "Time: 192.438467739726  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.201774630695581"
+[1] "Time: 192.640242370421  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 5.36530695834613"
+[1] "Time: 198.005549328767  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 2.78856308897957"
+[1] "Time: 200.794112417747  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.30035643701528"
+[1] "Time: 202.094468854762  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 8.88380269477975"
+[1] "Time: 210.978271549542  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 7.72774111437512"
+[1] "Time: 218.706012663917  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.118965262081474"
+[1] "Time: 218.824977925998  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.652338962331974"
+[1] "Time: 219.47731688833  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 5.89041986016041"
+[1] "Time: 225.367736748491  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.390568543225527"
+[1] "Time: 225.758305291716  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.98930332576856"
+[1] "Time: 226.747608617485  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.460945074465288"
+[1] "Time: 227.20855369195  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 6.8786406747759"
+[1] "Time: 234.087194366726  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 5.15448755097991"
+[1] "Time: 239.241681917706  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.258852883707732"
+[1] "Time: 239.500534801414  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.60319508519024"
+[1] "Time: 241.103729886604  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 7.9814496352793"
+[1] "Time: 249.085179521883  Rejections: 1  t: 5  lambda_t: 0.125  IAT: 8.78258515573007"
+[1] "Time: 257.867764677613  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 2.90078448408458"
+[1] "Time: 260.768549161698  Rejections: 1  t: 5  lambda_t: 0.125  IAT: 15.2932765957186"
+[1] "Time: 276.061825757417  Rejections: 1  t: 5  lambda_t: 0.125  IAT: 3.92720333496348"
+[1] "Time: 279.98902909238  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 10.640234061818"
+[1] "Time: 290.629263154198  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 2.65486059710383"
+[1] "Time: 293.284123751302  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 0.366098023401414"
+[1] "Time: 293.650221774703  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 2.80324171762913"
+[1] "Time: 296.453463492333  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 13.8838152951541"
+[1] "Time: 310.337278787487  Rejections: 5  t: 6  lambda_t: 0.1  IAT: 37.5443030241372"
+[1] "Time: 347.881581811624  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 5.23993168470866"
+[1] "Time: 353.121513496332  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 5.81505749353624"
+[1] "Time: 358.936570989869  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 7.74937196270691"
+[1] "Time: 366.685942952576  Rejections: 6  t: 7  lambda_t: 0.0666666666666667  IAT: 29.969419847332"
+[1] "Time: 396.655362799908  Rejections: 1  t: 7  lambda_t: 0.0666666666666667  IAT: 8.08030803666866"
+[1] "Time: 404.735670836576  Rejections: 0  t: 7  lambda_t: 0.0666666666666667  IAT: 3.51695505372931"
+[1] "Time: 408.252625890306  Rejections: 0  t: 7  lambda_t: 0.0666666666666667  IAT: 1.95318409241736"
+[1] "Time: 410.205809982723  Rejections: 2  t: 7  lambda_t: 0.0666666666666667  IAT: 15.5546986885349"
+[1] "Time: 425.760508671258  Rejections: 4  t: 8  lambda_t: 0.05  IAT: 12.3249977273203"
+[1] "Time: 438.085506398578  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 5.03450708480194"
+[1] "Time: 443.12001348338  Rejections: 1  t: 8  lambda_t: 0.05  IAT: 3.29074969266698"
+[1] "Time: 446.410763176047  Rejections: 1  t: 8  lambda_t: 0.05  IAT: 16.7015309053852"
+[1] "Time: 463.112294081432  Rejections: 3  t: 8  lambda_t: 0.05  IAT: 44.5938544010622"
+[1] "Time: 507.706148482494  Rejections: 2  t: 9  lambda_t: 0.05  IAT: 13.0159013810939"
+[1] "Time: 520.722049863588  Rejections: 0  t: 9  lambda_t: 0.05  IAT: 1.14258074434474"
+[1] "Time: 521.864630607933  Rejections: 6  t: 9  lambda_t: 0.05  IAT: 44.0995109208309"</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>simmer environment: TreatSim | now: 540 | next: 540.610303103216
+<pre><code>simmer environment: TreatSim | now: 540 | next: 565.964141528764
 { Monitor: in memory }
-{ Source: patient | monitored: 1 | n_generated: 60 }</code></pre>
+{ Source: patient | monitored: 1 | n_generated: 64 }</code></pre>
 </div>
 </div>
 </section>
