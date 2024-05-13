@@ -5,6 +5,7 @@ project:
     - preface.qmd
     - 02_model/01_model.qmd
     - 02_model/02_thinning.qmd
+    - 02_model/03_r_sampling.qmd
 
 # theme:
 #   light: flatly
@@ -25,6 +26,7 @@ website:
         contents:
           - 02_model/01_model.qmd
           - 02_model/02_thinning.qmd
+          - 02_model/03_r_sampling.qmd
     tools:
       - icon: github
         menu:
