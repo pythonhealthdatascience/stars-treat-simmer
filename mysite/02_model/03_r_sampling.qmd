@@ -3,6 +3,8 @@
 By default R offers less control over random sampling than python and commercial simulation software. It uses a single random number stream for all sampling and does not allow you to create individual random number streams (each with its own seed) for each sampling distribution.
 
 > This is not ideal for DES, and has a range of impacts. The one you will likely experience is additional noise between experiments due to this lack of control.
+>
+> The result is typically that you need to run a lot more replications to carefully assess difference between experiments. It is also harder to debug experiments.
 
 To illustrate the impact of this design consider the example below. Imagine we are going to simulate 5 patients length of stay (LoS) in an acute hospital followed by rehabilitation. Acute LoS is exponentially distribution while rehabilitation LoS follows a uniform distribution (the choice of distribution does not matter).
 
@@ -13,6 +15,7 @@ To illustrate the impact of this design consider the example below. Imagine we a
 ```{r}
 library(simmer)
 library(simmer.bricks)
+library(magrittr)
 ```
 
 ## Constants
@@ -70,7 +73,9 @@ print(rehab_los)
 
 ## Force the order of sampling
 
-To force the order of sampling within a single random number stream each patient must do their sampling upfront and in order.
+To force the order of sampling within a single random number stream each patient must do their sampling upfront and in process order.
+
+Below we re-run Experiments 1 and 2, but this time we make sure the process is sampled in order (acute then rehab) for each patient.
 
 ### A Return to Experiment 1
 
@@ -101,4 +106,101 @@ for (patient_i in 1:n_patients) {
     print(paste("Rehab ", runif(n=1, min=REHAB_MIN, max=REHAB_MAX)))
 }
 
+```
+
+## What happens in practice when combined with `simmer`
+
+By default `simmer` **will be** affected by the single random stream for all sampling. This is because in a DES sampling will not occur in process order like we saw above. The numbers generated will vary depending on when events are scheduled to take place.
+
+We will first consider this in experiments where we control the exact number of arrivals.
+
+> To simplify display we show the time patients **exit** acute and rehab activities.
+
+### A return to Experiment 1 (again)
+
+```{r}
+
+# set the seed
+set.seed(SEED)
+
+# create simmer environment
+env <- simmer("Experiment_1") 
+
+# setup simple patient trajectory
+patient <- trajectory("patient_pathway") %>% 
+  timeout(function() rexp(1, rate=1.0/ACUTE_MEAN)) %>% 
+  log_(function() {paste("Acute Los complete ", now(env))}) %>% 
+  timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% log_(function() {paste("Rehab Los complete ", now(env))})
+
+env %>% 
+  # add 5 arrivals all at the same time.
+  add_generator("patient", patient, at(0, 0, 0, 0, 0))
+ 
+
+env %>%run() %>% 
+  invisible
+  
+```
+
+### A return to Experiment 2 (again)
+
+Here we limit the model to simulated 3 patients that all arrive as the unit opens. Although arrival times are the same we can see that the acute length of stay and rehab length of stay quickly goes out of sync i.e. we have introduced noise between experiments that is nothing to do with the variation in the number of patients. Let's take patient 0 as an example.
+
+In experiment 1:
+
+-   Exits acute treatment at 6.3
+
+-   Exits rehab treatment at 64.1
+
+In experiment 2:
+
+-   Exits acute treatment at 6.3
+
+-   Exits rehab treatment at 55.1
+
+```{r}
+# reset the seed
+set.seed(SEED)
+
+# create simmer environment
+env <- simmer("Experiment_2") 
+
+# setup simple patient trajectory
+patient <- trajectory("patient_pathway") %>% 
+  timeout(function() rexp(1, rate=1.0/ACUTE_MEAN)) %>% 
+  log_(function() {paste("Acute Los complete ", now(env))}) %>% 
+  timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% log_(function() {paste("Rehab Los complete ", now(env))})
+
+env %>% 
+  # now limit to 3 patients.
+  add_generator("patient", patient, at(0, 0, 0))
+ 
+env %>%run() %>% 
+  invisible
+```
+
+### Experiment 3: increased arrivals
+
+Note that this also occurs when arrivals rates are increased. In experiment 3, there are 12 initial arrivals. Due to random sampling patient 0 now exits rehab at 30.4
+
+```{r}
+# reset the seed
+set.seed(SEED)
+
+# create simmer environment
+env <- simmer("Experiment_3") 
+
+# setup simple patient trajectory
+patient <- trajectory("patient_pathway") %>% 
+  timeout(function() rexp(1, rate=1.0/ACUTE_MEAN)) %>% 
+  log_(function() {paste("Acute Los complete ", now(env))}) %>% 
+  timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% log_(function() {paste("Rehab Los complete ", now(env))})
+
+env %>% 
+  # now limit to 3 patients.
+  add_generator("patient", patient, at(0, 0, 0, 0, 0, 0,
+                                       0, 0, 0, 0, 0, 0))
+ 
+env %>%run() %>% 
+  invisible
 ```
