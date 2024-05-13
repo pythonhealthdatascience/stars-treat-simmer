@@ -1,5 +1,5 @@
 ---
-title: "Simulating time-dependent arrivals using thinning"
+title: "Time-dependent arrivals"
 author: "Thomas Monks, Alison Harper"
 format: html
 editor: visual

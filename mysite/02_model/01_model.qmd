@@ -1,5 +1,5 @@
 ---
-title: "Treatment Sim: an R `simmer` implementation"
+title: "Model code"
 author: "Thomas Monks, Alison Harper"
 format: html
 editor: visual
