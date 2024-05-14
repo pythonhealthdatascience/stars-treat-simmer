@@ -226,7 +226,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#experiment-1-5-arrivals" id="toc-experiment-1-5-arrivals" class="nav-link" data-scroll-target="#experiment-1-5-arrivals">4.1 Experiment 1 (5 arrivals)</a></li>
   <li><a href="#experiment-2-3-arrivals" id="toc-experiment-2-3-arrivals" class="nav-link" data-scroll-target="#experiment-2-3-arrivals">4.2 Experiment 2 (3 arrivals)</a></li>
   </ul></li>
-  <li><a href="#simmer-and-random-arrivals" id="toc-simmer-and-random-arrivals" class="nav-link" data-scroll-target="#simmer-and-random-arrivals"><code>5. simmer</code> and random arrivals</a>
+  <li><a href="#a-simmer-model-with-random-arrivals" id="toc-a-simmer-model-with-random-arrivals" class="nav-link" data-scroll-target="#a-simmer-model-with-random-arrivals">5. A <code>simmer</code> model with random arrivals</a>
   <ul class="collapse">
   <li><a href="#iat-exponential10.0" id="toc-iat-exponential10.0" class="nav-link" data-scroll-target="#iat-exponential10.0">5.1 IAT ~ Exponential(10.0)</a></li>
   <li><a href="#iat-exponential2.0" id="toc-iat-exponential2.0" class="nav-link" data-scroll-target="#iat-exponential2.0">5.2 IAT ~ Exponential(2.0)</a></li>
@@ -471,10 +471,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 </section>
-<section id="simmer-and-random-arrivals" class="level2">
-<h2 class="anchored" data-anchor-id="simmer-and-random-arrivals"><code>5. simmer</code> and random arrivals</h2>
+<section id="a-simmer-model-with-random-arrivals" class="level2">
+<h2 class="anchored" data-anchor-id="a-simmer-model-with-random-arrivals">5. A <code>simmer</code> model with random arrivals</h2>
 <p>Finally we demonstrate that the effect is still observed across two experiments that vary the parameter of exponentially distributed inter-arrival times. We will run two new experiments. In the first IAT is 10 minutes. The second experiment increases the intensity of arrivals to an IAT of 2.0 minutes.</p>
-<p>The function <code>get_results_for_patient</code> helps us trace patient 0 as they flowed through the model. The results illustratrate that the acute LoS remains the same, but the rehab LoS is different. As a single stream of random numbers was used, we were unable to control the order in which <span class="math inline">\(U\)</span>’s were used to generate samples from the rehab LoS distribution.</p>
+<p>The function <code>get_results_for_patient</code> helps us trace patient 0 as they flowed through the model. The results illustratrate that the acute LoS remains the same, but the rehab LoS is different. As a single stream of random numbers was used, we were unable to control the order in which <span class="math inline">\(U\)</span>’s were used to generate samples from the rehab L distributions.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># helper function to process results </span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>get_results_for_patient <span class="ot">&lt;-</span> <span class="cf">function</span>(sim_env, patient_id){</span>
