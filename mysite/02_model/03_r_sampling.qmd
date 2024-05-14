@@ -2,7 +2,7 @@
 
 By **default** R offers less control over random sampling than python and commercial simulation software. It uses a single random number stream for all sampling and does not allow you to create individual random number streams (each with its own seed) for each sampling distribution.
 
-> This is not ideal for DES, and has a range of impacts. The one you will likely experience is additional noise between experiments due to this lack of control. Another way to describe this is that changes in sampling distribution parameters and particularly arrival rates cause experiments to go out of sync where the same patients experience different activity duration due to random sampling differences across scenarios rather than the systematic differences you have introduced in your experiments.
+> This is not ideal for DES, and has a range of impacts. The one you will likely experience is additional noise between experiments due to this lack of control. Another way to describe this is that changes in sampling distribution parameters and particularly arrival rates may cause experiments to go out of sync where the same patients experience different activity duration and routing due to random sampling differences across scenarios rather than the systematic differences you have introduced in your experiments.
 >
 > The result of this random noise is that typically you will need to run a lot more replications to carefully assess difference between experiments than if it were reduced/eliminated. It is also harder to debug experiments.
 
@@ -20,7 +20,7 @@ This notebook will:
 library(simmer)
 library(simmer.bricks)
 library(magrittr)
-library(simEd)
+suppressMessages(library(simEd))
 ```
 
 ## A simple motivating example
@@ -240,6 +240,90 @@ patient <- trajectory("patient_pathway") %>%
 env %>% 
   # expontially distr arrivals mean IAT = 9.0
   add_generator("patient", patient, function() rexp(1, rate=1.0/9.0))
+ 
+env %>%
+  run(80) %>% 
+  invisible
+```
+
+## Using the `simEd` package
+
+`simEd` is an R package aimed at improving simulation education. It makes use of a package called `rstream` that provides multiple random number streams for DES. `simEd` provides up to 25 streams and re-implements a useful selection of statistical distributions that can be used.
+
+Details of the package can be found here: https://www.rdocumentation.org/packages/simEd/versions/2.0.1
+
+> B. Lawson and L. M. Leemis, "An R package for simulation education," 2017 Winter Simulation Conference (WSC), Las Vegas, NV, USA, 2017, pp. 4175-4186, doi: 10.1109/WSC.2017.8248124 https://ieeexplore.ieee.org/document/8248124
+
+### Revisiting our initial experiment
+
+The code below re-implements the original experiments we conducted using `simEd` equivalent sampling functions. The main difference is that we prefix functions with `v` instead of `r`. For example `rexp` becomes `vexp`. We also introduce a third parameter called stream (settable 1:25).
+
+This time when we reduce the number of patients from 5 to 2 the acute and rehab samples remain the same for the first two patients.
+
+```{r}
+n_patients <- 5
+
+set.seed(SEED)
+# replace rexp with vexp and set stream number to 1
+acute_los <- vexp(n=n_patients, rate=1.0/ACUTE_MEAN, stream=1)
+
+# replace runif with vunif and set stream number to 2
+rehab_los <- vunif(n=n_patients, min=REHAB_MIN, max=REHAB_MAX, stream=2)
+
+print(acute_los)
+print(rehab_los)
+```
+
+```{r}
+n_patients <- 2
+
+set.seed(SEED)
+# replace rexp with vexp and set stream number to 1
+acute_los <- vexp(n=n_patients, rate=1.0/ACUTE_MEAN, stream=1)
+
+# replace runif with vunif and set stream number to 2
+rehab_los <- vunif(n=n_patients, min=REHAB_MIN, max=REHAB_MAX, stream=2)
+
+print(acute_los)
+print(rehab_los)
+```
+
+An updated simmer model
+
+```{r}
+# reset the seed
+set.seed(SEED)
+
+# create simmer environment
+env <- simmer("Experiment_1_simEd") 
+
+# setup simple patient trajectory
+patient <- trajectory("patient_pathway") %>% 
+  timeout(function() vexp(1, rate=1.0/ACUTE_MEAN, stream=1)) %>% 
+  log_(function() {paste("Acute Los complete ", now(env))}) %>% 
+  timeout(function() vunif(n=1, min=REHAB_MIN, max=REHAB_MAX, stream=2)) %>% 
+  log_(function() {paste("Rehab Los complete ", now(env))})
+
+env %>% 
+  # exponentially distr arrivals mean IAT = 10.0
+  add_generator("patient", patient, function() vexp(1, rate=1.0/10.0, stream=3))
+ 
+env %>%
+  run(80) %>% 
+  invisible
+```
+
+```{r}
+# reset the seed
+set.seed(SEED)
+
+# create simmer environment
+env <- simmer("Experiment_2_simEd") 
+
+env %>% 
+  # exponentially distr arrivals mean IAT = 9.0
+  add_generator("patient", patient, function() vexp(1, rate=1.0/9.0, stream=3)) %>% 
+  invisible
  
 env %>%
   run(80) %>% 
