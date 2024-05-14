@@ -1,14 +1,18 @@
 # Sampling in R
 
-By default R offers less control over random sampling than python and commercial simulation software. It uses a single random number stream for all sampling and does not allow you to create individual random number streams (each with its own seed) for each sampling distribution.
+By **default** R offers less control over random sampling than python and commercial simulation software. It uses a single random number stream for all sampling and does not allow you to create individual random number streams (each with its own seed) for each sampling distribution.
 
-> This is not ideal for DES, and has a range of impacts. The one you will likely experience is additional noise between experiments due to this lack of control.
+> This is not ideal for DES, and has a range of impacts. The one you will likely experience is additional noise between experiments due to this lack of control. Another way to describe this is that changes in sampling distribution parameters and particularly arrival rates cause experiments to go out of sync where the same patients experience different activity duration due to random sampling differences across scenarios rather than the systematic differences you have introduced in your experiments.
 >
-> The result is typically that you need to run a lot more replications to carefully assess difference between experiments. It is also harder to debug experiments.
+> The result of this random noise is that typically you will need to run a lot more replications to carefully assess difference between experiments than if it were reduced/eliminated. It is also harder to debug experiments.
 
-To illustrate the impact of this design consider the example below. Imagine we are going to simulate 5 patients length of stay (LoS) in an acute hospital followed by rehabilitation. Acute LoS is exponentially distribution while rehabilitation LoS follows a uniform distribution (the choice of distribution does not matter).
+This notebook will:
 
-> **IMPORTANT**: To make the results "repeatable" as possible we will set a random seed. With a single random stream we will see that this does not guarantee repeatable samples for patients between **experiments**.
+1.  Demonstrate the shortcomings of a single random number stream and how noise is introduced between experiments.
+
+2.  Illustrate that problem with a simple simmer model that varies arrival rates
+
+3.  Introduce up to 25 random streams for sampling using the `SimEd` R package.
 
 ## Imports
 
@@ -16,9 +20,16 @@ To illustrate the impact of this design consider the example below. Imagine we a
 library(simmer)
 library(simmer.bricks)
 library(magrittr)
+library(simEd)
 ```
 
-## Constants
+## A simple motivating example
+
+To illustrate the impact of this design consider the example below. Imagine we are going to simulate 5 patients length of stay (LoS) in an acute hospital followed by rehabilitation. Acute LoS is exponentially distribution while rehabilitation LoS follows a uniform distribution (the choice of distribution does not matter).
+
+> **IMPORTANT**: To make the results "repeatable" as possible we will set a random seed. With a single random stream we will see that this does not guarantee repeatable samples for patients **between** **experiments**.
+
+### Constants
 
 ```{r}
 SEED <- 42
@@ -27,7 +38,7 @@ REHAB_MIN <- 15.0
 REHAB_MAX <- 80.0
 ```
 
-## Experiment 1
+### Experiment 1
 
 ```{r}
 n_patients <- 5
@@ -40,7 +51,7 @@ print(acute_los)
 print(rehab_los)
 ```
 
-## Experiment 2
+### Experiment 2
 
 We will now reset the random stream using the same seed and limit the number of patients simulated to 2.
 
