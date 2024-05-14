@@ -141,14 +141,17 @@ env <- simmer("Experiment_1")
 patient <- trajectory("patient_pathway") %>% 
   timeout(function() rexp(1, rate=1.0/ACUTE_MEAN)) %>% 
   log_(function() {paste("Acute Los complete ", now(env))}) %>% 
-  timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% log_(function() {paste("Rehab Los complete ", now(env))})
+  timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% 
+  log_(function() {paste("Rehab Los complete ", now(env))})
 
 env %>% 
   # add 5 arrivals all at the same time.
-  add_generator("patient", patient, at(0, 0, 0, 0, 0))
+  add_generator("patient", patient, at(0, 0, 0, 0, 0)) %>% 
+  invisible
  
 
-env %>%run() %>% 
+env %>%
+  run() %>% 
   invisible
   
 ```
@@ -176,18 +179,13 @@ set.seed(SEED)
 # create simmer environment
 env <- simmer("Experiment_2") 
 
-# setup simple patient trajectory
-patient <- trajectory("patient_pathway") %>% 
-  timeout(function() rexp(1, rate=1.0/ACUTE_MEAN)) %>% 
-  log_(function() {paste("Acute Los complete ", now(env))}) %>% 
-  timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% 
-  log_(function() {paste("Rehab Los complete ", now(env))})
-
 env %>% 
   # now limit to 3 patients.
-  add_generator("patient", patient, at(0, 0, 0))
+  add_generator("patient", patient, at(0, 0, 0)) %>% 
+  invisible
  
-env %>%run() %>% 
+env %>%
+  run() %>% 
   invisible
 ```
 
@@ -215,7 +213,8 @@ patient <- trajectory("patient_pathway") %>%
 
 env %>% 
   # expontially distr arrivals mean IAT = 10.0
-  add_generator("patient", patient, function() rexp(1, rate=1.0/10.0))
+  add_generator("patient", patient, function() rexp(1, rate=1.0/10.0)) %>% 
+  invisible
  
 env %>%
   run(80) %>% 
@@ -231,15 +230,10 @@ set.seed(SEED)
 # create simmer environment
 env <- simmer("Experiment_4") 
 
-# setup simple patient trajectory
-patient <- trajectory("patient_pathway") %>% 
-  timeout(function() rexp(1, rate=1.0/ACUTE_MEAN)) %>% 
-  log_(function() {paste("Acute Los complete ", now(env))}) %>% 
-  timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% log_(function() {paste("Rehab Los complete ", now(env))})
-
 env %>% 
-  # expontially distr arrivals mean IAT = 9.0
-  add_generator("patient", patient, function() rexp(1, rate=1.0/9.0))
+  # modify expontially distr arrivals to mean IAT = 9.0
+  add_generator("patient", patient, function() rexp(1, rate=1.0/9.0)) %>% 
+  invisible
  
 env %>%
   run(80) %>% 
@@ -288,7 +282,7 @@ print(acute_los)
 print(rehab_los)
 ```
 
-An updated simmer model
+### An updated simmer model
 
 ```{r}
 # reset the seed
@@ -297,7 +291,8 @@ set.seed(SEED)
 # create simmer environment
 env <- simmer("Experiment_1_simEd") 
 
-# setup simple patient trajectory
+# redefine simple patient trajectory to use simEd variate functions
+# each distribution in the model has its own stream
 patient <- trajectory("patient_pathway") %>% 
   timeout(function() vexp(1, rate=1.0/ACUTE_MEAN, stream=1)) %>% 
   log_(function() {paste("Acute Los complete ", now(env))}) %>% 
@@ -306,7 +301,8 @@ patient <- trajectory("patient_pathway") %>%
 
 env %>% 
   # exponentially distr arrivals mean IAT = 10.0
-  add_generator("patient", patient, function() vexp(1, rate=1.0/10.0, stream=3))
+  add_generator("patient", patient, function() vexp(1, rate=1.0/10.0, stream=3)) %>% 
+  invisible
  
 env %>%
   run(80) %>% 
