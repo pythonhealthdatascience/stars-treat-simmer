@@ -14,22 +14,23 @@ This notebook will:
 
 3.  Introduce up to 25 random streams for sampling using the `SimEd` R package.
 
-## Imports
+## 1. Imports
 
 ```{r}
 library(simmer)
 library(simmer.bricks)
 library(magrittr)
 suppressMessages(library(simEd))
+suppressMessages(library(tidyr))
 ```
 
-## A simple motivating example
+## 2. A simple motivating example
 
 To illustrate the impact of this design consider the example below. Imagine we are going to simulate 5 patients length of stay (LoS) in an acute hospital followed by rehabilitation. Acute LoS is exponentially distribution while rehabilitation LoS follows a uniform distribution (the choice of distribution does not matter).
 
-> **IMPORTANT**: To make the results "repeatable" as possible we will set a random seed. With a single random stream we will see that this does not guarantee repeatable samples for patients **between** **experiments**.
+> **IMPORTANT**: To make the as results "repeatable" as possible we will set a random seed. With a single random stream we will see that this does not guarantee repeatable samples for patients **between** **experiments**.
 
-### Constants
+### 2.1 Constants
 
 ```{r}
 SEED <- 42
@@ -38,7 +39,7 @@ REHAB_MIN <- 15.0
 REHAB_MAX <- 80.0
 ```
 
-### Experiment 1
+### 2.2 Experiment 1
 
 ```{r}
 n_patients <- 5
@@ -51,7 +52,7 @@ print(acute_los)
 print(rehab_los)
 ```
 
-### Experiment 2
+### 2.3 Experiment 2
 
 We will now reset the random stream using the same seed and limit the number of patients simulated to 2.
 
@@ -82,13 +83,13 @@ print(acute_los)
 print(rehab_los)
 ```
 
-## Force the order of sampling
+## 3. Force the order of sampling
 
 To force the order of sampling within a single random number stream each patient must do their sampling upfront and in process order.
 
 Below we re-run Experiments 1 and 2, but this time we make sure the process is sampled in order (acute then rehab) for each patient.
 
-### A Return to Experiment 1
+### 3.1 A Return to Experiment 1
 
 ```{r}
 n_patients <- 3
@@ -104,7 +105,7 @@ for (patient_i in 1:n_patients) {
 
 ```
 
-### A Return to Experiment 2
+### 3.2 A Return to Experiment 2
 
 ```{r}
 n_patients <- 2
@@ -119,15 +120,13 @@ for (patient_i in 1:n_patients) {
 
 ```
 
-## A `simmer` model
+## 4. A `simmer` model
 
-By default `simmer` **will be** affected by the single random stream for all sampling. This is because in a DES sampling will not occur in process order like we saw above. The numbers generated will vary depending on when events are scheduled to take place.
+By default `simmer` **will be** affected by the single random stream for all sampling. This is because in a DES there is no guarantee that sampling will not occur in process order like we saw above. The numbers generated will vary depending on when events are scheduled to take place.
 
-We will first consider this in experiments where we control the exact number of arrivals. In these experiments we will not use resources. This means that there is no impact on the model due to queuing if we increase or decrease the number of arrivals to the model.
+We will first consider this in experiments where we set the exact number of arrivals to the model. In these experiments we will not use resources. This means that there is no impact on the model due to queuing if we increase or decrease the number of arrivals to the model.
 
-> To simplify output we display the time patients **exit** acute and rehab activities.
-
-### A return to Experiment 1 (again)
+### 4.1 Experiment 1 (5 arrivals)
 
 ```{r}
 
@@ -135,49 +134,54 @@ We will first consider this in experiments where we control the exact number of 
 set.seed(SEED)
 
 # create simmer environment
-env <- simmer("Experiment_1") 
+env <- simmer("Experiment_1", log_level=1) 
 
 # setup simple patient trajectory
 patient <- trajectory("patient_pathway") %>% 
+  set_attribute("start_acute", function() {now(env)}) %>%
   timeout(function() rexp(1, rate=1.0/ACUTE_MEAN)) %>% 
-  log_(function() {paste("Acute Los complete ", now(env))}) %>% 
+  set_attribute("acute_los", function() {now(env) - get_attribute(env, "start_acute")}) %>%
+  log_(function() {paste("Acute LoS ", now(env) - get_attribute(env, "start_acute"))},
+       level=1) %>%
+  set_attribute("start_rehab", function() {now(env)}) %>%
   timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% 
-  log_(function() {paste("Rehab Los complete ", now(env))})
+  set_attribute("rehab_los", function() {now(env) - get_attribute(env, "start_rehab")}) %>%
+  log_(function() {paste("Rehab LoS ", now(env) - get_attribute(env, "start_rehab"))},
+       level=1)
+
 
 env %>% 
   # add 5 arrivals all at the same time.
   add_generator("patient", patient, at(0, 0, 0, 0, 0)) %>% 
   invisible
  
-
 env %>%
   run() %>% 
   invisible
-  
 ```
 
-### A return to Experiment 2 (again)
+### 4.2 Experiment 2 (3 arrivals)
 
-Here we limit the model to simulated 3 patients that all arrive as the unit opens. Although arrival times are the same we can see that the acute length of stay and rehab length of stay quickly goes out of sync i.e. we have introduced noise between experiments that is nothing to do with the variation in the number of patients. Let's take patient 0 as an example.
+Here we setup the model to simulate 3 patients that all arrive as the unit opens. Arrival times are the same, so we may expect the acute and rehab lengths of stay to remain the same. However, we can see that the acute length of stay and rehab length of stay quickly goes out of sync i.e. we have introduced noise between experiments that is nothing to do with the variation in the number of patients (that we changed between experiments). Let's take patient 0 as an example.
 
 In experiment 1:
 
--   Exits acute treatment at 6.3
+-   Acute treatment is 6.3 days
 
--   Exits rehab treatment at 64.1
+-   Rehab treatment is 57.7 days
 
 In experiment 2:
 
--   Exits acute treatment at 6.3
+-   Acute treatment is 6.3 days
 
--   Exits rehab treatment at 55.1
+-   Rehab treatment is 48.7 days
 
 ```{r}
 # reset the seed
 set.seed(SEED)
 
 # create simmer environment
-env <- simmer("Experiment_2") 
+env <- simmer("Experiment_2", log_level=1) 
 
 env %>% 
   # now limit to 3 patients.
@@ -189,58 +193,77 @@ env %>%
   invisible
 ```
 
-## `simmer` and random arrivals
+## `5. simmer` and random arrivals
 
-Finally we demonstrate that the effect is still observed across two arrivals that vary exponentially distributed inter-arrival times. We will run two new experiments. In the first IAT is 10 minutes. The second experiment increases the intensity of arrivals to an IAT of 9.0 minutes.
+Finally we demonstrate that the effect is still observed across two experiments that vary the parameter of exponentially distributed inter-arrival times. We will run two new experiments. In the first IAT is 10 minutes. The second experiment increases the intensity of arrivals to an IAT of 2.0 minutes.
 
-Follow patient 0 through the system. You should see that the time rehabilitation ends is different. As a single stream of random numbers was used, we were unable to control the order in which these were used to generate samples from the distributions.
-
-### IAT \~ Exponential(10.0)
+The function `get_results_for_patient` helps us trace patient 0 as they flowed through the model. The results illustratrate that the acute LoS remains the same, but the rehab LoS is different. As a single stream of random numbers was used, we were unable to control the order in which $U$'s were used to generate samples from the rehab LoS distribution.
 
 ```{r}
+# helper function to process results 
+get_results_for_patient <- function(sim_env, patient_id){
+  results <- subset(get_mon_attributes(sim_env), select = c(name, key, value))
+  results <- spread(results, key, value)
+  return(results[results$name == patient_id,])
+}
+```
+
+### 5.1 IAT \~ Exponential(10.0)
+
+```{r}
+mean_iat = 10.0
+
 # reset the seed
 set.seed(SEED)
 
 # create simmer environment
-env <- simmer("Experiment_1") 
-
-# setup simple patient trajectory
-patient <- trajectory("patient_pathway") %>% 
-  timeout(function() rexp(1, rate=1.0/ACUTE_MEAN)) %>% 
-  log_(function() {paste("Acute Los complete ", now(env))}) %>% 
-  timeout(function() runif(n=1, min=REHAB_MIN, max=REHAB_MAX)) %>% 
-  log_(function() {paste("Rehab Los complete ", now(env))})
+env <- simmer("Experiment_simmer1") 
 
 env %>% 
   # expontially distr arrivals mean IAT = 10.0
-  add_generator("patient", patient, function() rexp(1, rate=1.0/10.0)) %>% 
+  add_generator("patient", patient, function() rexp(1, rate=1.0/mean_iat),
+                mon=2) %>% 
   invisible
  
 env %>%
-  run(80) %>% 
+  run(90) %>% 
   invisible
+
+
+results_exp1 <- get_results_for_patient(env, "patient0")
 ```
 
-### IAT \~ Exponential(9.0)
+### 5.2 IAT \~ Exponential(2.0)
 
 ```{r}
+mean_iat = 2.0
+
 # reset the seed
 set.seed(SEED)
 
 # create simmer environment
-env <- simmer("Experiment_4") 
+env <- simmer("Experiment_simmer2")
 
 env %>% 
   # modify expontially distr arrivals to mean IAT = 9.0
-  add_generator("patient", patient, function() rexp(1, rate=1.0/9.0)) %>% 
+  add_generator("patient", patient, function() rexp(1, rate=1.0/mean_iat),
+                mon=2) %>% 
   invisible
  
 env %>%
-  run(80) %>% 
+  run(90) %>% 
   invisible
+
+results_exp2 <- get_results_for_patient(env, "patient0")
 ```
 
-## Using the `simEd` package
+```{r}
+comparison <- rbind(results_exp1, results_exp2)
+comparison$name <- c("Patient 0 in Exp1", "Patient 0 in Exp2")
+comparison
+```
+
+## 6. Using the `simEd` package
 
 `simEd` is an R package aimed at improving simulation education. It makes use of a package called `rstream` that provides multiple random number streams for DES. `simEd` provides up to 25 streams and re-implements a useful selection of statistical distributions that can be used.
 
@@ -248,7 +271,7 @@ Details of the package can be found here: https://www.rdocumentation.org/package
 
 > B. Lawson and L. M. Leemis, "An R package for simulation education," 2017 Winter Simulation Conference (WSC), Las Vegas, NV, USA, 2017, pp. 4175-4186, doi: 10.1109/WSC.2017.8248124 https://ieeexplore.ieee.org/document/8248124
 
-### Revisiting our initial experiment
+### 6.1 Revisiting our initial experiment
 
 The code below re-implements the original experiments we conducted using `simEd` equivalent sampling functions. The main difference is that we prefix functions with `v` instead of `r`. For example `rexp` becomes `vexp`. We also introduce a third parameter called stream (settable 1:25).
 
@@ -282,7 +305,9 @@ print(acute_los)
 print(rehab_los)
 ```
 
-### An updated simmer model
+### 6.2 An updated simmer model
+
+Finally we update the `simmer` model to use `simEd` and compare the results for patient 0 again. As expected we confirm that the sampling of acute and rehab duration is now in sync across the experiments.
 
 ```{r}
 # reset the seed
@@ -294,19 +319,27 @@ env <- simmer("Experiment_1_simEd")
 # redefine simple patient trajectory to use simEd variate functions
 # each distribution in the model has its own stream
 patient <- trajectory("patient_pathway") %>% 
-  timeout(function() vexp(1, rate=1.0/ACUTE_MEAN, stream=1)) %>% 
-  log_(function() {paste("Acute Los complete ", now(env))}) %>% 
+  set_attribute("start_acute", function() {now(env)}) %>%
+  timeout(function() vexp(1, rate=1.0/ACUTE_MEAN, stream=1)) %>%  
+  set_attribute("acute_los", function() {now(env) - get_attribute(env, "start_acute")}) %>%
+  set_attribute("start_rehab", function() {now(env)}) %>%
   timeout(function() vunif(n=1, min=REHAB_MIN, max=REHAB_MAX, stream=2)) %>% 
-  log_(function() {paste("Rehab Los complete ", now(env))})
+  set_attribute("rehab_los", function() {now(env) - get_attribute(env, "start_rehab")}) 
 
 env %>% 
   # exponentially distr arrivals mean IAT = 10.0
-  add_generator("patient", patient, function() vexp(1, rate=1.0/10.0, stream=3)) %>% 
+  add_generator("patient", patient, function() vexp(1, rate=1.0/10.0, stream=3),
+                mon=2) %>% 
   invisible
  
 env %>%
-  run(80) %>% 
+  run(90) %>% 
   invisible
+
+
+# store results for experiment 1 and patient 0
+results_exp1 <- get_results_for_patient(env, "patient0")
+
 ```
 
 ```{r}
@@ -318,10 +351,21 @@ env <- simmer("Experiment_2_simEd")
 
 env %>% 
   # exponentially distr arrivals mean IAT = 9.0
-  add_generator("patient", patient, function() vexp(1, rate=1.0/9.0, stream=3)) %>% 
+  add_generator("patient", patient, function() vexp(1, rate=1.0/2.0, stream=3),
+                mon=2) %>% 
   invisible
  
 env %>%
-  run(80) %>% 
+  run(90) %>% 
   invisible
+
+# store results for experiment 2 and patient 0
+results_exp2 <- get_results_for_patient(env, "patient0")
+```
+
+```{r}
+# updated comparison
+comparison <- rbind(results_exp1, results_exp2)
+comparison$name <- c("Patient 0 in Exp1", "Patient 0 in Exp2")
+comparison
 ```
