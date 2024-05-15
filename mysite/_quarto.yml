@@ -3,6 +3,7 @@ project:
   render:
     - index.qmd
     - preface.qmd
+    - 01_introduction/02_license.qmd
     - 02_model/01_model.qmd
     - 02_model/02_thinning.qmd
     - 02_model/03_r_sampling.qmd
@@ -22,6 +23,7 @@ website:
       - section: "Introduction"
         contents:
           - preface.qmd
+          - 01_introduction/02_license.qmd
       - section: "`simmer` code"
         contents:
           - 02_model/01_model.qmd
