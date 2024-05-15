@@ -193,11 +193,11 @@ env %>%
   invisible
 ```
 
-## `5. simmer` and random arrivals
+## 5. A `simmer` model with random arrivals
 
 Finally we demonstrate that the effect is still observed across two experiments that vary the parameter of exponentially distributed inter-arrival times. We will run two new experiments. In the first IAT is 10 minutes. The second experiment increases the intensity of arrivals to an IAT of 2.0 minutes.
 
-The function `get_results_for_patient` helps us trace patient 0 as they flowed through the model. The results illustratrate that the acute LoS remains the same, but the rehab LoS is different. As a single stream of random numbers was used, we were unable to control the order in which $U$'s were used to generate samples from the rehab LoS distribution.
+The function `get_results_for_patient` helps us trace patient 0 as they flowed through the model. The results illustratrate that the acute LoS remains the same, but the rehab LoS is different. As a single stream of random numbers was used, we were unable to control the order in which $U$'s were used to generate samples from the rehab L distributions.
 
 ```{r}
 # helper function to process results 
