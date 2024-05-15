@@ -167,6 +167,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Abstract</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../01_introduction/02_license.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">License</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -453,58 +459,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                <span class="cf">function</span>() <span class="fu">nspp_thinning</span>(<span class="fu">now</span>(env), arrivals, <span class="at">debug=</span><span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">run</span>(<span class="at">until=</span><span class="fl">540.0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Time: 0  Rejections: 3  t: 1  lambda_t: 0.0666666666666667  IAT: 18.2845589093151"
-[1] "Time: 18.2845589093151  Rejections: 8  t: 1  lambda_t: 0.0666666666666667  IAT: 42.5600031823655"
-[1] "Time: 60.8445620916805  Rejections: 3  t: 2  lambda_t: 0.0833333333333333  IAT: 31.2601332496251"
-[1] "Time: 92.1046953413057  Rejections: 2  t: 2  lambda_t: 0.0833333333333333  IAT: 9.12568733033217"
-[1] "Time: 101.230382671638  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 0.374840120784938"
-[1] "Time: 101.605222792423  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 3.25402378803119"
-[1] "Time: 104.859246580454  Rejections: 1  t: 2  lambda_t: 0.0833333333333333  IAT: 1.30764902970047"
-[1] "Time: 106.166895610154  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 10.1648427076162"
-[1] "Time: 116.331738317771  Rejections: 3  t: 2  lambda_t: 0.0833333333333333  IAT: 27.5753137410658"
-[1] "Time: 143.907052058836  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 15.9170528120341"
-[1] "Time: 159.824104870871  Rejections: 2  t: 3  lambda_t: 0.142857142857143  IAT: 14.0056534850256"
-[1] "Time: 173.829758355896  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 0.538326447522276"
-[1] "Time: 174.368084803419  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 2.10515086073428"
-[1] "Time: 176.473235664153  Rejections: 1  t: 3  lambda_t: 0.142857142857143  IAT: 14.339217324111"
-[1] "Time: 190.812452988264  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 6.459720399952"
-[1] "Time: 197.272173388216  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.223294260055318"
-[1] "Time: 197.495467648271  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 20.2568469465453"
-[1] "Time: 217.752314594816  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 5.05420398877418"
-[1] "Time: 222.806518583591  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 4.11178719525975"
-[1] "Time: 226.91830577885  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.50229311002869"
-[1] "Time: 228.420598888879  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.119056089795655"
-[1] "Time: 228.539654978675  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 6.93508165846479"
-[1] "Time: 235.47473663714  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 5.52134140839285"
-[1] "Time: 240.996078045532  Rejections: 4  t: 5  lambda_t: 0.125  IAT: 16.8544789434031"
-[1] "Time: 257.850556988935  Rejections: 1  t: 5  lambda_t: 0.125  IAT: 2.68707966897637"
-[1] "Time: 260.537636657912  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 3.86278571539974"
-[1] "Time: 264.400422373312  Rejections: 5  t: 5  lambda_t: 0.125  IAT: 31.3677927616335"
-[1] "Time: 295.768215134945  Rejections: 1  t: 5  lambda_t: 0.125  IAT: 13.2499900686772"
-[1] "Time: 309.018205203622  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 3.28267095610499"
-[1] "Time: 312.300876159727  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 1.57980591011755"
-[1] "Time: 313.880682069845  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 0.945282816259048"
-[1] "Time: 314.825964886104  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 1.71027394477278"
-[1] "Time: 316.536238830877  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 10.1286302316458"
-[1] "Time: 326.664869062523  Rejections: 3  t: 6  lambda_t: 0.1  IAT: 14.4789175147409"
-[1] "Time: 341.143786577264  Rejections: 2  t: 6  lambda_t: 0.1  IAT: 22.3644388222395"
-[1] "Time: 363.508225399503  Rejections: 4  t: 7  lambda_t: 0.0666666666666667  IAT: 11.0897862258375"
-[1] "Time: 374.598011625341  Rejections: 5  t: 7  lambda_t: 0.0666666666666667  IAT: 12.5560522487612"
-[1] "Time: 387.154063874102  Rejections: 2  t: 7  lambda_t: 0.0666666666666667  IAT: 3.17273366330131"
-[1] "Time: 390.326797537403  Rejections: 1  t: 7  lambda_t: 0.0666666666666667  IAT: 22.4512496822413"
-[1] "Time: 412.778047219644  Rejections: 0  t: 7  lambda_t: 0.0666666666666667  IAT: 2.91790703544393"
-[1] "Time: 415.695954255088  Rejections: 2  t: 7  lambda_t: 0.0666666666666667  IAT: 14.7811349677628"
-[1] "Time: 430.477089222851  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 5.81322755177921"
-[1] "Time: 436.29031677463  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 4.27144984693682"
-[1] "Time: 440.561766621567  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 2.64223572565243"
-[1] "Time: 443.20400234722  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 1.97992700850591"
-[1] "Time: 445.183929355726  Rejections: 16  t: 8  lambda_t: 0.05  IAT: 80.866766358974"
-[1] "Time: 526.0506957147  Rejections: 6  t: 9  lambda_t: 0.05  IAT: 49.3959571173291"</code></pre>
+<pre><code>[1] "Time: 0  Rejections: 6  t: 1  lambda_t: 0.0666666666666667  IAT: 33.5200980320404"
+[1] "Time: 33.5200980320404  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 3.81393849828696"
+[1] "Time: 37.3340365303274  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 3.36145904147997"
+[1] "Time: 40.6954955718073  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 5.13485132695592"
+[1] "Time: 45.8303468987633  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 1.32352768772477"
+[1] "Time: 47.153874586488  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 1.76001061750678"
+[1] "Time: 48.9138852039948  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 8.61447293602623"
+[1] "Time: 57.528358140021  Rejections: 14  t: 1  lambda_t: 0.0666666666666667  IAT: 78.9044174392909"
+[1] "Time: 136.432775579312  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 3.89573549830771"
+[1] "Time: 140.32851107762  Rejections: 2  t: 3  lambda_t: 0.142857142857143  IAT: 9.97739376040757"
+[1] "Time: 150.305904838027  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 2.62906914809719"
+[1] "Time: 152.934973986124  Rejections: 1  t: 3  lambda_t: 0.142857142857143  IAT: 6.08679874612412"
+[1] "Time: 159.021772732249  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 26.7391672063817"
+[1] "Time: 185.76093993863  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 6.61135393639511"
+[1] "Time: 192.372293875025  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 2.56115276599303"
+[1] "Time: 194.933446641018  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 6.82137783595777"
+[1] "Time: 201.754824476976  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.229064174927771"
+[1] "Time: 201.983888651904  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.59620280843228"
+[1] "Time: 203.580091460336  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.0473874481394887"
+[1] "Time: 203.627478908476  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 14.9578277013245"
+[1] "Time: 218.5853066098  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 3.22828953154385"
+[1] "Time: 221.813596141344  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.7590237618424"
+[1] "Time: 223.572619903186  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.17247998278517"
+[1] "Time: 223.745099885972  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 3.08621887350455"
+[1] "Time: 226.831318759476  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.65752177266404"
+[1] "Time: 227.48884053214  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.18241797434166"
+[1] "Time: 228.671258506482  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 5.07960279451168"
+[1] "Time: 233.750861300994  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 17.4399162872808"
+[1] "Time: 251.190777588274  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 0.947026163339615"
+[1] "Time: 252.137803751614  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 2.46803309535608"
+[1] "Time: 254.60583684697  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 3.82389974246337"
+[1] "Time: 258.429736589433  Rejections: 2  t: 5  lambda_t: 0.125  IAT: 21.7076573021452"
+[1] "Time: 280.137393891579  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 10.8858477597343"
+[1] "Time: 291.023241651313  Rejections: 1  t: 5  lambda_t: 0.125  IAT: 16.1418948360699"
+[1] "Time: 307.165136487383  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 2.86286774324253"
+[1] "Time: 310.028004230625  Rejections: 1  t: 6  lambda_t: 0.1  IAT: 8.15702171685576"
+[1] "Time: 318.185025947481  Rejections: 1  t: 6  lambda_t: 0.1  IAT: 15.8306994003462"
+[1] "Time: 334.015725347827  Rejections: 1  t: 6  lambda_t: 0.1  IAT: 21.6951490392651"
+[1] "Time: 355.710874387092  Rejections: 2  t: 6  lambda_t: 0.1  IAT: 10.6123247695669"
+[1] "Time: 366.323199156659  Rejections: 4  t: 7  lambda_t: 0.0666666666666667  IAT: 25.2464647510238"
+[1] "Time: 391.569663907683  Rejections: 4  t: 7  lambda_t: 0.0666666666666667  IAT: 23.8610684209245"
+[1] "Time: 415.430732328607  Rejections: 2  t: 7  lambda_t: 0.0666666666666667  IAT: 6.35584883857518"
+[1] "Time: 421.786581167183  Rejections: 1  t: 8  lambda_t: 0.05  IAT: 8.98481857709071"
+[1] "Time: 430.771399744273  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 13.134219450246"
+[1] "Time: 443.905619194519  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 0.0909088331505746"
+[1] "Time: 443.99652802767  Rejections: 1  t: 8  lambda_t: 0.05  IAT: 6.24467818743965"
+[1] "Time: 450.241206215109  Rejections: 1  t: 8  lambda_t: 0.05  IAT: 14.8813823113198"
+[1] "Time: 465.122588526429  Rejections: 6  t: 8  lambda_t: 0.05  IAT: 38.8672440589675"
+[1] "Time: 503.989832585397  Rejections: 4  t: 9  lambda_t: 0.05  IAT: 12.9348669780072"
+[1] "Time: 516.924699563404  Rejections: 2  t: 9  lambda_t: 0.05  IAT: 19.7696259574812"
+[1] "Time: 536.694325520885  Rejections: 9  t: 9  lambda_t: 0.05  IAT: 67.2666817708089"</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>simmer environment: TreatSim | now: 540 | next: 575.446652832029
+<pre><code>simmer environment: TreatSim | now: 540 | next: 547.565856749039
 { Monitor: in memory }
-{ Source: patient | monitored: 1 | n_generated: 47 }</code></pre>
+{ Source: patient | monitored: 1 | n_generated: 51 }</code></pre>
 </div>
 </div>
 </section>
