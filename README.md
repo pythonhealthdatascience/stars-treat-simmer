@@ -7,6 +7,8 @@
 
 # 💫  Towards Sharing Tools, Artifacts, and Reproducible Simulation: a `simmer` model example
 
+> [Looking for a python implementation? ](https://github.com/pythonhealthdatascience/stars-simpy-example-docs)
+
 ## Overview
 
   The materials and methods in this documentation support work towards developing the **S.T.A.R.S healthcare framework** (**S**haring **T**ools and **A**rtifacts for **R**eproducible **S**imulations in healthcare).  Long term S.T.A.R.S aims to support researchers share open simulation models regardless of language choice, improve the quality of sharing, and reduce the workload required to meet high standards of open science for the modelling and simulation community.
