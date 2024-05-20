@@ -28,9 +28,15 @@ authors:
 repository-code: 'https://github.com/TomMonks/treat-sim-rsimmer'
 abstract: >
 
-The materials and methods in this documentation support work towards developing the STARS healthcare framework (Sharing Tools and Artifacts for Reproducible Simulations in healthcare). 
-
- The code and written materials are a **work in progress** towards STARS version 2.0 (aiming to support both R and Python).  The materials are not currently production ready and are not recommended for use in simulation practice at this stage.
+  The materials and methods in this documentation support 
+  work towards developing the STARS healthcare framework 
+  (Sharing Tools and Artifacts for Reproducible Simulations 
+  in healthcare). The code and written materials are a work 
+  in progress towards STARS version 2.0 (aiming to support 
+  both R and Python).  The materials are not currently 
+  production ready and are not recommended for use in
+  simulation practice at this stage.
+  
 keywords:
   - Free and Open Source Software
   - Model Reuse
