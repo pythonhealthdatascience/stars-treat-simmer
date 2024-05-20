@@ -11,7 +11,9 @@
 
   The materials and methods in this documentation support work towards developing the **S.T.A.R.S healthcare framework** (**S**haring **T**ools and **A**rtifacts for **R**eproducible **S**imulations in healthcare).  Long term S.T.A.R.S aims to support researchers share open simulation models regardless of language choice, improve the quality of sharing, and reduce the workload required to meet high standards of open science for the modelling and simulation community.
 
-  The code and written materials are a **work in progress** towards STARS version 2.0. It demonstrates the application od sharing a discrete-event simuilation model and associated research artifacts:  
+> The code and written materials are a **work in progress** towards STARS version 2.0. It is not recommended to use these materials in simulation practice at the moment.
+  
+This repo demonstrates the application of sharing a discrete-event simulation model in R and associated research artifacts:  
   
   * All artifacts in this repository are linked to study researchers via ORCIDs;
   * Model code is made available under a GNU Public License version 3;
