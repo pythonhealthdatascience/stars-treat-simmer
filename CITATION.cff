@@ -3,8 +3,7 @@
 
 cff-version: 1.2.0
 title: >-
-  Towards Sharing Tools, and Artifacts, for Reusable
-  Simulation: a minimal model example
+  Towards Sharing Tools, Artifacts, and Reproducible Simulation: a `simmer` model example
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
@@ -29,20 +28,9 @@ authors:
 repository-code: 'https://github.com/TomMonks/treat-sim-rsimmer'
 abstract: >
 
-  The materials and methods in this documentation support
-  work towards developing the S.T.A.R.S healthcare framework
-  (Sharing Tools and Artifacts for Reproducible Simulations
-  in healthcare). Long term S.T.A.R.S aims to support
-  researchers share open simulation models regardless of
-  language choice, improve the quality of sharing, and
-  reduce the workload required to meet high standards of
-  open science for the modelling and simulation community.
+The materials and methods in this documentation support work towards developing the STARS healthcare framework (Sharing Tools and Artifacts for Reproducible Simulations in healthcare). 
 
-
-  The code and written materials are a work in progress
-  towards STARS version 2.0. It demonstrates the application
-  of sharing a discrete-event simulation model and
-  associated research artifacts.
+ The code and written materials are a **work in progress** towards STARS version 2.0 (aiming to support both R and Python).  The materials are not currently production ready and are not recommended for use in simulation practice at this stage.
 keywords:
   - Free and Open Source Software
   - Model Reuse
