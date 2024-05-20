@@ -25,7 +25,7 @@ authors:
     family-names: Mustafee
     affiliation: University of Exeter
     orcid: 'https://orcid.org/0000-0002-2204-8924'
-repository-code: 'https://github.com/TomMonks/treat-sim-rsimmer'
+repository-code: 'https://github.com/pythonhealthdatascience/stars-treat-simmer'
 abstract: >
 
   The materials and methods in this documentation support 
