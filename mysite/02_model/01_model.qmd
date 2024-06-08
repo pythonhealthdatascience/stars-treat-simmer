@@ -783,3 +783,46 @@ resource_waiting_times_by_replication <- function(reps) {
 
 resource_waiting_times_by_replication(reps)
 ```
+
+```{r}
+
+resource_utilisation_by_replication <- function(reps, results_collection_period){
+  
+   # get results dataframe broken down by resource and replication.
+  arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
+    
+  # utilisation calculation:
+  # simple calculation of total busy time / total scheduled resource time.
+  # where total scheduled time = n_resource * results collection period.
+  util_long <- arrivals %>%
+    # total activity time in each replication per resource (long format)
+    group_by(across(all_of(cols))) %>%
+    summarise(in_use=sum(activity_time))
+  
+  # add resource counts to table for calc
+  util_long <- merge(util_long, get_resource_counts(exp), 
+                     by="resource", all=TRUE)
+    
+  # total in use / total scheduled time
+  util_long$util = util_long$in_use / (results_collection_period * util_long$count)  
+  
+  # drop activity time and count and recode names
+  util_long <- subset(util_long, select = c(replication, resource, util)) %>% 
+    mutate(resource=recode(resource,
+                       'triage_bay'='01b_triage_util',
+                       'registration_clerk'='02b_registration_util',
+                       'examination_room'='03b_examination_util',
+                       'nontrauma_treat_cubicle'='04b_treatment_util(non_trauma)',
+                       'trauma_room'='06b_stabilisation_util',
+                       'trauma_treat_cubicle'='07b_treatment_util(trauma)')) %>%
+      arrange(resource)
+  
+  
+  # long to wide format...
+  util_wide <- spread(util_long, resource, util)
+    
+  return(util_wide)
+}
+
+resource_utilisation_by_replication(reps, DEFAULT_RESULTS_COLLECTION_PERIOD)
+```
