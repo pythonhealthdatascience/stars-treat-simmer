@@ -114,7 +114,7 @@ DEFAULT_N_REG <- 1
 DEFAULT_N_EXAM <- 3
 
 # stabilisation rooms
-DEFAULT_N_TRAUMA <- 10000
+DEFAULT_N_TRAUMA <- 1
 
 # Non-trauma cubicles
 DEFAULT_NON_TRAUMA_CUBICLES <- 1
@@ -524,6 +524,7 @@ for(rep in 1:N_REPS){
   treat_sim <- single_run(treat_sim, exp)
   # store the latest simulation enviornment and its results.
   reps <- c(reps, treat_sim)
+  
 }
 print("Complete.")
 ```
@@ -692,6 +693,9 @@ create_summary_table <- function(reps, exp, dp=2){
   ## KPIs calculated from attributes
   # empty dataframe for attribute calculations.
   att_results <- calc_kpi_from_attributes(reps)
+  
+  print(att_results)
+  
   mean_att_results <- colMeans(att_results)
 
   overall <- overall %>%
@@ -709,4 +713,73 @@ create_summary_table <- function(reps, exp, dp=2){
 ```{r}
 results_summary <- create_summary_table(reps, exp)
 results_summary
+```
+
+At the moment the code creates a summary table. It does not return a table of replications versus performance measures. This is necessary for charts. Function create_summary_table needs to be broken up. A function that first assembles the replication results would be better.
+
+column 1: arrivals_by_replication
+
+```{r}
+# get results dataframe broken down by resource and replication.
+  arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
+  
+  # calculate waiting time
+  arrivals$waiting_time <-arrivals$end_time - arrivals$start_time - arrivals$activity_time
+  # arrivals$waiting_time <- round(arrivals$waiting_time, 2)
+  
+  cols <- c("resource", "replication")
+  summary_wait <- arrivals %>%
+    # mean waiting time in each replication
+    group_by(across(all_of(cols))) %>%
+    summarise(rep_waiting_time=mean(waiting_time)) %>% 
+    # mean waiting time across replications
+    group_by(resource) %>% 
+    summarise(mean=mean(rep_waiting_time)) %>% 
+    mutate(resource=recode(resource,  
+                         'triage_bay'='01a_triage_wait', 
+                         'registration_clerk'='02a_registration_wait',
+                         'examination_room'='03a_examination_wait',
+                         'nontrauma_treat_cubicle'='04a_treatment_wait(non_trauma)',
+                         'trauma_room'='06a_stabilisation_wait',
+                         'trauma_treat_cubicle'='07a_treatment_wait(trauma)')) %>% 
+    arrange(resource)
+  
+  
+  names(summary_wait)<-c("kpi","mean")
+  
+summary_wait
+```
+
+```{r}
+
+resource_waiting_times_by_replication <- function(reps) {
+  
+  # - WAITING TIMES FOR RESOURCES - #
+  
+  # get results dataframe broken down by resource and replication.
+  arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
+  
+  # calculate waiting time
+  arrivals$waiting_time <-arrivals$end_time - arrivals$start_time - arrivals$activity_time
+  
+  cols <- c("resource", "replication")
+  waiting_times_long <- arrivals %>%
+    # mean waiting time in each replication
+    group_by(across(all_of(cols))) %>%
+    summarise(rep_waiting_time=mean(waiting_time)) %>% 
+    mutate(resource=recode(resource,
+                       'triage_bay'='01a_triage_wait',
+                       'registration_clerk'='02a_registration_wait',
+                       'examination_room'='03a_examination_wait',
+                       'nontrauma_treat_cubicle'='04a_treatment_wait(non_trauma)',
+                       'trauma_room'='06a_stabilisation_wait',
+                       'trauma_treat_cubicle'='07a_treatment_wait(trauma)')) %>%
+    arrange(resource)
+  
+  # long to wide format...
+  waiting_times_wide <- spread(waiting_times_long, resource, rep_waiting_time)
+  return(waiting_times_wide)
+}
+
+resource_waiting_times_by_replication(reps)
 ```
