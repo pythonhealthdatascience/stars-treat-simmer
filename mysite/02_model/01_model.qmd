@@ -574,7 +574,7 @@ Functions to calculate KPIs from custom attributes
 
 ```{r}
 # mean time in the system and throughput
-calc_kpi_from_attributes_for_rep <- function(rep){
+calc_kpi_from_attributes_for_rep <- function(reps, rep){
   
   # get attributes
   att <- get_mon_attributes(reps)
@@ -601,7 +601,7 @@ calc_kpi_from_attributes_for_rep <- function(rep){
   return(rep_results)
 }
 
-calc_kpi_from_attributes <- function(){
+calc_kpi_from_attributes <- function(reps){
   # calcs total time by patient type and total throughput
   
   # empty dataframe for attribute calculations.
@@ -609,8 +609,8 @@ calc_kpi_from_attributes <- function(){
   colnames(att_results) <- c("05_total_time(non-trauma)", "08_total_time(trauma)", "09_throughput")
 
   # add each rep separately as this works faster with pivot
-  for(rep in 1:N_REPS){
-    att_results <- rbind(att_results, calc_kpi_from_attributes_for_rep(rep))
+  for(rep_i in 1:length(reps)){
+    att_results <- rbind(att_results, calc_kpi_from_attributes_for_rep(reps, rep_i))
   }
 
   # return the KPIs by replications
@@ -691,7 +691,7 @@ create_summary_table <- function(reps, exp, dp=2){
   
   ## KPIs calculated from attributes
   # empty dataframe for attribute calculations.
-  att_results <- calc_kpi_from_attributes()
+  att_results <- calc_kpi_from_attributes(reps)
   mean_att_results <- colMeans(att_results)
 
   overall <- overall %>%
