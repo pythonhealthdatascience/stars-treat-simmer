@@ -18,7 +18,7 @@
 This repo demonstrates the application of sharing a discrete-event simulation model in R and associated research artifacts:  
   
   * All artifacts in this repository are linked to study researchers via ORCIDs;
-  * Model code is made available under a GNU Public License version 3;
+  * Model code is made available under the MIT license;
   * [**To do**: validate and test R dependencies managed through `renv`]
   *  The R code and simmer model are documented and explained in a quarto website served up by GitHub pages;
   * [**To do**: the materials are deposited and made citatable using Zenodo;]
