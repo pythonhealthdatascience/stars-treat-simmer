@@ -1,7 +1,9 @@
 ---
 title: "Model code"
 author: "Thomas Monks, Alison Harper"
-format: html
+format: 
+  html:
+    df-print: kable
 editor: visual
 ---
 
@@ -885,6 +887,8 @@ replication_results_table <- function(reps, results_collection_period){
 }
 
 rep_table <- replication_results_table(reps, DEFAULT_RESULTS_COLLECTION_PERIOD)
+
+head(rep_table)
 ```
 
 ```{r}
@@ -914,6 +918,6 @@ create_summary_table <- function(rep_table, exp, dp=2){
   return(round(mean_values, dp))
 
 }
-print(create_summary_table(rep_table, exp))
+create_summary_table(rep_table, exp)
 
 ```
