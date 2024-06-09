@@ -753,8 +753,6 @@ resource_waiting_times_by_replication <- function(reps) {
   
   return(waiting_times_wide)
 }
-
-resource_waiting_times_by_replication(reps)
 ```
 
 ```{r}
@@ -798,8 +796,6 @@ resource_utilisation_by_replication <- function(reps, results_collection_period)
     
   return(util_wide)
 }
-
-resource_utilisation_by_replication(reps, DEFAULT_RESULTS_COLLECTION_PERIOD)
 ```
 
 ```{r}
@@ -815,12 +811,6 @@ arrivals_by_replication <- function(envs){
   colnames(results) <- c("replication", "00_arrivals")
   return(results)
 }
-
-arrivals_by_replication(reps)
-```
-
-```{r}
-calc_kpi_from_attributes(reps)
 ```
 
 ```{r}
@@ -877,8 +867,6 @@ system_kpi_by_replication <- function(reps){
   # return the KPIs by replications
   return(att_results)
 }
-
-system_kpi_by_replication(reps)
 ```
 
 ```{r}
