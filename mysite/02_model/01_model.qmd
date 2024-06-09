@@ -891,9 +891,8 @@ histogram_of_replications <- function(rep_table, column_name, unit_label, n_bins
   
   # Divide the x range for selected column into n_bins
   binwidth <- diff(range(select(rep_table, all_of(column_name))))/n_bins
-
-  # top/tail with "`" as numeric in string.
-  g <- ggplot(rep_table, aes_string(paste("`", column_name, "`", sep=""))) +
+  
+  g <- ggplot(rep_table, aes(.data[[column_name]])) +
    geom_histogram(binwidth = binwidth, fill="steelblue", colour = "black") + 
     xlab(paste(column_name, " (", unit_label, ")")) + 
     ylab("Replications")
