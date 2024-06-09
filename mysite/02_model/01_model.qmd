@@ -885,9 +885,10 @@ replication_results_table <- function(reps, results_collection_period){
 }
 
 rep_table <- replication_results_table(reps, DEFAULT_RESULTS_COLLECTION_PERIOD)
+```
 
-
-histogram_of_replications <- function(rep_table, column_name, unit_label, n_bins=30){
+```{r}
+histogram_of_replications <- function(rep_table, column_name, unit_label, n_bins=10){
   
   # Divide the x range for selected column into n_bins
   binwidth <- diff(range(select(rep_table, all_of(column_name))))/n_bins
@@ -902,16 +903,6 @@ histogram_of_replications <- function(rep_table, column_name, unit_label, n_bins
 
 # as numeric names make sure to pass column name in ticks ``
 histogram_of_replications(rep_table, "09_throughput", "patients/day", n_bins=10)
-#histogram_of_replications("`01a_triage_wait`", "mins")
-
-
-
-
-
-
-
-
-
 ```
 
 ```{r}
