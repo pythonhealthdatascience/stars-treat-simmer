@@ -801,3 +801,141 @@ resource_utilisation_by_replication <- function(reps, results_collection_period)
 
 resource_utilisation_by_replication(reps, DEFAULT_RESULTS_COLLECTION_PERIOD)
 ```
+
+```{r}
+# number of arrivals in each replication
+arrivals_by_replication <- function(envs){
+  results <- vector()
+  for(env in envs){
+    results <- c(results, get_n_generated(env, "Patient"))
+  }
+ 
+  results <- data.frame(replication = c(1:length(results)), 
+                        arrivals = results)
+  colnames(results) <- c("replication", "00_arrivals")
+  return(results)
+}
+
+arrivals_by_replication(reps)
+```
+
+```{r}
+calc_kpi_from_attributes(reps)
+```
+
+```{r}
+# mean time in the system and throughput
+system_kpi_for_rep_i <- function(reps, rep_i){
+  
+  # get attributes
+  att <- get_mon_attributes(reps)
+  
+  # for speed - limit to replication number.
+  data_wide <- subset(att[att$replication == rep_i,], select = c(name, key, value)) %>% 
+    spread(key, value)
+
+  # Patient type 1: trauma
+  # take the mean and ignore patients still in pathway
+  mean_time_1 = mean(data_wide[data_wide$patient_type == 1,]$total_time, na.rm = TRUE)
+  
+  # Patient type 2: non_trauma
+  # take the mean and ignore patients still in pathway
+  mean_time_2 = mean(data_wide[data_wide$patient_type == 2,]$total_time, na.rm = TRUE)
+  
+  # Throughput - discharges during opening hours.
+  throughput <- sum(data_wide$departed, na.rm=TRUE)
+  
+  # store and return data.frame of results
+  rep_results <- data.frame("replication" = rep_i,
+                            "05_total_time(non-trauma)" = mean_time_2,
+                            "08_total_time(trauma)" = mean_time_1, 
+                            "09_throughput"= throughput)
+  
+  colnames(rep_results) = c("replication",
+                            "05_total_time(non-trauma)",
+                            "08_total_time(trauma)", 
+                            "09_throughput")
+  return(rep_results)
+}
+
+
+system_kpi_by_replication <- function(reps){
+  # calcs total time by patient type and total throughput
+  
+  # empty dataframe for attribute calculations.
+  att_results <- data.frame(matrix(ncol = 4, nrow = 0))
+  colnames(att_results) <- c("replication", 
+                             "05_total_time(non-trauma)", 
+                             "08_total_time(trauma)", 
+                             "_09_throughput")
+
+  # add each rep separately as this works faster with pivot
+  for(rep_i in 1:length(reps)){
+    att_results <- rbind(att_results, system_kpi_for_rep_i(reps, rep_i))
+  }
+
+  # return the KPIs by replications
+  return(att_results)
+}
+
+system_kpi_by_replication(reps)
+```
+
+```{r}
+replication_results_table <- function(reps, results_collection_period){
+  # generate and merge all results tables on the replication column
+  results_table <- arrivals_by_replication(reps) %>% 
+    merge(resource_waiting_times_by_replication(reps), by="replication", all=TRUE) %>% 
+    merge(resource_utilisation_by_replication(reps, 
+                                              results_collection_period), 
+          by="replication", all=TRUE) %>% 
+    merge(system_kpi_by_replication(reps), by="replication", all=TRUE) %>% 
+    # sort by column names to get "replication" followed by ordered 00_, 01a, 01b and so on...
+    select(replication, sort(tidyselect::peek_vars()))
+  
+  results_table 
+}
+
+rep_table <- replication_results_table(reps, DEFAULT_RESULTS_COLLECTION_PERIOD)
+
+
+histogram_of_replications <- function(rep_table, column_name, unit_label, n_bins=30){
+  
+  # Divide the x range for selected column into n_bins
+  binwidth <- diff(range(select(rep_table, all_of(column_name))))/n_bins
+
+  # top/tail with "`" as numeric in string.
+  g <- ggplot(rep_table, aes_string(paste("`", column_name, "`", sep=""))) +
+   geom_histogram(binwidth = binwidth, fill="steelblue", colour = "black") + 
+    xlab(paste(column_name, " (", unit_label, ")")) + 
+    ylab("Replications")
+  
+  return(g)
+}
+
+# as numeric names make sure to pass column name in ticks ``
+histogram_of_replications(rep_table, "09_throughput", "patients/day", n_bins=10)
+#histogram_of_replications("`01a_triage_wait`", "mins")
+
+
+
+
+
+
+
+
+
+```
+
+```{r}
+# modified summary table function
+create_summary_table <- function(rep_table, exp, dp=2){
+  # mean of all columns, but ignore rep number
+  mean_values <- data.frame(colMeans(rep_table[c(2:length(rep_table))]))
+  colnames(mean_values) <- c("mean")
+  return(round(mean_values, dp))
+
+}
+print(create_summary_table(rep_table, exp))
+
+```
