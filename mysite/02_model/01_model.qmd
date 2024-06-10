@@ -509,26 +509,35 @@ print("Simulation Complete.")
 ## 8. Multiple replications
 
 ```{r}
-N_REPS <- 50
-
-set.seed(42)
-
-# note unlike in simmer documentation we use a traditional for loop
-# instead of lapply. This allows us to separate env creation
-# from run and preserve the environment interaction between NSPP 
-# and current sim time.
-# TO DO: look again -> can treat_sim be created inside single_run()
-print("running replications...")
-reps = vector()
-for(rep in 1:N_REPS){
-  exp <- create_experiment(log_level=0)
-  treat_sim <- simmer("TreatSim", log_level=exp$log_level)
-  treat_sim <- single_run(treat_sim, exp)
-  # store the latest simulation enviornment and its results.
-  reps <- c(reps, treat_sim)
+multiple_replications <- function(exp, n_reps=5, random_seed=0){
   
+  # set seed in once place.  No CRN
+  set.seed(random_seed)
+  
+  # note unlike in simmer documentation we use a traditional for loop
+  # instead of lapply. This allows us to separate env creation
+  # from run and preserve the environment interaction between NSPP 
+  # and current sim time.
+  # TO DO: look again -> can treat_sim be created inside single_run()
+  print("running replications...")
+  reps = vector()
+  for(rep in 1:n_reps){
+    treat_sim <- simmer("TreatSimmer", log_level=exp$log_level)
+    treat_sim <- single_run(treat_sim, exp)
+    # store the latest simulation environment and its results.
+    reps <- c(reps, treat_sim)
+  }
+  print("Complete.")
+  return(reps)
 }
-print("Complete.")
+```
+
+```{r}
+# create experiment
+exp <- create_experiment(log_level=0)
+
+# run 50 replications of the model
+reps <- multiple_replications(exp, n_reps=50, random_seed=0)
 ```
 
 ## 9. Results analysis
