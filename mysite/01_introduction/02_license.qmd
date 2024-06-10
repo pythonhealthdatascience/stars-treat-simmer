@@ -2,12 +2,9 @@
 
 ## 1. Code and model
 
-All code is licenced under the [GNU General Public License v3.0](https://github.com/TomMonks/treat-sim-rsimmer/blob/main/LICENSE). Our decision to use GPL v3.0 is based on the dependency tree below.
-
-![Software dependencies for treat-simr](images/license.png){#fig-license}
+All model and analysis code is licensed under the [MIT license](https://github.com/pythonhealthdatascience/stars-treat-simmer/blob/main/LICENSE). 
 
 ## 2. Written materials
-
 All written content in this book is shared under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0).
 
 You are free to:
