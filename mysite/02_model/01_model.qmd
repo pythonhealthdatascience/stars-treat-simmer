@@ -539,94 +539,23 @@ In general, we follow a typical strategy in a simulation study. We calculate the
 
 Below we construct a summary table of results providing the mean of 16 KPIs.
 
+We assemble the table of KPIs across replications using the following key functions
+
+-   `resource_waiting_times_by_replication` - creates a data frame where columns report the mean waiting time within a replication for a activity in the model (e.g. triage waiting time)
+
+-   `resource_utilisation_by_replication` - creates a data frame where columns report the utilisation of a resource within a replication (e.g. the proportion of the scheduled time that triage bays are in use).
+
+-   `arrivals_by_replication` - creates a data frame of the total number of patient arrivals in a replication.
+
+-   `system_kpi_by_replication` - creates a data frame containing system level KPIs by replication e.g. throughput and time in system (created from custom attributes).
+
+-   `replication_results_table` - creates the overall data frame using the other functions.
+
 > Code quality is a work in progress. 😃
 
-```{r}
-# arrivals_by_replication <- function(envs){
-#   results <- vector()
-#   for(env in envs){
-#     results <- c(results, get_n_generated(env, "Patient"))
-#   }
-#   return(data.frame(results))
-# }
-```
+### 9.1. Waiting time KPIs
 
 ```{r}
-get_resource_counts <- function(exp) {
-  resource = c("triage_bay", 
-                "registration_clerk", 
-                "examination_room",
-                "trauma_room",
-                "trauma_treat_cubicle",
-                "nontrauma_treat_cubicle")
-  
-  resource_counts = c(exp$n_triage_bays,
-                      exp$n_reg_clerks,
-                      exp$n_exam_rooms,
-                      exp$n_trauma_rooms,
-                      exp$n_trauma_cubicles,
-                      exp$n_non_trauma_cubicles)
-  
-  df_resource <- data.frame(resource)
-  df_resource$count <- resource_counts
-  return(df_resource)
-}
-```
-
-Functions to calculate KPIs from custom attributes
-
-```{r}
-# # mean time in the system and throughput
-# calc_kpi_from_attributes_for_rep <- function(reps, rep){
-#   
-#   # get attributes
-#   att <- get_mon_attributes(reps)
-#   # for speed - limit to replication number.
-#   rep_att <- subset(att[att$replication == rep,], select = c(name, key, value))
-#   # long to wide format...
-#   data_wide <- spread(rep_att, key, value)
-#   
-#   # Patient type 1: trauma
-#   # take the mean and ignore patients still in pathway
-#   mean_time_1 = mean(data_wide[data_wide$patient_type == 1,]$total_time, na.rm = TRUE)
-#   
-#   # Patient type 2: non_trauma
-#   # take the mean and ignore patients still in pathway
-#   mean_time_2 = mean(data_wide[data_wide$patient_type == 2,]$total_time, na.rm = TRUE)
-#   
-#   # Throughput - discharges during opening hours.
-#   throughput <- sum(data_wide$departed, na.rm=TRUE)
-#   
-#   # store and return data.frame of results
-#   rep_results <- data.frame("05_total_time(non-trauma)" = mean_time_2,
-#                             "08_total_time(trauma)" = mean_time_1, 
-#                             "09_throughput"= throughput)
-#   return(rep_results)
-# }
-# 
-# calc_kpi_from_attributes <- function(reps){
-#   # calcs total time by patient type and total throughput
-#   
-#   # empty dataframe for attribute calculations.
-#   att_results <- data.frame(matrix(ncol = 3, nrow = 0))
-#   colnames(att_results) <- c("05_total_time(non-trauma)", "08_total_time(trauma)", "09_throughput")
-# 
-#   # add each rep separately as this works faster with pivot
-#   for(rep_i in 1:length(reps)){
-#     att_results <- rbind(att_results, calc_kpi_from_attributes_for_rep(reps, rep_i))
-#   }
-# 
-#   # return the KPIs by replications
-#   return(att_results)
-# }
-```
-
-At the moment the code creates a summary table. It does not return a table of replications versus performance measures. This is necessary for charts. Function create_summary_table needs to be broken up. A function that first assembles the replication results would be better.
-
-column 1: arrivals_by_replication
-
-```{r}
-
 # assumes df is monitored arrivals
 waiting_time <- function(df){
   df$waiting_time <-df$end_time - df$start_time - df$activity_time  
@@ -661,7 +590,29 @@ resource_waiting_times_by_replication <- function(reps) {
 }
 ```
 
+### 9.2. Resource utilisation KPIs
+
 ```{r}
+get_resource_counts <- function(exp) {
+  resource = c("triage_bay", 
+                "registration_clerk", 
+                "examination_room",
+                "trauma_room",
+                "trauma_treat_cubicle",
+                "nontrauma_treat_cubicle")
+  
+  resource_counts = c(exp$n_triage_bays,
+                      exp$n_reg_clerks,
+                      exp$n_exam_rooms,
+                      exp$n_trauma_rooms,
+                      exp$n_trauma_cubicles,
+                      exp$n_non_trauma_cubicles)
+  
+  df_resource <- data.frame(resource)
+  df_resource$count <- resource_counts
+  return(df_resource)
+}
+
 
 # simple calculation of total busy time / total scheduled resource time.
 resource_utilisation <- function(df, scheduled_time){
@@ -704,6 +655,8 @@ resource_utilisation_by_replication <- function(reps, results_collection_period)
 }
 ```
 
+### 9.3. Patient arrival numbers output
+
 ```{r}
 # number of arrivals in each replication
 arrivals_by_replication <- function(envs){
@@ -718,6 +671,8 @@ arrivals_by_replication <- function(envs){
   return(results)
 }
 ```
+
+### 9.4 System level KPIs
 
 ```{r}
 # mean time in the system and throughput
@@ -775,6 +730,8 @@ system_kpi_by_replication <- function(reps){
 }
 ```
 
+### 9.5. Function to create the replications table
+
 ```{r}
 replication_results_table <- function(reps, results_collection_period){
   # generate and merge all results tables on the replication column
@@ -795,6 +752,8 @@ rep_table <- replication_results_table(reps, DEFAULT_RESULTS_COLLECTION_PERIOD)
 head(rep_table)
 ```
 
+### 9.6 Histogram of replications
+
 ```{r}
 histogram_of_replications <- function(rep_table, column_name, unit_label, n_bins=10){
   
@@ -812,6 +771,8 @@ histogram_of_replications <- function(rep_table, column_name, unit_label, n_bins
 # as numeric names make sure to pass column name in ticks ``
 histogram_of_replications(rep_table, "09_throughput", "patients/day", n_bins=10)
 ```
+
+### 9.7 Results summary table
 
 ```{r}
 # modified summary table function
