@@ -230,7 +230,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#modelling-patient-arrivals" id="toc-modelling-patient-arrivals" class="nav-link" data-scroll-target="#modelling-patient-arrivals">6. Modelling patient arrivals</a></li>
   <li><a href="#single-run-of-the-model" id="toc-single-run-of-the-model" class="nav-link" data-scroll-target="#single-run-of-the-model">7. Single run of the model</a></li>
   <li><a href="#multiple-replications" id="toc-multiple-replications" class="nav-link" data-scroll-target="#multiple-replications">8. Multiple replications</a></li>
-  <li><a href="#results-analysis" id="toc-results-analysis" class="nav-link" data-scroll-target="#results-analysis">9. Results analysis</a></li>
+  <li><a href="#results-analysis" id="toc-results-analysis" class="nav-link" data-scroll-target="#results-analysis">9. Results analysis</a>
+  <ul class="collapse">
+  <li><a href="#waiting-time-kpis" id="toc-waiting-time-kpis" class="nav-link" data-scroll-target="#waiting-time-kpis">9.1. Waiting time KPIs</a></li>
+  <li><a href="#resource-utilisation-kpis" id="toc-resource-utilisation-kpis" class="nav-link" data-scroll-target="#resource-utilisation-kpis">9.2. Resource utilisation KPIs</a></li>
+  <li><a href="#patient-arrival-numbers-output" id="toc-patient-arrival-numbers-output" class="nav-link" data-scroll-target="#patient-arrival-numbers-output">9.3. Patient arrival numbers output</a></li>
+  <li><a href="#system-level-kpis" id="toc-system-level-kpis" class="nav-link" data-scroll-target="#system-level-kpis">9.4 System level KPIs</a></li>
+  <li><a href="#function-to-create-the-replications-table" id="toc-function-to-create-the-replications-table" class="nav-link" data-scroll-target="#function-to-create-the-replications-table">9.5. Function to create the replications table</a></li>
+  <li><a href="#histogram-of-replications" id="toc-histogram-of-replications" class="nav-link" data-scroll-target="#histogram-of-replications">9.6 Histogram of replications</a></li>
+  <li><a href="#results-summary-table" id="toc-results-summary-table" class="nav-link" data-scroll-target="#results-summary-table">9.7 Results summary table</a></li>
+  </ul></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/TomMonks/treat-sim-rsimmer/edit/main/02_model/01_model.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/TomMonks/treat-sim-rsimmer/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -370,7 +379,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_EXAM <span class="ot">&lt;-</span> <span class="dv">3</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># stabilisation rooms</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_TRAUMA <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>DEFAULT_N_TRAUMA <span class="ot">&lt;-</span> <span class="dv">1</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Non-trauma cubicles</span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>DEFAULT_NON_TRAUMA_CUBICLES <span class="ot">&lt;-</span> <span class="dv">1</span></span>
@@ -751,30 +760,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="multiple-replications" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-replications">8. Multiple replications</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>N_REPS <span class="ot">&lt;-</span> <span class="dv">50</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co"># note unlike in simmer documentation we use a traditional for loop</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># instead of lapply. This allows us to separate env creation</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co"># from run and preserve the environment interaction between NSPP </span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co"># and current sim time.</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co"># TO DO: look again -&gt; can treat_sim be created inside single_run()</span></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"running replications..."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "running replications..."</code></pre>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>multiple_replications <span class="ot">&lt;-</span> <span class="cf">function</span>(exp, <span class="at">n_reps=</span><span class="dv">5</span>, <span class="at">random_seed=</span><span class="dv">0</span>){</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># set seed in once place.  No CRN</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(random_seed)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># note unlike in simmer documentation we use a traditional for loop</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># instead of lapply. This allows us to separate env creation</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># from run and preserve the environment interaction between NSPP </span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># and current sim time.</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># TO DO: look again -&gt; can treat_sim be created inside single_run()</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="st">"running replications..."</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  reps <span class="ot">=</span> <span class="fu">vector</span>()</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(rep <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_reps){</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    treat_sim <span class="ot">&lt;-</span> <span class="fu">simmer</span>(<span class="st">"TreatSimmer"</span>, <span class="at">log_level=</span>exp<span class="sc">$</span>log_level)</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    treat_sim <span class="ot">&lt;-</span> <span class="fu">single_run</span>(treat_sim, exp)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># store the latest simulation environment and its results.</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    reps <span class="ot">&lt;-</span> <span class="fu">c</span>(reps, treat_sim)</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="st">"Complete."</span>)</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(reps)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>reps <span class="ot">=</span> <span class="fu">vector</span>()</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(rep <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>N_REPS){</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  exp <span class="ot">&lt;-</span> <span class="fu">create_experiment</span>(<span class="at">log_level=</span><span class="dv">0</span>)</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  treat_sim <span class="ot">&lt;-</span> <span class="fu">simmer</span>(<span class="st">"TreatSim"</span>, <span class="at">log_level=</span>exp<span class="sc">$</span>log_level)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  treat_sim <span class="ot">&lt;-</span> <span class="fu">single_run</span>(treat_sim, exp)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># store the latest simulation enviornment and its results.</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  reps <span class="ot">&lt;-</span> <span class="fu">c</span>(reps, treat_sim)</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"Complete."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create experiment</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>exp <span class="ot">&lt;-</span> <span class="fu">create_experiment</span>(<span class="at">log_level=</span><span class="dv">0</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co"># run 50 replications of the model</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>reps <span class="ot">&lt;-</span> <span class="fu">multiple_replications</span>(exp, <span class="at">n_reps=</span><span class="dv">50</span>, <span class="at">random_seed=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Complete."</code></pre>
+<pre><code>[1] "running replications..."
+[1] "Complete."</code></pre>
 </div>
 </div>
 </section>
@@ -783,51 +799,149 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Analysis of <code>simmer</code> results is achieved using a mix of statistics collected automatically and custom attributes set by the modeller during the run.</p>
 <p>In general, we follow a typical strategy in a simulation study. We calculate the mean Key Performance Indicator (KPI) seen during an individual replication of the model (e.g.&nbsp;waiting time for triage and utilisation of the the triage rooms). This is repeated for all replications and the distribution of results can be visualised or we use a summary measure such as the mean.</p>
 <p>Below we construct a summary table of results providing the mean of 16 KPIs.</p>
+<p>We assemble the table of KPIs across replications using the following key functions</p>
+<ul>
+<li><p><code>resource_waiting_times_by_replication</code> - creates a data frame where columns report the mean waiting time within a replication for a activity in the model (e.g.&nbsp;triage waiting time)</p></li>
+<li><p><code>resource_utilisation_by_replication</code> - creates a data frame where columns report the utilisation of a resource within a replication (e.g.&nbsp;the proportion of the scheduled time that triage bays are in use).</p></li>
+<li><p><code>arrivals_by_replication</code> - creates a data frame of the total number of patient arrivals in a replication.</p></li>
+<li><p><code>system_kpi_by_replication</code> - creates a data frame containing system level KPIs by replication e.g.&nbsp;throughput and time in system (created from custom attributes).</p></li>
+<li><p><code>replication_results_table</code> - creates the overall data frame using the other functions.</p></li>
+</ul>
 <blockquote class="blockquote">
 <p>Code quality is a work in progress. 😃</p>
 </blockquote>
+<section id="waiting-time-kpis" class="level3">
+<h3 class="anchored" data-anchor-id="waiting-time-kpis">9.1. Waiting time KPIs</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>arrivals_by_replication <span class="ot">&lt;-</span> <span class="cf">function</span>(envs){</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  results <span class="ot">&lt;-</span> <span class="fu">vector</span>()</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(env <span class="cf">in</span> envs){</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> <span class="fu">c</span>(results, <span class="fu">get_n_generated</span>(env, <span class="st">"Patient"</span>))</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">data.frame</span>(results))</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># assumes df is monitored arrivals</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>waiting_time <span class="ot">&lt;-</span> <span class="cf">function</span>(df){</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  df<span class="sc">$</span>waiting_time <span class="ot">&lt;-</span>df<span class="sc">$</span>end_time <span class="sc">-</span> df<span class="sc">$</span>start_time <span class="sc">-</span> df<span class="sc">$</span>activity_time  </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(df)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>resource_waiting_times_by_replication <span class="ot">&lt;-</span> <span class="cf">function</span>(reps) {</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># - WAITING TIMES FOR RESOURCES - #</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"resource"</span>, <span class="st">"replication"</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  waiting_times_wide <span class="ot">&lt;-</span> <span class="fu">get_mon_arrivals</span>(reps, <span class="at">per_resource=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># waiting time = end time - start time - activity time</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">waiting_time</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># mean waiting time in each replication</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(cols))) <span class="sc">%&gt;%</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># mean for each replication</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">rep_waiting_time=</span><span class="fu">mean</span>(waiting_time)) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># recode kpi names</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">resource=</span><span class="fu">recode</span>(resource,</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'triage_bay'</span><span class="ot">=</span><span class="st">'01a_triage_wait'</span>,</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'registration_clerk'</span><span class="ot">=</span><span class="st">'02a_registration_wait'</span>,</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'examination_room'</span><span class="ot">=</span><span class="st">'03a_examination_wait'</span>,</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'nontrauma_treat_cubicle'</span><span class="ot">=</span><span class="st">'04a_treatment_wait(non_trauma)'</span>,</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'trauma_room'</span><span class="ot">=</span><span class="st">'06a_stabilisation_wait'</span>,</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'trauma_treat_cubicle'</span><span class="ot">=</span><span class="st">'07a_treatment_wait(trauma)'</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># organise</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(resource) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># long to wide format ...</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spread</span>(resource, rep_waiting_time)</span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(waiting_times_wide)</span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="resource-utilisation-kpis" class="level3">
+<h3 class="anchored" data-anchor-id="resource-utilisation-kpis">9.2. Resource utilisation KPIs</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>get_resource_counts <span class="ot">&lt;-</span> <span class="cf">function</span>(exp) {</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  resource <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"triage_bay"</span>, </span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>                <span class="st">"registration_clerk"</span>, </span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>                <span class="st">"examination_room"</span>,</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>                <span class="st">"trauma_room"</span>,</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>                <span class="st">"trauma_treat_cubicle"</span>,</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>                <span class="st">"nontrauma_treat_cubicle"</span>)</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  resource_counts <span class="ot">=</span> <span class="fu">c</span>(exp<span class="sc">$</span>n_triage_bays,</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>                      exp<span class="sc">$</span>n_reg_clerks,</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>                      exp<span class="sc">$</span>n_exam_rooms,</span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>                      exp<span class="sc">$</span>n_trauma_rooms,</span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>                      exp<span class="sc">$</span>n_trauma_cubicles,</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>                      exp<span class="sc">$</span>n_non_trauma_cubicles)</span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>  df_resource <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(resource)</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  df_resource<span class="sc">$</span>count <span class="ot">&lt;-</span> resource_counts</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(df_resource)</span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>get_resource_counts <span class="ot">&lt;-</span> <span class="cf">function</span>(exp) {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  resource <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"triage_bay"</span>, </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>                <span class="st">"registration_clerk"</span>, </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>                <span class="st">"examination_room"</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                <span class="st">"trauma_room"</span>,</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>                <span class="st">"trauma_treat_cubicle"</span>,</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>                <span class="st">"nontrauma_treat_cubicle"</span>)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  resource_counts <span class="ot">=</span> <span class="fu">c</span>(exp<span class="sc">$</span>n_triage_bays,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>                      exp<span class="sc">$</span>n_reg_clerks,</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>                      exp<span class="sc">$</span>n_exam_rooms,</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>                      exp<span class="sc">$</span>n_trauma_rooms,</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>                      exp<span class="sc">$</span>n_trauma_cubicles,</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>                      exp<span class="sc">$</span>n_non_trauma_cubicles)</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>  df_resource <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(resource)</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>  df_resource<span class="sc">$</span>count <span class="ot">&lt;-</span> resource_counts</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(df_resource)</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="co"># simple calculation of total busy time / total scheduled resource time.</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>resource_utilisation <span class="ot">&lt;-</span> <span class="cf">function</span>(df, scheduled_time){</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>   df<span class="sc">$</span>util <span class="ot">=</span> df<span class="sc">$</span>in_use <span class="sc">/</span> (scheduled_time <span class="sc">*</span> df<span class="sc">$</span>count)  </span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>   <span class="fu">return</span>(df)</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate resource utilisation and return table (rows = reps and cols = resources)</span></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>resource_utilisation_by_replication <span class="ot">&lt;-</span> <span class="cf">function</span>(reps, results_collection_period){</span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get results dataframe broken down by resource and replication.</span></span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>  cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"resource"</span>, <span class="st">"replication"</span>)</span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a>  <span class="co"># utilisation calculation:</span></span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># simple calculation of total busy time / total scheduled resource time.</span></span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># where total scheduled time = n_resource * results collection period.</span></span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a>  util_wide <span class="ot">&lt;-</span> <span class="fu">get_mon_arrivals</span>(reps, <span class="at">per_resource=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a>    <span class="co"># total activity time in each replication per resource (long format)</span></span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(cols))) <span class="sc">%&gt;%</span></span>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">in_use=</span><span class="fu">sum</span>(activity_time)) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># merge with the number of resources available</span></span>
+<span id="cb24-42"><a href="#cb24-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">merge</span>(<span class="fu">get_resource_counts</span>(exp), <span class="at">by=</span><span class="st">"resource"</span>, <span class="at">all=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-43"><a href="#cb24-43" aria-hidden="true" tabindex="-1"></a>    <span class="co"># calculate the utilisation using scheduled resource availability</span></span>
+<span id="cb24-44"><a href="#cb24-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">resource_utilisation</span>(results_collection_period) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-45"><a href="#cb24-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># drop total activity time and count of resources</span></span>
+<span id="cb24-46"><a href="#cb24-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">subset</span>(<span class="at">select =</span> <span class="fu">c</span>(replication, resource, util)) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-47"><a href="#cb24-47" aria-hidden="true" tabindex="-1"></a>    <span class="co"># recode names</span></span>
+<span id="cb24-48"><a href="#cb24-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">resource=</span><span class="fu">recode</span>(resource,</span>
+<span id="cb24-49"><a href="#cb24-49" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'triage_bay'</span><span class="ot">=</span><span class="st">'01b_triage_util'</span>,</span>
+<span id="cb24-50"><a href="#cb24-50" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'registration_clerk'</span><span class="ot">=</span><span class="st">'02b_registration_util'</span>,</span>
+<span id="cb24-51"><a href="#cb24-51" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'examination_room'</span><span class="ot">=</span><span class="st">'03b_examination_util'</span>,</span>
+<span id="cb24-52"><a href="#cb24-52" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'nontrauma_treat_cubicle'</span><span class="ot">=</span><span class="st">'04b_treatment_util(non_trauma)'</span>,</span>
+<span id="cb24-53"><a href="#cb24-53" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'trauma_room'</span><span class="ot">=</span><span class="st">'06b_stabilisation_util'</span>,</span>
+<span id="cb24-54"><a href="#cb24-54" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'trauma_treat_cubicle'</span><span class="ot">=</span><span class="st">'07b_treatment_util(trauma)'</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb24-55"><a href="#cb24-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(resource) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-56"><a href="#cb24-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># long to wide format...</span></span>
+<span id="cb24-57"><a href="#cb24-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spread</span>(resource, util)</span>
+<span id="cb24-58"><a href="#cb24-58" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-59"><a href="#cb24-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(util_wide)</span>
+<span id="cb24-60"><a href="#cb24-60" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Functions to calculate KPIs from custom attributes</p>
+</section>
+<section id="patient-arrival-numbers-output" class="level3">
+<h3 class="anchored" data-anchor-id="patient-arrival-numbers-output">9.3. Patient arrival numbers output</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># number of arrivals in each replication</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>arrivals_by_replication <span class="ot">&lt;-</span> <span class="cf">function</span>(envs){</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  results <span class="ot">&lt;-</span> <span class="fu">vector</span>()</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(env <span class="cf">in</span> envs){</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> <span class="fu">c</span>(results, <span class="fu">get_n_generated</span>(env, <span class="st">"Patient"</span>))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">replication =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(results)), </span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>                        <span class="at">arrivals =</span> results)</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(results) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"replication"</span>, <span class="st">"00_arrivals"</span>)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(results)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="system-level-kpis" class="level3">
+<h3 class="anchored" data-anchor-id="system-level-kpis">9.4 System level KPIs</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># mean time in the system and throughput</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>calc_kpi_from_attributes_for_rep <span class="ot">&lt;-</span> <span class="cf">function</span>(rep){</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>system_kpi_for_rep_i <span class="ot">&lt;-</span> <span class="cf">function</span>(reps, rep_i){</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get attributes</span></span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  att <span class="ot">&lt;-</span> <span class="fu">get_mon_attributes</span>(reps)</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># for speed - limit to replication number.</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  rep_att <span class="ot">&lt;-</span> <span class="fu">subset</span>(att[att<span class="sc">$</span>replication <span class="sc">==</span> rep,], <span class="at">select =</span> <span class="fu">c</span>(name, key, value))</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># long to wide format...</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  data_wide <span class="ot">&lt;-</span> <span class="fu">spread</span>(rep_att, key, value)</span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># for speed - limit to replication number.</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  data_wide <span class="ot">&lt;-</span> <span class="fu">subset</span>(att[att<span class="sc">$</span>replication <span class="sc">==</span> rep_i,], <span class="at">select =</span> <span class="fu">c</span>(name, key, value)) <span class="sc">%&gt;%</span> </span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spread</span>(key, value)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Patient type 1: trauma</span></span>
 <span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># take the mean and ignore patients still in pathway</span></span>
 <span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>  mean_time_1 <span class="ot">=</span> <span class="fu">mean</span>(data_wide[data_wide<span class="sc">$</span>patient_type <span class="sc">==</span> <span class="dv">1</span>,]<span class="sc">$</span>total_time, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
@@ -840,140 +954,340 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>  throughput <span class="ot">&lt;-</span> <span class="fu">sum</span>(data_wide<span class="sc">$</span>departed, <span class="at">na.rm=</span><span class="cn">TRUE</span>)</span>
 <span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># store and return data.frame of results</span></span>
-<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>  rep_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"05_total_time(non-trauma)"</span> <span class="ot">=</span> mean_time_2,</span>
-<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"08_total_time(trauma)"</span> <span class="ot">=</span> mean_time_1, </span>
-<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"09_throughput"</span><span class="ot">=</span> throughput)</span>
-<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rep_results)</span>
-<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>calc_kpi_from_attributes <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
-<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calcs total time by patient type and total throughput</span></span>
-<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>  <span class="co"># empty dataframe for attribute calculations.</span></span>
-<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>  att_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">matrix</span>(<span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">nrow =</span> <span class="dv">0</span>))</span>
-<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(att_results) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"05_total_time(non-trauma)"</span>, <span class="st">"08_total_time(trauma)"</span>, <span class="st">"09_throughput"</span>)</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>  rep_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"replication"</span> <span class="ot">=</span> rep_i,</span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"05_total_time(non-trauma)"</span> <span class="ot">=</span> mean_time_2,</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"08_total_time(trauma)"</span> <span class="ot">=</span> mean_time_1, </span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"09_throughput"</span><span class="ot">=</span> throughput)</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(rep_results) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"replication"</span>,</span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"05_total_time(non-trauma)"</span>,</span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"08_total_time(trauma)"</span>, </span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"09_throughput"</span>)</span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rep_results)</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add each rep separately as this works faster with pivot</span></span>
-<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(rep <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>N_REPS){</span>
-<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>    att_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(att_results, <span class="fu">calc_kpi_from_attributes_for_rep</span>(rep))</span>
-<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a>  <span class="co"># return the KPIs by replications</span></span>
-<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(att_results)</span>
-<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>system_kpi_by_replication <span class="ot">&lt;-</span> <span class="cf">function</span>(reps){</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calcs total time by patient type and total throughput</span></span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>  <span class="co"># empty dataframe for attribute calculations.</span></span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>  att_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">matrix</span>(<span class="at">ncol =</span> <span class="dv">4</span>, <span class="at">nrow =</span> <span class="dv">0</span>))</span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(att_results) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"replication"</span>, </span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>                             <span class="st">"05_total_time(non-trauma)"</span>, </span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a>                             <span class="st">"08_total_time(trauma)"</span>, </span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a>                             <span class="st">"_09_throughput"</span>)</span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add each rep separately as this works faster with pivot</span></span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(rep_i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(reps)){</span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>    att_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(att_results, <span class="fu">system_kpi_for_rep_i</span>(reps, rep_i))</span>
+<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>  <span class="co"># return the KPIs by replications</span></span>
+<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(att_results)</span>
+<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="function-to-create-the-replications-table" class="level3">
+<h3 class="anchored" data-anchor-id="function-to-create-the-replications-table">9.5. Function to create the replications table</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>create_summary_table <span class="ot">&lt;-</span> <span class="cf">function</span>(reps, exp, <span class="at">dp=</span><span class="dv">2</span>){</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mean number of arrivals</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  arrival_counts <span class="ot">&lt;-</span> <span class="fu">arrivals_by_replication</span>(reps)</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  mean_arrivals <span class="ot">&lt;-</span> <span class="fu">mean</span>(arrival_counts<span class="sc">$</span>results)</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  arrival_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"00_arrivals"</span>, mean_arrivals)</span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(arrival_df)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">"kpi"</span>,<span class="st">"mean"</span>)</span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get results dataframe broken down by resource and replication.</span></span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  arrivals <span class="ot">&lt;-</span> <span class="fu">get_mon_arrivals</span>(reps, <span class="at">per_resource=</span><span class="cn">TRUE</span>)</span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calculate waiting time</span></span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  arrivals<span class="sc">$</span>waiting_time <span class="ot">&lt;-</span>arrivals<span class="sc">$</span>end_time <span class="sc">-</span> arrivals<span class="sc">$</span>start_time <span class="sc">-</span> arrivals<span class="sc">$</span>activity_time</span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># arrivals$waiting_time &lt;- round(arrivals$waiting_time, 2)</span></span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>  cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"resource"</span>, <span class="st">"replication"</span>)</span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>  summary_wait <span class="ot">&lt;-</span> arrivals <span class="sc">%&gt;%</span></span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># mean waiting time in each replication</span></span>
-<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(cols))) <span class="sc">%&gt;%</span></span>
-<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">rep_waiting_time=</span><span class="fu">mean</span>(waiting_time)) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># mean waiting time across replications</span></span>
-<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(resource) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">mean=</span><span class="fu">mean</span>(rep_waiting_time)) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">resource=</span><span class="fu">recode</span>(resource,  </span>
-<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'triage_bay'</span><span class="ot">=</span><span class="st">'01a_triage_wait'</span>, </span>
-<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'registration_clerk'</span><span class="ot">=</span><span class="st">'02a_registration_wait'</span>,</span>
-<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'examination_room'</span><span class="ot">=</span><span class="st">'03a_examination_wait'</span>,</span>
-<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'nontrauma_treat_cubicle'</span><span class="ot">=</span><span class="st">'04a_treatment_wait(non_trauma)'</span>,</span>
-<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'trauma_room'</span><span class="ot">=</span><span class="st">'06a_stabilisation_wait'</span>,</span>
-<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'trauma_treat_cubicle'</span><span class="ot">=</span><span class="st">'07a_treatment_wait(trauma)'</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(resource)</span>
-<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(summary_wait)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">"kpi"</span>,<span class="st">"mean"</span>)</span>
-<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># utilisation calculation:</span></span>
-<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>  <span class="co"># simple calculation of total busy time / total scheduled resource time.</span></span>
-<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a>  <span class="co"># where total scheduled time = n_resource * results collection period.</span></span>
-<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a>  summary_util <span class="ot">&lt;-</span> arrivals <span class="sc">%&gt;%</span></span>
-<span id="cb27-41"><a href="#cb27-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># mean waiting time in each replication</span></span>
-<span id="cb27-42"><a href="#cb27-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(cols))) <span class="sc">%&gt;%</span></span>
-<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">in_use=</span><span class="fu">sum</span>(activity_time)) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-44"><a href="#cb27-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(resource)</span>
-<span id="cb27-45"><a href="#cb27-45" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-46"><a href="#cb27-46" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add resource counts to table for calc</span></span>
-<span id="cb27-47"><a href="#cb27-47" aria-hidden="true" tabindex="-1"></a>  summary_util <span class="ot">&lt;-</span> <span class="fu">merge</span>(summary_util, <span class="fu">get_resource_counts</span>(exp), </span>
-<span id="cb27-48"><a href="#cb27-48" aria-hidden="true" tabindex="-1"></a>                        <span class="at">by=</span><span class="st">"resource"</span>, <span class="at">all=</span><span class="cn">TRUE</span>)</span>
-<span id="cb27-49"><a href="#cb27-49" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-50"><a href="#cb27-50" aria-hidden="true" tabindex="-1"></a>  <span class="co"># total in use / total scheduled time</span></span>
-<span id="cb27-51"><a href="#cb27-51" aria-hidden="true" tabindex="-1"></a>  summary_util<span class="sc">$</span>util <span class="ot">=</span> summary_util<span class="sc">$</span>in_use <span class="sc">/</span> (DEFAULT_RESULTS_COLLECTION_PERIOD <span class="sc">*</span> summary_util<span class="sc">$</span>count)  </span>
-<span id="cb27-52"><a href="#cb27-52" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-53"><a href="#cb27-53" aria-hidden="true" tabindex="-1"></a>  summary_util <span class="ot">&lt;-</span> summary_util <span class="sc">%&gt;%</span></span>
-<span id="cb27-54"><a href="#cb27-54" aria-hidden="true" tabindex="-1"></a>    <span class="co"># mean waiting time in each replication</span></span>
-<span id="cb27-55"><a href="#cb27-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(resource) <span class="sc">%&gt;%</span></span>
-<span id="cb27-56"><a href="#cb27-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">mean=</span><span class="fu">mean</span>(util)) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-57"><a href="#cb27-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">resource=</span><span class="fu">recode</span>(resource,  </span>
-<span id="cb27-58"><a href="#cb27-58" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'triage_bay'</span><span class="ot">=</span><span class="st">'01b_triage_util'</span>, </span>
-<span id="cb27-59"><a href="#cb27-59" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'registration_clerk'</span><span class="ot">=</span><span class="st">'02b_registration_util'</span>,</span>
-<span id="cb27-60"><a href="#cb27-60" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'examination_room'</span><span class="ot">=</span><span class="st">'03b_examination_util'</span>,</span>
-<span id="cb27-61"><a href="#cb27-61" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'nontrauma_treat_cubicle'</span><span class="ot">=</span><span class="st">'04b_treatment_util(non_trauma)'</span>,</span>
-<span id="cb27-62"><a href="#cb27-62" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'trauma_room'</span><span class="ot">=</span><span class="st">'06b_stabilisation_util'</span>,</span>
-<span id="cb27-63"><a href="#cb27-63" aria-hidden="true" tabindex="-1"></a>                         <span class="st">'trauma_treat_cubicle'</span><span class="ot">=</span><span class="st">'07b_treatment_util(trauma)'</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-64"><a href="#cb27-64" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(resource)</span>
-<span id="cb27-65"><a href="#cb27-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-66"><a href="#cb27-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(summary_util) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"kpi"</span>,<span class="st">"mean"</span>)</span>
-<span id="cb27-67"><a href="#cb27-67" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-68"><a href="#cb27-68" aria-hidden="true" tabindex="-1"></a>  overall <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(arrival_df, summary_wait, summary_util) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-69"><a href="#cb27-69" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(kpi) </span>
-<span id="cb27-70"><a href="#cb27-70" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-71"><a href="#cb27-71" aria-hidden="true" tabindex="-1"></a>  <span class="do">## KPIs calculated from attributes</span></span>
-<span id="cb27-72"><a href="#cb27-72" aria-hidden="true" tabindex="-1"></a>  <span class="co"># empty dataframe for attribute calculations.</span></span>
-<span id="cb27-73"><a href="#cb27-73" aria-hidden="true" tabindex="-1"></a>  att_results <span class="ot">&lt;-</span> <span class="fu">calc_kpi_from_attributes</span>()</span>
-<span id="cb27-74"><a href="#cb27-74" aria-hidden="true" tabindex="-1"></a>  mean_att_results <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(att_results)</span>
-<span id="cb27-75"><a href="#cb27-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-76"><a href="#cb27-76" aria-hidden="true" tabindex="-1"></a>  overall <span class="ot">&lt;-</span> overall <span class="sc">%&gt;%</span></span>
-<span id="cb27-77"><a href="#cb27-77" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_row</span>(<span class="at">kpi=</span><span class="st">"05_total_time(non-trauma)"</span>, <span class="at">mean=</span>mean_att_results[<span class="dv">1</span>]) <span class="sc">%&gt;%</span></span>
-<span id="cb27-78"><a href="#cb27-78" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_row</span>(<span class="at">kpi=</span><span class="st">"08_total_time(trauma)"</span>, <span class="at">mean=</span>mean_att_results[<span class="dv">2</span>]) <span class="sc">%&gt;%</span></span>
-<span id="cb27-79"><a href="#cb27-79" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_row</span>(<span class="at">kpi=</span><span class="st">"09_throughput"</span>, <span class="at">mean=</span>mean_att_results[<span class="dv">3</span>]) <span class="sc">%&gt;%</span></span>
-<span id="cb27-80"><a href="#cb27-80" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(kpi)</span>
-<span id="cb27-81"><a href="#cb27-81" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-82"><a href="#cb27-82" aria-hidden="true" tabindex="-1"></a>  <span class="co"># round and return</span></span>
-<span id="cb27-83"><a href="#cb27-83" aria-hidden="true" tabindex="-1"></a>  overall<span class="sc">$</span>mean <span class="ot">&lt;-</span> <span class="fu">round</span>(overall<span class="sc">$</span>mean, dp)</span>
-<span id="cb27-84"><a href="#cb27-84" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(overall)</span>
-<span id="cb27-85"><a href="#cb27-85" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>replication_results_table <span class="ot">&lt;-</span> <span class="cf">function</span>(reps, results_collection_period){</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># generate and merge all results tables on the replication column</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  results_table <span class="ot">&lt;-</span> <span class="fu">arrivals_by_replication</span>(reps) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">merge</span>(<span class="fu">resource_waiting_times_by_replication</span>(reps), <span class="at">by=</span><span class="st">"replication"</span>, <span class="at">all=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">merge</span>(<span class="fu">resource_utilisation_by_replication</span>(reps, </span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>                                              results_collection_period), </span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">by=</span><span class="st">"replication"</span>, <span class="at">all=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">merge</span>(<span class="fu">system_kpi_by_replication</span>(reps), <span class="at">by=</span><span class="st">"replication"</span>, <span class="at">all=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># sort by column names to get "replication" followed by ordered 00_, 01a, 01b and so on...</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(replication, <span class="fu">sort</span>(tidyselect<span class="sc">::</span><span class="fu">peek_vars</span>()))</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  results_table </span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>rep_table <span class="ot">&lt;-</span> <span class="fu">replication_results_table</span>(reps, DEFAULT_RESULTS_COLLECTION_PERIOD)</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(rep_table)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 3%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">replication</th>
+<th style="text-align: right;">00_arrivals</th>
+<th style="text-align: right;">01a_triage_wait</th>
+<th style="text-align: right;">01b_triage_util</th>
+<th style="text-align: right;">02a_registration_wait</th>
+<th style="text-align: right;">02b_registration_util</th>
+<th style="text-align: right;">03a_examination_wait</th>
+<th style="text-align: right;">03b_examination_util</th>
+<th style="text-align: right;">04a_treatment_wait(non_trauma)</th>
+<th style="text-align: right;">04b_treatment_util(non_trauma)</th>
+<th style="text-align: right;">05_total_time(non-trauma)</th>
+<th style="text-align: right;">06a_stabilisation_wait</th>
+<th style="text-align: right;">06b_stabilisation_util</th>
+<th style="text-align: right;">07a_treatment_wait(trauma)</th>
+<th style="text-align: right;">07b_treatment_util(trauma)</th>
+<th style="text-align: right;">08_total_time(trauma)</th>
+<th style="text-align: right;">09_throughput</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">227</td>
+<td style="text-align: right;">38.510472</td>
+<td style="text-align: right;">0.6500712</td>
+<td style="text-align: right;">55.63581</td>
+<td style="text-align: right;">0.8313868</td>
+<td style="text-align: right;">33.71627</td>
+<td style="text-align: right;">0.8440569</td>
+<td style="text-align: right;">161.3438</td>
+<td style="text-align: right;">0.8528225</td>
+<td style="text-align: right;">224.4021</td>
+<td style="text-align: right;">322.3138</td>
+<td style="text-align: right;">0.6826987</td>
+<td style="text-align: right;">4.930242</td>
+<td style="text-align: right;">0.2696664</td>
+<td style="text-align: right;">448.4067</td>
+<td style="text-align: right;">149</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">217</td>
+<td style="text-align: right;">39.962735</td>
+<td style="text-align: right;">0.5764697</td>
+<td style="text-align: right;">92.59627</td>
+<td style="text-align: right;">0.8241213</td>
+<td style="text-align: right;">24.76566</td>
+<td style="text-align: right;">0.8355781</td>
+<td style="text-align: right;">120.8921</td>
+<td style="text-align: right;">0.8715918</td>
+<td style="text-align: right;">232.8177</td>
+<td style="text-align: right;">341.0050</td>
+<td style="text-align: right;">0.7482643</td>
+<td style="text-align: right;">20.730095</td>
+<td style="text-align: right;">0.3229111</td>
+<td style="text-align: right;">501.7710</td>
+<td style="text-align: right;">167</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">220</td>
+<td style="text-align: right;">8.028919</td>
+<td style="text-align: right;">0.5145182</td>
+<td style="text-align: right;">125.19868</td>
+<td style="text-align: right;">0.8363566</td>
+<td style="text-align: right;">22.93733</td>
+<td style="text-align: right;">0.8317090</td>
+<td style="text-align: right;">151.4920</td>
+<td style="text-align: right;">0.8235007</td>
+<td style="text-align: right;">226.3541</td>
+<td style="text-align: right;">175.9264</td>
+<td style="text-align: right;">0.8472946</td>
+<td style="text-align: right;">4.735720</td>
+<td style="text-align: right;">0.4148506</td>
+<td style="text-align: right;">273.4123</td>
+<td style="text-align: right;">149</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">207</td>
+<td style="text-align: right;">32.157743</td>
+<td style="text-align: right;">0.5447273</td>
+<td style="text-align: right;">100.08161</td>
+<td style="text-align: right;">0.7600335</td>
+<td style="text-align: right;">22.39284</td>
+<td style="text-align: right;">0.7850996</td>
+<td style="text-align: right;">104.7379</td>
+<td style="text-align: right;">0.8154391</td>
+<td style="text-align: right;">227.6200</td>
+<td style="text-align: right;">217.9818</td>
+<td style="text-align: right;">0.8518988</td>
+<td style="text-align: right;">11.741513</td>
+<td style="text-align: right;">0.3679632</td>
+<td style="text-align: right;">358.0275</td>
+<td style="text-align: right;">153</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">220</td>
+<td style="text-align: right;">17.281597</td>
+<td style="text-align: right;">0.5382466</td>
+<td style="text-align: right;">95.79616</td>
+<td style="text-align: right;">0.8497077</td>
+<td style="text-align: right;">29.89311</td>
+<td style="text-align: right;">0.8479559</td>
+<td style="text-align: right;">124.9008</td>
+<td style="text-align: right;">0.8803980</td>
+<td style="text-align: right;">213.6180</td>
+<td style="text-align: right;">163.9983</td>
+<td style="text-align: right;">0.6404862</td>
+<td style="text-align: right;">5.159307</td>
+<td style="text-align: right;">0.1560905</td>
+<td style="text-align: right;">347.3643</td>
+<td style="text-align: right;">145</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">244</td>
+<td style="text-align: right;">19.722275</td>
+<td style="text-align: right;">0.6032575</td>
+<td style="text-align: right;">139.37281</td>
+<td style="text-align: right;">0.8861767</td>
+<td style="text-align: right;">13.59604</td>
+<td style="text-align: right;">0.8731107</td>
+<td style="text-align: right;">150.0938</td>
+<td style="text-align: right;">0.8974080</td>
+<td style="text-align: right;">247.6859</td>
+<td style="text-align: right;">220.1141</td>
+<td style="text-align: right;">0.8915800</td>
+<td style="text-align: right;">5.252764</td>
+<td style="text-align: right;">0.3437842</td>
+<td style="text-align: right;">310.7147</td>
+<td style="text-align: right;">167</td>
+</tr>
+</tbody>
+</table>
 </div>
+</div>
+</div>
+</section>
+<section id="histogram-of-replications" class="level3">
+<h3 class="anchored" data-anchor-id="histogram-of-replications">9.6 Histogram of replications</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>results_summary <span class="ot">&lt;-</span> <span class="fu">create_summary_table</span>(reps, exp)</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>results_summary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                              kpi   mean
-1                     00_arrivals 230.48
-2                 01a_triage_wait  34.05
-3                 01b_triage_util   0.60
-4           02a_registration_wait 107.45
-5           02b_registration_util   0.84
-6            03a_examination_wait  23.92
-7            03b_examination_util   0.84
-8  04a_treatment_wait(non_trauma) 139.57
-9  04b_treatment_util(non_trauma)   0.87
-10      05_total_time(non-trauma) 236.96
-11         06a_stabilisation_wait   0.00
-12         06b_stabilisation_util   0.00
-13     07a_treatment_wait(trauma)  53.18
-14     07b_treatment_util(trauma)   0.65
-15          08_total_time(trauma) 197.52
-16                  09_throughput 168.54</code></pre>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>histogram_of_replications <span class="ot">&lt;-</span> <span class="cf">function</span>(rep_table, column_name, unit_label, <span class="at">n_bins=</span><span class="dv">10</span>){</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Divide the x range for selected column into n_bins</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  binwidth <span class="ot">&lt;-</span> <span class="fu">diff</span>(<span class="fu">range</span>(<span class="fu">select</span>(rep_table, <span class="fu">all_of</span>(column_name))))<span class="sc">/</span>n_bins</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(rep_table, <span class="fu">aes</span>(.data[[column_name]])) <span class="sc">+</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>   <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> binwidth, <span class="at">fill=</span><span class="st">"steelblue"</span>, <span class="at">colour =</span> <span class="st">"black"</span>) <span class="sc">+</span> </span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="fu">paste</span>(column_name, <span class="st">" ("</span>, unit_label, <span class="st">")"</span>)) <span class="sc">+</span> </span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylab</span>(<span class="st">"Replications"</span>)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(g)</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="co"># as numeric names make sure to pass column name in ticks ``</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="fu">histogram_of_replications</span>(rep_table, <span class="st">"09_throughput"</span>, <span class="st">"patients/day"</span>, <span class="at">n_bins=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="01_model_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="results-summary-table" class="level3">
+<h3 class="anchored" data-anchor-id="results-summary-table">9.7 Results summary table</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># modified summary table function</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>create_summary_table <span class="ot">&lt;-</span> <span class="cf">function</span>(rep_table, exp, <span class="at">dp=</span><span class="dv">2</span>){</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mean of all columns, but ignore rep number</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  mean_values <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">colMeans</span>(rep_table[<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(rep_table))]))</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(mean_values) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"mean"</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">round</span>(mean_values, dp))</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">create_summary_table</span>(rep_table, exp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mean</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">00_arrivals</td>
+<td style="text-align: right;">227.28</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">01a_triage_wait</td>
+<td style="text-align: right;">34.24</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">01b_triage_util</td>
+<td style="text-align: right;">0.60</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">02a_registration_wait</td>
+<td style="text-align: right;">104.06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">02b_registration_util</td>
+<td style="text-align: right;">0.83</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">03a_examination_wait</td>
+<td style="text-align: right;">23.60</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">03b_examination_util</td>
+<td style="text-align: right;">0.83</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">04a_treatment_wait(non_trauma)</td>
+<td style="text-align: right;">126.82</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">04b_treatment_util(non_trauma)</td>
+<td style="text-align: right;">0.86</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">05_total_time(non-trauma)</td>
+<td style="text-align: right;">229.06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">06a_stabilisation_wait</td>
+<td style="text-align: right;">217.85</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">06b_stabilisation_util</td>
+<td style="text-align: right;">0.74</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">07a_treatment_wait(trauma)</td>
+<td style="text-align: right;">7.22</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">07b_treatment_util(trauma)</td>
+<td style="text-align: right;">0.27</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">08_total_time(trauma)</td>
+<td style="text-align: right;">354.38</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">09_throughput</td>
+<td style="text-align: right;">154.86</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

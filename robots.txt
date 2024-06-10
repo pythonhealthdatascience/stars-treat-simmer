@@ -1,1 +1,1 @@
-Sitemap: https://TomMonks.github.io/treat-sim-rsimmer/sitemap.xml
+Sitemap: https://pythonhealthdatascience.github.io/stars-treat-simmer/sitemap.xml

@@ -227,7 +227,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#example-usage" id="toc-example-usage" class="nav-link" data-scroll-target="#example-usage">4.2 Example usage</a></li>
   </ul></li>
   <li><a href="#validation" id="toc-validation" class="nav-link" data-scroll-target="#validation">5. Validation</a></li>
-  <li><a href="#running-code" id="toc-running-code" class="nav-link" data-scroll-target="#running-code">Running Code</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/TomMonks/treat-sim-rsimmer/edit/main/02_model/02_thinning.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/TomMonks/treat-sim-rsimmer/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -459,62 +458,71 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                <span class="cf">function</span>() <span class="fu">nspp_thinning</span>(<span class="fu">now</span>(env), arrivals, <span class="at">debug=</span><span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">run</span>(<span class="at">until=</span><span class="fl">540.0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Time: 0  Rejections: 6  t: 1  lambda_t: 0.0666666666666667  IAT: 33.5200980320404"
-[1] "Time: 33.5200980320404  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 3.81393849828696"
-[1] "Time: 37.3340365303274  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 3.36145904147997"
-[1] "Time: 40.6954955718073  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 5.13485132695592"
-[1] "Time: 45.8303468987633  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 1.32352768772477"
-[1] "Time: 47.153874586488  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 1.76001061750678"
-[1] "Time: 48.9138852039948  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 8.61447293602623"
-[1] "Time: 57.528358140021  Rejections: 14  t: 1  lambda_t: 0.0666666666666667  IAT: 78.9044174392909"
-[1] "Time: 136.432775579312  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 3.89573549830771"
-[1] "Time: 140.32851107762  Rejections: 2  t: 3  lambda_t: 0.142857142857143  IAT: 9.97739376040757"
-[1] "Time: 150.305904838027  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 2.62906914809719"
-[1] "Time: 152.934973986124  Rejections: 1  t: 3  lambda_t: 0.142857142857143  IAT: 6.08679874612412"
-[1] "Time: 159.021772732249  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 26.7391672063817"
-[1] "Time: 185.76093993863  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 6.61135393639511"
-[1] "Time: 192.372293875025  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 2.56115276599303"
-[1] "Time: 194.933446641018  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 6.82137783595777"
-[1] "Time: 201.754824476976  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.229064174927771"
-[1] "Time: 201.983888651904  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.59620280843228"
-[1] "Time: 203.580091460336  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.0473874481394887"
-[1] "Time: 203.627478908476  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 14.9578277013245"
-[1] "Time: 218.5853066098  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 3.22828953154385"
-[1] "Time: 221.813596141344  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.7590237618424"
-[1] "Time: 223.572619903186  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.17247998278517"
-[1] "Time: 223.745099885972  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 3.08621887350455"
-[1] "Time: 226.831318759476  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 0.65752177266404"
-[1] "Time: 227.48884053214  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.18241797434166"
-[1] "Time: 228.671258506482  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 5.07960279451168"
-[1] "Time: 233.750861300994  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 17.4399162872808"
-[1] "Time: 251.190777588274  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 0.947026163339615"
-[1] "Time: 252.137803751614  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 2.46803309535608"
-[1] "Time: 254.60583684697  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 3.82389974246337"
-[1] "Time: 258.429736589433  Rejections: 2  t: 5  lambda_t: 0.125  IAT: 21.7076573021452"
-[1] "Time: 280.137393891579  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 10.8858477597343"
-[1] "Time: 291.023241651313  Rejections: 1  t: 5  lambda_t: 0.125  IAT: 16.1418948360699"
-[1] "Time: 307.165136487383  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 2.86286774324253"
-[1] "Time: 310.028004230625  Rejections: 1  t: 6  lambda_t: 0.1  IAT: 8.15702171685576"
-[1] "Time: 318.185025947481  Rejections: 1  t: 6  lambda_t: 0.1  IAT: 15.8306994003462"
-[1] "Time: 334.015725347827  Rejections: 1  t: 6  lambda_t: 0.1  IAT: 21.6951490392651"
-[1] "Time: 355.710874387092  Rejections: 2  t: 6  lambda_t: 0.1  IAT: 10.6123247695669"
-[1] "Time: 366.323199156659  Rejections: 4  t: 7  lambda_t: 0.0666666666666667  IAT: 25.2464647510238"
-[1] "Time: 391.569663907683  Rejections: 4  t: 7  lambda_t: 0.0666666666666667  IAT: 23.8610684209245"
-[1] "Time: 415.430732328607  Rejections: 2  t: 7  lambda_t: 0.0666666666666667  IAT: 6.35584883857518"
-[1] "Time: 421.786581167183  Rejections: 1  t: 8  lambda_t: 0.05  IAT: 8.98481857709071"
-[1] "Time: 430.771399744273  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 13.134219450246"
-[1] "Time: 443.905619194519  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 0.0909088331505746"
-[1] "Time: 443.99652802767  Rejections: 1  t: 8  lambda_t: 0.05  IAT: 6.24467818743965"
-[1] "Time: 450.241206215109  Rejections: 1  t: 8  lambda_t: 0.05  IAT: 14.8813823113198"
-[1] "Time: 465.122588526429  Rejections: 6  t: 8  lambda_t: 0.05  IAT: 38.8672440589675"
-[1] "Time: 503.989832585397  Rejections: 4  t: 9  lambda_t: 0.05  IAT: 12.9348669780072"
-[1] "Time: 516.924699563404  Rejections: 2  t: 9  lambda_t: 0.05  IAT: 19.7696259574812"
-[1] "Time: 536.694325520885  Rejections: 9  t: 9  lambda_t: 0.05  IAT: 67.2666817708089"</code></pre>
+<pre><code>[1] "Time: 0  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 6.60448138813904"
+[1] "Time: 6.60448138813904  Rejections: 3  t: 1  lambda_t: 0.0666666666666667  IAT: 38.2223867671698"
+[1] "Time: 44.8268681553088  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 4.11055026089257"
+[1] "Time: 48.9374184162014  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 1.96410055505112"
+[1] "Time: 50.9015189712525  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 3.96994441638414"
+[1] "Time: 54.8714633876367  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 0.0909436540678144"
+[1] "Time: 54.9624070417045  Rejections: 0  t: 1  lambda_t: 0.0666666666666667  IAT: 0.294763366219829"
+[1] "Time: 55.2571704079243  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 2.94235679725938"
+[1] "Time: 58.1995272051837  Rejections: 1  t: 1  lambda_t: 0.0666666666666667  IAT: 3.31893699516812"
+[1] "Time: 61.5184642003518  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 0.125600891187787"
+[1] "Time: 61.6440650915396  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 1.94474088028073"
+[1] "Time: 63.5888059718203  Rejections: 2  t: 2  lambda_t: 0.0833333333333333  IAT: 11.5495376145835"
+[1] "Time: 75.1383435864039  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 0.313380176667124"
+[1] "Time: 75.451723763071  Rejections: 5  t: 2  lambda_t: 0.0833333333333333  IAT: 10.0872231288384"
+[1] "Time: 85.5389468919094  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 2.53530872520059"
+[1] "Time: 88.07425561711  Rejections: 5  t: 2  lambda_t: 0.0833333333333333  IAT: 11.0190523967693"
+[1] "Time: 99.0933080138793  Rejections: 3  t: 2  lambda_t: 0.0833333333333333  IAT: 12.8680750852042"
+[1] "Time: 111.961383099083  Rejections: 0  t: 2  lambda_t: 0.0833333333333333  IAT: 0.273815204855055"
+[1] "Time: 112.235198303939  Rejections: 1  t: 2  lambda_t: 0.0833333333333333  IAT: 7.04419449649236"
+[1] "Time: 119.279392800431  Rejections: 1  t: 2  lambda_t: 0.0833333333333333  IAT: 6.11522971255491"
+[1] "Time: 125.394622512986  Rejections: 2  t: 3  lambda_t: 0.142857142857143  IAT: 18.8611651017311"
+[1] "Time: 144.255787614717  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 4.16606501253862"
+[1] "Time: 148.421852627255  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 14.9911227729349"
+[1] "Time: 163.41297540019  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 0.877300298307091"
+[1] "Time: 164.290275698497  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 0.771620173472911"
+[1] "Time: 165.06189587197  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 8.03274416148261"
+[1] "Time: 173.094640033453  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 3.93080355112857"
+[1] "Time: 177.025443584582  Rejections: 0  t: 3  lambda_t: 0.142857142857143  IAT: 7.97838258515012"
+[1] "Time: 185.003826169732  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 2.33859735172552"
+[1] "Time: 187.342423521457  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 5.01475271747863"
+[1] "Time: 192.357176238936  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 2.38979005953297"
+[1] "Time: 194.746966298469  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.97432373650372"
+[1] "Time: 196.721290034972  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 6.32978100199179"
+[1] "Time: 203.051071036964  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 9.55589522565615"
+[1] "Time: 212.60696626262  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 11.7599831235813"
+[1] "Time: 224.366949386202  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 4.42439305136488"
+[1] "Time: 228.791342437567  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 5.80665699185288"
+[1] "Time: 234.59799942942  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 1.46109151421115"
+[1] "Time: 236.059090943631  Rejections: 0  t: 4  lambda_t: 0.2  IAT: 4.11777440895921"
+[1] "Time: 240.17686535259  Rejections: 2  t: 5  lambda_t: 0.125  IAT: 30.4208898415293"
+[1] "Time: 270.597755194119  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 0.718266416806728"
+[1] "Time: 271.316021610926  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 8.47060439134848"
+[1] "Time: 279.786626002274  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 1.80463053518906"
+[1] "Time: 281.591256537463  Rejections: 0  t: 5  lambda_t: 0.125  IAT: 2.73546760900867"
+[1] "Time: 284.326724146472  Rejections: 2  t: 5  lambda_t: 0.125  IAT: 20.6461490123808"
+[1] "Time: 304.972873158853  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 1.91213063514486"
+[1] "Time: 306.885003793998  Rejections: 2  t: 6  lambda_t: 0.1  IAT: 12.6577376756341"
+[1] "Time: 319.542741469632  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 4.29773922057307"
+[1] "Time: 323.840480690205  Rejections: 2  t: 6  lambda_t: 0.1  IAT: 23.4489883913778"
+[1] "Time: 347.289469081583  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 0.377947333957309"
+[1] "Time: 347.66741641554  Rejections: 0  t: 6  lambda_t: 0.1  IAT: 0.309758780058473"
+[1] "Time: 347.977175195599  Rejections: 1  t: 6  lambda_t: 0.1  IAT: 18.1603777353632"
+[1] "Time: 366.137552930962  Rejections: 8  t: 7  lambda_t: 0.0666666666666667  IAT: 29.9604206477663"
+[1] "Time: 396.097973578728  Rejections: 0  t: 7  lambda_t: 0.0666666666666667  IAT: 11.492602591704"
+[1] "Time: 407.590576170432  Rejections: 4  t: 7  lambda_t: 0.0666666666666667  IAT: 16.8726465525595"
+[1] "Time: 424.463222722992  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 0.252609157435063"
+[1] "Time: 424.715831880427  Rejections: 7  t: 8  lambda_t: 0.05  IAT: 42.4018466228467"
+[1] "Time: 467.117678503273  Rejections: 0  t: 8  lambda_t: 0.05  IAT: 1.55156628927216"
+[1] "Time: 468.669244792546  Rejections: 9  t: 8  lambda_t: 0.05  IAT: 44.4204908224895"
+[1] "Time: 513.089735615035  Rejections: 5  t: 9  lambda_t: 0.05  IAT: 40.0685665684267"</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>simmer environment: TreatSim | now: 540 | next: 547.565856749039
+<pre><code>simmer environment: TreatSim | now: 540 | next: 553.158302183462
 { Monitor: in memory }
-{ Source: patient | monitored: 1 | n_generated: 51 }</code></pre>
+{ Source: patient | monitored: 1 | n_generated: 60 }</code></pre>
 </div>
 </div>
 </section>
@@ -591,24 +599,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="02_thinning_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<pre><code></code></pre>
-</section>
-<section id="running-code" class="level2">
-<h2 class="anchored" data-anchor-id="running-code">Running Code</h2>
-<p>When you click the <strong>Render</strong> button a document will be generated that includes both content and the output of embedded code. You can embed code like this:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
-</div>
-</div>
-<p>You can add options to executable code like this</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 4</code></pre>
-</div>
-</div>
-<p>The <code>echo: false</code> option disables the printing of code (only output is displayed).</p>
 
 
 </section>
