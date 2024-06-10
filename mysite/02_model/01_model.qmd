@@ -542,13 +542,13 @@ Below we construct a summary table of results providing the mean of 16 KPIs.
 > Code quality is a work in progress. 😃
 
 ```{r}
-arrivals_by_replication <- function(envs){
-  results <- vector()
-  for(env in envs){
-    results <- c(results, get_n_generated(env, "Patient"))
-  }
-  return(data.frame(results))
-}
+# arrivals_by_replication <- function(envs){
+#   results <- vector()
+#   for(env in envs){
+#     results <- c(results, get_n_generated(env, "Patient"))
+#   }
+#   return(data.frame(results))
+# }
 ```
 
 ```{r}
@@ -576,145 +576,49 @@ get_resource_counts <- function(exp) {
 Functions to calculate KPIs from custom attributes
 
 ```{r}
-# mean time in the system and throughput
-calc_kpi_from_attributes_for_rep <- function(reps, rep){
-  
-  # get attributes
-  att <- get_mon_attributes(reps)
-  # for speed - limit to replication number.
-  rep_att <- subset(att[att$replication == rep,], select = c(name, key, value))
-  # long to wide format...
-  data_wide <- spread(rep_att, key, value)
-  
-  # Patient type 1: trauma
-  # take the mean and ignore patients still in pathway
-  mean_time_1 = mean(data_wide[data_wide$patient_type == 1,]$total_time, na.rm = TRUE)
-  
-  # Patient type 2: non_trauma
-  # take the mean and ignore patients still in pathway
-  mean_time_2 = mean(data_wide[data_wide$patient_type == 2,]$total_time, na.rm = TRUE)
-  
-  # Throughput - discharges during opening hours.
-  throughput <- sum(data_wide$departed, na.rm=TRUE)
-  
-  # store and return data.frame of results
-  rep_results <- data.frame("05_total_time(non-trauma)" = mean_time_2,
-                            "08_total_time(trauma)" = mean_time_1, 
-                            "09_throughput"= throughput)
-  return(rep_results)
-}
-
-calc_kpi_from_attributes <- function(reps){
-  # calcs total time by patient type and total throughput
-  
-  # empty dataframe for attribute calculations.
-  att_results <- data.frame(matrix(ncol = 3, nrow = 0))
-  colnames(att_results) <- c("05_total_time(non-trauma)", "08_total_time(trauma)", "09_throughput")
-
-  # add each rep separately as this works faster with pivot
-  for(rep_i in 1:length(reps)){
-    att_results <- rbind(att_results, calc_kpi_from_attributes_for_rep(reps, rep_i))
-  }
-
-  # return the KPIs by replications
-  return(att_results)
-}
-```
-
-```{r}
-create_summary_table <- function(reps, exp, dp=2){
-
-  # mean number of arrivals
-  arrival_counts <- arrivals_by_replication(reps)
-  mean_arrivals <- mean(arrival_counts$results)
-  arrival_df <- data.frame("00_arrivals", mean_arrivals)
-  names(arrival_df)<-c("kpi","mean")
-
-  
-  # get results dataframe broken down by resource and replication.
-  arrivals <- get_mon_arrivals(reps, per_resource=TRUE)
-  
-  # calculate waiting time
-  arrivals$waiting_time <-arrivals$end_time - arrivals$start_time - arrivals$activity_time
-  # arrivals$waiting_time <- round(arrivals$waiting_time, 2)
-  
-  cols <- c("resource", "replication")
-  summary_wait <- arrivals %>%
-    # mean waiting time in each replication
-    group_by(across(all_of(cols))) %>%
-    summarise(rep_waiting_time=mean(waiting_time)) %>% 
-    # mean waiting time across replications
-    group_by(resource) %>% 
-    summarise(mean=mean(rep_waiting_time)) %>% 
-    mutate(resource=recode(resource,  
-                         'triage_bay'='01a_triage_wait', 
-                         'registration_clerk'='02a_registration_wait',
-                         'examination_room'='03a_examination_wait',
-                         'nontrauma_treat_cubicle'='04a_treatment_wait(non_trauma)',
-                         'trauma_room'='06a_stabilisation_wait',
-                         'trauma_treat_cubicle'='07a_treatment_wait(trauma)')) %>% 
-    arrange(resource)
-  
-  
-  names(summary_wait)<-c("kpi","mean")
-  
-  # utilisation calculation:
-  # simple calculation of total busy time / total scheduled resource time.
-  # where total scheduled time = n_resource * results collection period.
-  summary_util <- arrivals %>%
-    # mean waiting time in each replication
-    group_by(across(all_of(cols))) %>%
-    summarise(in_use=sum(activity_time)) %>% 
-    arrange(resource)
-  
-  # add resource counts to table for calc
-  summary_util <- merge(summary_util, get_resource_counts(exp), 
-                        by="resource", all=TRUE)
-  
-  # total in use / total scheduled time
-  summary_util$util = summary_util$in_use / (DEFAULT_RESULTS_COLLECTION_PERIOD * summary_util$count)  
-  
-  summary_util <- summary_util %>%
-    # mean waiting time in each replication
-    group_by(resource) %>%
-    summarise(mean=mean(util)) %>% 
-    mutate(resource=recode(resource,  
-                         'triage_bay'='01b_triage_util', 
-                         'registration_clerk'='02b_registration_util',
-                         'examination_room'='03b_examination_util',
-                         'nontrauma_treat_cubicle'='04b_treatment_util(non_trauma)',
-                         'trauma_room'='06b_stabilisation_util',
-                         'trauma_treat_cubicle'='07b_treatment_util(trauma)')) %>% 
-    arrange(resource)
-
-  names(summary_util) <- c("kpi","mean")
-  
-  overall <- bind_rows(arrival_df, summary_wait, summary_util) %>% 
-    arrange(kpi) 
-  
-  ## KPIs calculated from attributes
-  # empty dataframe for attribute calculations.
-  att_results <- calc_kpi_from_attributes(reps)
-  
-  print(att_results)
-  
-  mean_att_results <- colMeans(att_results)
-
-  overall <- overall %>%
-    add_row(kpi="05_total_time(non-trauma)", mean=mean_att_results[1]) %>%
-    add_row(kpi="08_total_time(trauma)", mean=mean_att_results[2]) %>%
-    add_row(kpi="09_throughput", mean=mean_att_results[3]) %>%
-    arrange(kpi)
-  
-  # round and return
-  overall$mean <- round(overall$mean, dp)
-  return(overall)
-}
-```
-
-```{r}
-results_summary <- create_summary_table(reps, exp)
-results_summary
+# # mean time in the system and throughput
+# calc_kpi_from_attributes_for_rep <- function(reps, rep){
+#   
+#   # get attributes
+#   att <- get_mon_attributes(reps)
+#   # for speed - limit to replication number.
+#   rep_att <- subset(att[att$replication == rep,], select = c(name, key, value))
+#   # long to wide format...
+#   data_wide <- spread(rep_att, key, value)
+#   
+#   # Patient type 1: trauma
+#   # take the mean and ignore patients still in pathway
+#   mean_time_1 = mean(data_wide[data_wide$patient_type == 1,]$total_time, na.rm = TRUE)
+#   
+#   # Patient type 2: non_trauma
+#   # take the mean and ignore patients still in pathway
+#   mean_time_2 = mean(data_wide[data_wide$patient_type == 2,]$total_time, na.rm = TRUE)
+#   
+#   # Throughput - discharges during opening hours.
+#   throughput <- sum(data_wide$departed, na.rm=TRUE)
+#   
+#   # store and return data.frame of results
+#   rep_results <- data.frame("05_total_time(non-trauma)" = mean_time_2,
+#                             "08_total_time(trauma)" = mean_time_1, 
+#                             "09_throughput"= throughput)
+#   return(rep_results)
+# }
+# 
+# calc_kpi_from_attributes <- function(reps){
+#   # calcs total time by patient type and total throughput
+#   
+#   # empty dataframe for attribute calculations.
+#   att_results <- data.frame(matrix(ncol = 3, nrow = 0))
+#   colnames(att_results) <- c("05_total_time(non-trauma)", "08_total_time(trauma)", "09_throughput")
+# 
+#   # add each rep separately as this works faster with pivot
+#   for(rep_i in 1:length(reps)){
+#     att_results <- rbind(att_results, calc_kpi_from_attributes_for_rep(reps, rep_i))
+#   }
+# 
+#   # return the KPIs by replications
+#   return(att_results)
+# }
 ```
 
 At the moment the code creates a summary table. It does not return a table of replications versus performance measures. This is necessary for charts. Function create_summary_table needs to be broken up. A function that first assembles the replication results would be better.
