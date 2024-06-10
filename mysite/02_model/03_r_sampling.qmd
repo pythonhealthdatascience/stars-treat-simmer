@@ -1,4 +1,13 @@
-# Sampling in R
+---
+title: "Sampling in R"
+author: "Thomas Monks, Alison Harper, Amy Heather"
+format: 
+  html:
+    df-print: kable
+editor: visual
+---
+
+## Overview
 
 By **default** R offers less control over random sampling than python and commercial simulation software. It uses a single random number stream for all sampling and does not allow you to create individual random number streams (each with its own seed) for each sampling distribution.
 
