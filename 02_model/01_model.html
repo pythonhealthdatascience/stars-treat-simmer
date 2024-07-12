@@ -878,7 +878,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate resource utilisation and return table (rows = reps and cols = resources)</span></span>
-<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>resource_utilisation_by_replication <span class="ot">&lt;-</span> <span class="cf">function</span>(reps, results_collection_period){</span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>resource_utilisation_by_replication <span class="ot">&lt;-</span> <span class="cf">function</span>(reps, exp, results_collection_period){</span>
 <span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get results dataframe broken down by resource and replication.</span></span>
 <span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>  cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"resource"</span>, <span class="st">"replication"</span>)</span>
@@ -990,11 +990,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="function-to-create-the-replications-table" class="level3">
 <h3 class="anchored" data-anchor-id="function-to-create-the-replications-table">9.5. Function to create the replications table</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>replication_results_table <span class="ot">&lt;-</span> <span class="cf">function</span>(reps, results_collection_period){</span>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>replication_results_table <span class="ot">&lt;-</span> <span class="cf">function</span>(reps, exp, results_collection_period){</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># generate and merge all results tables on the replication column</span></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  results_table <span class="ot">&lt;-</span> <span class="fu">arrivals_by_replication</span>(reps) <span class="sc">%&gt;%</span> </span>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">merge</span>(<span class="fu">resource_waiting_times_by_replication</span>(reps), <span class="at">by=</span><span class="st">"replication"</span>, <span class="at">all=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">merge</span>(<span class="fu">resource_utilisation_by_replication</span>(reps, </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">merge</span>(<span class="fu">resource_utilisation_by_replication</span>(reps, exp,</span>
 <span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>                                              results_collection_period), </span>
 <span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">by=</span><span class="st">"replication"</span>, <span class="at">all=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">merge</span>(<span class="fu">system_kpi_by_replication</span>(reps), <span class="at">by=</span><span class="st">"replication"</span>, <span class="at">all=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
@@ -1004,7 +1004,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  results_table </span>
 <span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>rep_table <span class="ot">&lt;-</span> <span class="fu">replication_results_table</span>(reps, DEFAULT_RESULTS_COLLECTION_PERIOD)</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>rep_table <span class="ot">&lt;-</span> <span class="fu">replication_results_table</span>(reps, exp, DEFAULT_RESULTS_COLLECTION_PERIOD)</span>
 <span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(rep_table)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -1198,14 +1198,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="results-summary-table">9.7 Results summary table</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># modified summary table function</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>create_summary_table <span class="ot">&lt;-</span> <span class="cf">function</span>(rep_table, exp, <span class="at">dp=</span><span class="dv">2</span>){</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>create_summary_table <span class="ot">&lt;-</span> <span class="cf">function</span>(rep_table, <span class="at">dp=</span><span class="dv">2</span>){</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mean of all columns, but ignore rep number</span></span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  mean_values <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">colMeans</span>(rep_table[<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(rep_table))]))</span>
 <span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(mean_values) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"mean"</span>)</span>
 <span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">round</span>(mean_values, dp))</span>
 <span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">create_summary_table</span>(rep_table, exp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">create_summary_table</span>(rep_table)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="table table-sm table-striped small">
