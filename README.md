@@ -1,10 +1,10 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11546973.svg)](https://doi.org/10.5281/zenodo.11546973)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Read the Docs](https://readthedocs.org/projects/pip/badge/?version=latest)](https://pythonhealthdatascience.github.io/stars-treat-simmer/)
-[![ORCID: Harper](https://img.shields.io/badge/ORCID-0000--0001--5274--5037-brightgreen)](https://orcid.org/0000-0001-5274-5037)
-[![ORCID: Monks](https://img.shields.io/badge/ORCID-0000--0003--2631--4481-brightgreen)](https://orcid.org/0000-0003-2631-4481)
-[![ORCID: Heather](https://img.shields.io/badge/ORCID-0000--0002--6596--3479-brightgreen)](https://orcid.org/0000-0002-6596-3479)
-[![ORCID: Mustafee](https://img.shields.io/badge/ORCID-0000--0002--2204--8924-brightgreen)](https://orcid.org/0000-0002-2204-8924)
+[![ORCID: Harper](https://img.shields.io/badge/Alison_Harper-0000--0001--5274--5037-brightgreen)](https://orcid.org/0000-0001-5274-5037)
+[![ORCID: Monks](https://img.shields.io/badge/Tom_Monks-0000--0003--2631--4481-brightgreen)](https://orcid.org/0000-0003-2631-4481)
+[![ORCID: Heather](https://img.shields.io/badge/Amy_Heather-0000--0002--6596--3479-brightgreen)](https://orcid.org/0000-0002-6596-3479)
+[![ORCID: Mustafee](https://img.shields.io/badge/Nav_Mustafee-0000--0002--2204--8924-brightgreen)](https://orcid.org/0000-0002-2204-8924)
 
 # 💫  Towards Sharing Tools, Artifacts, and Reproducible Simulation: a `simmer` model example
 
