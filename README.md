@@ -1,5 +1,6 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11546973.svg)](https://doi.org/10.5281/zenodo.11546973)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Read the Docs](https://readthedocs.org/projects/pip/badge/?version=latest)](https://tommonks.github.io/treat-sim-rsimmer/)
+[![Read the Docs](https://readthedocs.org/projects/pip/badge/?version=latest)](https://pythonhealthdatascience.github.io/stars-treat-simmer/)
 [![ORCID: Harper](https://img.shields.io/badge/ORCID-0000--0001--5274--5037-brightgreen)](https://orcid.org/0000-0001-5274-5037)
 [![ORCID: Monks](https://img.shields.io/badge/ORCID-0000--0003--2631--4481-brightgreen)](https://orcid.org/0000-0003-2631-4481)
 [![ORCID: Heather](https://img.shields.io/badge/ORCID-0000--0002--6596--3479-brightgreen)](https://orcid.org/0000-0002-6596-3479)
@@ -11,7 +12,7 @@
 
 ## Overview
 
-  The materials and methods in this documentation support work towards developing the **S.T.A.R.S healthcare framework** (**S**haring **T**ools and **A**rtifacts for **R**eproducible **S**imulations in healthcare).  Long term S.T.A.R.S aims to support researchers share open simulation models regardless of language choice, improve the quality of sharing, and reduce the workload required to meet high standards of open science for the modelling and simulation community.
+  The materials and methods in this documentation support work towards developing the **STARS healthcare framework** (**S**haring **T**ools and **A**rtifacts for **R**eproducible **S**imulations in healthcare).  Long term S.T.A.R.S aims to support researchers share open simulation models regardless of language choice, improve the quality of sharing, and reduce the workload required to meet high standards of open science for the modelling and simulation community.
 
 > The code and written materials are a **work in progress** towards STARS version 2.0. It is not recommended to use these materials in simulation practice at the moment.
   
@@ -19,9 +20,9 @@ This repo demonstrates the application of sharing a discrete-event simulation mo
   
   * All artifacts in this repository are linked to study researchers via ORCIDs;
   * Model code is made available under the MIT license;
-  * [**To do**: validate and test R dependencies managed through `renv`]
-  *  The R code and simmer model are documented and explained in a quarto website served up by GitHub pages;
-  * [**To do**: the materials are deposited and made citatable using Zenodo;]
+  * Project dependencies managed through `renv`
+  * The R code and simmer model are documented and explained in a quarto website served up by GitHub pages;
+  * The materials are deposited and made citatable using Zenodo;
   * [**To do**: The models are sharable with other researchers and the NHS without the need to install software.]
 
 ## Author ORCIDs
@@ -33,7 +34,28 @@ This repo demonstrates the application of sharing a discrete-event simulation mo
 
 ## Citation
 
-To Add
+If you use any of the material in this repo please cite the repository: 
+
+```
+Monks, T., Harper, A., Heather, A., & Mustafee, N. (2024). Towards Sharing Tools, Artifacts, and Reproducible Simulation: a `simmer` model example (v0.2.0). Zenodo. https://doi.org/10.5281/zenodo.11222943
+```
+
+```bibtex
+@software{monks_2024_11546973,
+  author       = {Monks, Thomas and
+                  Harper, Alison and
+                  Heather, Amy and
+                  Mustafee, Navonil},
+  title        = {{Towards Sharing Tools, Artifacts, and Reproducible 
+                   Simulation: a `simmer` model example}},
+  month        = jun,
+  year         = 2024,
+  publisher    = {Zenodo},
+  version      = {v0.3.0},
+  doi          = {10.5281/zenodo.11222943},
+  url          = {https://doi.org/10.5281/zenodo.11222943}
+}
+```
 
 ## Funding
 
@@ -53,6 +75,6 @@ To do
 
 ## Online documentation produced by Quarto
 
-[![Read the Docs](https://readthedocs.org/projects/pip/badge/?version=latest)](https://tommonks.github.io/treat-sim-rsimmer)
+[![Read the Docs](https://readthedocs.org/projects/pip/badge/?version=latest)](https://pythonhealthdatascience.github.io/stars-treat-simmer/)
 
-* The documentation can be access at [https://tommonks.github.io/treat-sim-rsimmer](https://tommonks.github.io/treat-sim-rsimmer)
+* The documentation can be access at [https://pythonhealthdatascience.github.io/stars-treat-simmer/](https://pythonhealthdatascience.github.io/stars-treat-simmer/)
