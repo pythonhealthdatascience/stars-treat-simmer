@@ -8,7 +8,10 @@
 
 # 💫  Towards Sharing Tools, Artifacts, and Reproducible Simulation: a `simmer` model example
 
-> [Looking for a python implementation? ](https://github.com/pythonhealthdatascience/stars-simpy-example-docs)
+> 🏗 **WORK IN PROGRESS** (STARS 2.0) 🏗️   
+  > The materials in this repo are experimental. 
+
+> 🐍 [Looking for a python implementation? ](https://github.com/pythonhealthdatascience/stars-simpy-example-docs)
 
 ## Overview
 
@@ -34,7 +37,7 @@ This repo demonstrates the application of sharing a discrete-event simulation mo
 
 ## Citation
 
-If you use any of the material in this repo please cite the repository: 
+Please cite our code if you use it:
 
 ```
 Monks, T., Harper, A., Heather, A., & Mustafee, N. (2024). Towards Sharing Tools, Artifacts, and Reproducible Simulation: a `simmer` model example (v0.2.0). Zenodo. https://doi.org/10.5281/zenodo.11222943
@@ -54,6 +57,24 @@ Monks, T., Harper, A., Heather, A., & Mustafee, N. (2024). Towards Sharing Tools
   version      = {v0.3.0},
   doi          = {10.5281/zenodo.11222943},
   url          = {https://doi.org/10.5281/zenodo.11222943}
+}
+```
+
+
+We do not have a publication to support this work yet.  For now, please cite the Journal of Simulation article that reports STARS 1.0 and our pilot work.
+
+```bibtex
+@article{towards_stars_jos_paper,
+author = {Thomas Monks, Alison Harper and Navonil Mustafee},
+title = {Towards sharing tools and artefacts for reusable simulations in healthcare},
+journal = {Journal of Simulation},
+volume = {0},
+number = {0},
+pages = {1--20},
+year = {2024},
+publisher = {Taylor \& Francis},
+doi = {10.1080/17477778.2024.2347882},
+URL = { https://doi.org/10.1080/17477778.2024.2347882},
 }
 ```
 
