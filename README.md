@@ -90,9 +90,38 @@ This work was supported by the Medical Research Council [grant number MR/Z503915
 
 We adapt a textbook example from Nelson (2013): a terminating discrete-event simulation model of a U.S based treatment centre. In the model, patients arrive to the health centre between 6am and 12am following a non-stationary Poisson process. On arrival, all patients sign-in and are triaged into two classes: trauma and non-trauma. Trauma patients include impact injuries, broken bones, strains or cuts etc. Non-trauma include acute sickness, pain, and general feelings of being unwell etc. Trauma patients must first be stabilised in a trauma room. These patients then undergo treatment in a cubicle before being discharged. Non-trauma patients go through registration and examination activities. A proportion of non-trauma patients require treatment in a cubicle before being discharged. The model predicts waiting time and resource utilisation statistics for the treatment centre. The model allows managers to ask question about the physical design and layout of the treatment centre, the order in which patients are seen, the diagnostic equipment needed by patients, and the speed of treatments. For example: “what if we converted a doctors examination room into a room where nurses assess the urgency of the patients needs.”; or “what if the number of patients we treat in the afternoon doubled” 
 
-## Online Notebooks via Binder
+## Instructions to run the model
 
-To do
+> 🏗 **Only tested on Linux (Ubuntu 22.04)* 🏗️   
+  > The materials in this repo are experimental. 
+
+> We recommend the use of RStudio to run the code locally.
+
+### Downloading the code
+
+Either clone the repository using git or click on the green "code" button and select "Download Zip".
+
+```bash
+git clone https://github.com/pythonhealthdatascience/stars-treat-simmer
+```
+
+### Installing dependencies
+
+The current version of the code is maintained in R version 4.4.1
+
+Dependencies are managed via [renv](https://rstudio.github.io/renv/articles/renv.html). To replicate the R package software environment follow these instructions:
+
+1. Open RStudio
+2. Using RStudio open the project `treat-sim-rsimmer.Rproj` (
+
+
+At this point RStudio will identify that `renv` is required and install and activate it.  To restore the R packages issue the following command in R:
+
+```R
+renv::restore()
+```
+
+> You may need to wait several minutes while the software environment is restored.
 
 ## Online documentation produced by Quarto
 

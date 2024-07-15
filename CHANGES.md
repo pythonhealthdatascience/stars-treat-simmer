@@ -11,6 +11,7 @@ Consistent identifier (represents all versions, resolves to latest): [![DOI](htt
 ### Changes
 
 * RENV: added new renv where dependencies are built in a fresh Ubuntu 22.04 LTS instance with R installed. 
+* CHANGES: added CHANGES.md
 
 ## [v0.2.1](https://github.com/pythonhealthdatascience/stars-treat-simmer/releases/tag/v0.2.1) - 2024-07-12
 ### Fixed
