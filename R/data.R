@@ -10,14 +10,12 @@ NSPP_PATH = 'https://raw.githubusercontent.com/TomMonks/open-science-for-sim/mai
 #'     \item{arrival_rate}{rate per hour}
 #'     \item{arrival_rate2}{rate per minute}
 #' }
-#' @source: https://blogs.sas.com/content/iml/2014/06/04/simulate-lognormal-data-with-specified-mean-and-variance.html
+#' @source 'https://raw.githubusercontent.com/TomMonks/open-science-for-sim/main/src/notebooks/01_foss_sim/data/ed_arrivals.csv'
 #' 
-#' @param path A string. Optional path to arrival Profile from Nelson (2013)
 #' @returns A data.frame
 #' @importFrom RCurl getURL
-#' @importFrom tibble read.csv
 #' @importFrom assertthat assert_that
-nelson_arrivals <- function(path=NSPP_PATH){
+nelson_arrivals <- function(){
   csv_data <- RCurl::getURL(NSPP_PATH)
   df <- tibble::read.csv(text=csv_data)
   

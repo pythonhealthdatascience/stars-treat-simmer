@@ -13,13 +13,10 @@ This is a data.frame containing the following columns
 }
 }
 \source{
-: https://blogs.sas.com/content/iml/2014/06/04/simulate-lognormal-data-with-specified-mean-and-variance.html
+'https://raw.githubusercontent.com/TomMonks/open-science-for-sim/main/src/notebooks/01_foss_sim/data/ed_arrivals.csv'
 }
 \usage{
-nelson_arrivals(path = NSPP_PATH)
-}
-\arguments{
-\item{path}{A string. Optional path to arrival Profile from Nelson (2013)}
+nelson_arrivals()
 }
 \value{
 A data.frame
