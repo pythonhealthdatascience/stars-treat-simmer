@@ -18,7 +18,7 @@ Thinning is a acceptance-rejection sampling method and is used to generate inter
 The table below is adapted from Banks et al (2013) and breaks an arrival process down into 60 minutes intervals.
 
 | t(min) | Mean time between arrivals (min) | Arrival Rate $\lambda(t)$ (arrivals/min) |
-|:----------------:|:-----------------------:|:---------------------------:|
+|:------:|:--------------------------------:|:----------------------------------------:|
 |   0    |                15                |                   1/15                   |
 |   60   |                12                |                   1/12                   |
 |  120   |                7                 |                   1/7                    |
