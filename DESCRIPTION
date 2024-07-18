@@ -1,4 +1,4 @@
-Package: stars-treat-simmer
+Package: treat.sim
 Type: Package
 Title: Nelson's Treatment Centre Simulation in Simmer
 Version: 0.1.0
@@ -8,7 +8,9 @@ Description: R Simmer implemention of a simple urgent care treatment
     centre simulation from Nelson (2013). The model is packaged to 
     allow for easy experimentation, summary of results, and implementation
     in other software such as a Shiny interface.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
+Imports: 
+    assertthat (>= 0.2.1)

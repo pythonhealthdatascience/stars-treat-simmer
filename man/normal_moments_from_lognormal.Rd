@@ -9,7 +9,7 @@ normal_moments_from_lognormal(mean, std)
 \arguments{
 \item{mean}{A number. Sample mean.}
 
-\item{stdev}{A number. Sample standard deviation}
+\item{std}{A number. Sample standard deviation}
 }
 \value{
 A list

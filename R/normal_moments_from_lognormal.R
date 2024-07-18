@@ -13,8 +13,9 @@
 #' source: https://blogs.sas.com/content/iml/2014/06/04/simulate-lognormal-data-with-specified-mean-and-variance.html
 #' 
 #' @param mean A number. Sample mean.
-#' @param stdev A number. Sample standard deviation
+#' @param std A number. Sample standard deviation
 #' @returns A list 
+#' @importFrom assertthat assert_that
 #' @export
 #' @examples
 #' normal_moments_from_lognormal(mean = 125.0,
