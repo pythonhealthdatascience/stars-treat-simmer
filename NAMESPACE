@@ -3,5 +3,8 @@
 export(create_experiment)
 export(normal_moments_from_lognormal)
 export(nspp_thinning)
+export(sample_arrival_type)
+export(sample_nt_trauma_treatment)
 importFrom(RCurl,getURL)
+importFrom(Rlab,rbern)
 importFrom(assertthat,assert_that)

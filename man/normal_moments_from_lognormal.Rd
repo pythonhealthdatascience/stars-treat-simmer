@@ -3,6 +3,9 @@
 \name{normal_moments_from_lognormal}
 \alias{normal_moments_from_lognormal}
 \title{Mean and Variance of the underlying Normal Distribution}
+\source{
+https://blogs.sas.com/content/iml/2014/06/04/simulate-lognormal-data-with-specified-mean-and-variance.html
+}
 \usage{
 normal_moments_from_lognormal(mean, std)
 }
@@ -12,21 +15,17 @@ normal_moments_from_lognormal(mean, std)
 \item{std}{A number. Sample standard deviation}
 }
 \value{
-A list
+A list containing mu and sigma
 }
 \description{
-`normal_moments_from_lognormal` calculates the mu and sigma
-of the normal distribution underlying a lognormal
-mean and standard
+Calculates the mu and sigma of the normal distribution underlying a lognormal
 }
 \details{
 `rlnorm` from `stats` is designed to sample from the lognormal distribution. 
 The parameters is expects are moments of the underlying normal distribution
 Using sample mean and standard deviation this function calculates 
-the mu and sigma of the normal distribution. 
-source: https://blogs.sas.com/content/iml/2014/06/04/simulate-lognormal-data-with-specified-mean-and-variance.html
+the mu and sigma of the normal distribution.
 }
 \examples{
-normal_moments_from_lognormal(mean = 125.0,
-                              std = 5.0)
+normal_moments_from_lognormal(mean = 125.0, std = 5.0)
 }
