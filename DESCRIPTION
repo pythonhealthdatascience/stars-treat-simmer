@@ -4,12 +4,14 @@ Title: Nelson's Treatment Centre Simulation in Simmer
 Version: 0.1.0
 Author: Thomas Monks
 Maintainer: The package maintainer <yourself@somewhere.net>
-Description: R Simmer implemention of a simple urgent care treatment 
-    centre simulation from Nelson (2013). The model is packaged to 
-    allow for easy experimentation, summary of results, and implementation
+Description: A discrete-event simulation of a simple urgent care treatment 
+    centre simulation from Nelson (2013). Implemented in R Simmer.
+    The model is packaged to allow for easy experimentation, summary of results, and implementation
     in other software such as a Shiny interface.
 License: MIT + file LICENSE
 Encoding: UTF-8
+URL: https://github.com/pythonhealthdatascience/stars-treat-simmer https://pythonhealthdatascience.github.io/stars-treat-simmer/
+BugReports: https://github.com/pythonhealthdatascience/stars-treat-simmer/issues
 LazyData: true
 RoxygenNote: 7.3.2
 Imports: 
@@ -20,4 +22,4 @@ Imports:
     Rlab (>= 4.0),
     magrittr (>= 2.0.3)
 Depends: 
-    R (>= 2.10)
+    R (>= 3.4.0)
