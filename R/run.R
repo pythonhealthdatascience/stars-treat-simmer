@@ -27,14 +27,14 @@ LOG_LEVEL <- 1
 #' @param debug_arrivals boolean flag to show debug info for the thinning process
 #'  Use treat.sim::create_experiment() to generate an experiment list.
 #' @returns a simmer environment
-#' @importFrom simmer add_resource add_generator now run
+#' @importFrom simmer add_resource add_generator now run simmer
 #' 
 #' @seealso [create_experiment()] to create list containing default and custom experimental parameters.
 #' @export
 #' @examples
 #' set.seed(42)
 #' exp <- create_experiment(log_level=0)
-#' treat_sim <- simmer("TreatSim", log_level=exp$log_level)
+#' treat_sim <- simmer::simmer("TreatSim", log_level=exp$log_level)
 #' treat_sim <- single_run(treat_sim, exp)
 #' print("Simulation Complete.")
 single_run <- function(env, 
@@ -63,4 +63,47 @@ single_run <- function(env,
   
   # return environment and all of its results.
   return(env)
+}
+
+
+#' Perform multiple replications of the treat.sim model
+#' 
+#' @description
+#' The function runs single_run in a loop and returns the list of environments
+#' from each replication. The result can be used for analysis of the model
+#' 
+#' @param exp An experiment in list form - contains all model parameters. 
+#' @param n_reps number of replications to run.
+#' @param random_seed the random seed for the reps
+#' @returns a list of simmer environments
+#' @importFrom simmer simmer
+#' 
+#' @seealso [single_run()] to perform a single replication with the model
+#' @export
+#' @examples
+# create experiment
+#' exp <- create_experiment(log_level=0)
+#'
+#' # run 50 replications of the model
+#' reps <- multiple_replications(exp, n_reps=50, random_seed=0)
+multiple_replications <- function(exp, n_reps=5, random_seed=0){
+  
+  # set seed in once place.  No CRN
+  set.seed(random_seed)
+  
+  # note unlike in simmer documentation we use a traditional for loop
+  # instead of lapply. This allows us to separate env creation
+  # from run and preserve the environment interaction between NSPP 
+  # and current sim time.
+  # TO DO: look again -> can treat_sim be created inside single_run()
+  print("running replications...")
+  reps = vector()
+  for(rep in 1:n_reps){
+    treat_sim <- simmer::simmer("TreatSimmer", log_level=exp$log_level)
+    treat_sim <- single_run(treat_sim, exp)
+    # store the latest simulation environment and its results.
+    reps <- c(reps, treat_sim)
+  }
+  print("Complete.")
+  return(reps)
 }

@@ -35,7 +35,7 @@ returned for use in results analysis.
 \examples{
 set.seed(42)
 exp <- create_experiment(log_level=0)
-treat_sim <- simmer("TreatSim", log_level=exp$log_level)
+treat_sim <- simmer::simmer("TreatSim", log_level=exp$log_level)
 treat_sim <- single_run(treat_sim, exp)
 print("Simulation Complete.")
 }
