@@ -25,6 +25,7 @@
 #'      FALSE = no debug info provided.
 #' @returns A number 
 #' @importFrom assertthat assert_that
+#' @importFrom stats runif
 #' @export
 #' @examples
 #' # sample from Nelson arrivals at time 20.0

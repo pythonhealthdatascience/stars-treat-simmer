@@ -17,7 +17,7 @@ NSPP_PATH = 'https://raw.githubusercontent.com/TomMonks/open-science-for-sim/mai
 #' @importFrom assertthat assert_that
 nelson_arrivals <- function(){
   csv_data <- RCurl::getURL(NSPP_PATH)
-  df <- tibble::read.csv(text=csv_data)
+  df <- read.csv(text=csv_data)
   
   # arrivals per minute...
   df$arrival_rate2 <- df$arrival_rate/60.0

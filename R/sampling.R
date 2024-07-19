@@ -29,6 +29,7 @@ sample_nt_trauma_treatment <- function(p){
 #' if a patient is Trauma or Non-Trauma.  The return values are 
 #' 1 = Trauma, 2 = Non-trauma.
 #' @param p A number: the probability a patient has trauma on arrival
+#' @param n A number: number of samples to generate.
 #' @importFrom Rlab rbern
 #' @export
 #' @examples

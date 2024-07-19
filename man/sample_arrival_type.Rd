@@ -8,6 +8,8 @@ sample_arrival_type(p, n = 1)
 }
 \arguments{
 \item{p}{A number: the probability a patient has trauma on arrival}
+
+\item{n}{A number: number of samples to generate.}
 }
 \description{
 `sample_arrival_type` samples if a patient type is trauma or non-trauma
