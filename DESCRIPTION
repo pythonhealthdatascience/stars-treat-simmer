@@ -18,7 +18,6 @@ Imports:
     simmer.bricks (>= 0.2.2),
     RCurl (>=  1.98-1.16),
     Rlab (>= 4.0),
-    magrittr (>= 2.0.3),
-    tibble (>= 3.2.1)
+    magrittr (>= 2.0.3)
 Depends: 
     R (>= 2.10)

@@ -169,3 +169,42 @@ create_non_trauma_pathway <- function(exp){
   
   return(non_trauma_pathway)
 }
+
+
+#' Create a trajectory to generate trauma and not-trauma arrivals to the treatment centre.
+#' 
+#' @description
+#' Simulates the arrival of a patient, assigns a patient type and selects 
+#' treatment trajectory.
+#' 
+#' @param exp An experiment in list form - contains all model parameters. 
+#'  Use treat.sim::create_experiment() to generate an experiment list.
+#' @returns a simmer trajectory
+#' @importFrom simmer trajectory log_ branch set_attribute
+#' 
+#' @seealso [create_experiment()] to create list containing default and custom experimental parameters.
+#' @export
+#' @examples
+#' default_exp <- create_experiment()
+#' patient_generator <- create_arrival_generator(default_exp)
+create_arrival_generator <- function(exp){
+  
+  DEPART_MSG <- "A patient has departed the UTC"
+  
+  # create and parameterise the trauma pathway trajectory
+  trauma_pathway <- create_trauma_pathway(exp)
+  
+  # create and parameterise the non-trauma pathway trajectory
+  non_trauma_pathway <- create_non_trauma_pathway(exp)
+  
+  patient_arrival <- simmer::trajectory() %>%
+    simmer::branch(
+      function() sample_arrival_type(exp$prob_trauma), continue=T,
+      trauma_pathway,
+      non_trauma_pathway
+    ) %>%
+    simmer::log_(function() {paste(DEPART_MSG)},level=1) %>% 
+    simmer::set_attribute("departed", 1)
+  
+  return(patient_arrival)
+}

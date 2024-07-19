@@ -14,6 +14,7 @@ NSPP_PATH = 'https://raw.githubusercontent.com/TomMonks/open-science-for-sim/mai
 #' 
 #' @returns A data.frame
 #' @importFrom RCurl getURL
+#' @importFrom utils read.csv
 #' @importFrom assertthat assert_that
 nelson_arrivals <- function(){
   csv_data <- RCurl::getURL(NSPP_PATH)

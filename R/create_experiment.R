@@ -71,23 +71,6 @@ DEFAULT_NON_TRAUMA_CUBICLES <- 1
 # trauma pathway cubicles
 DEFAULT_TRAUMA_CUBICLES <- 1
 
-# SIMULATION CONFIG
-# Random seed - this will be investigated for CRN
-SEED <- 42
-
-# default results collection period
-DEFAULT_RESULTS_COLLECTION_PERIOD <- 60 * 19
-
-# number of replications.
-DEFAULT_N_REPS <- 5
-
-# Show the a trace of simulated events
-# 1 = show, 0 = do not show.
-LOG_LEVEL <- 1
-
-
-
-
 #' Create a simulation experiment parameter list
 #' 
 #' @description
