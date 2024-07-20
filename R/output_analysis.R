@@ -1,10 +1,3 @@
-# library(simmer)
-# library(simmer.bricks)
-# #library(tibble)
-# library(ggplot2)
-# suppressMessages(library(dplyr))
-# suppressMessages(library(tidyr))
-
 options(dplyr.summarise.inform = FALSE)
 
 ## 9. Results analysis
