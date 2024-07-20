@@ -206,7 +206,7 @@ system_kpi_by_replication <- function(reps){
 #' @returns data.frame
 #' @importFrom assertthat assert_that
 #' @importFrom tidyselect peek_vars
-#' @importFrom dplyr select merge
+#' @importFrom dplyr select
 #' 
 #' @export
 replication_results_table <- function(reps, exp, results_collection_period){
