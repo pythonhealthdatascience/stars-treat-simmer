@@ -40,7 +40,7 @@ waiting_time <- function(df){
 #' @returns data.frame
 #' @importFrom simmer get_mon_arrivals 
 #' @importFrom tidyr spread
-#' @importFrom deplyr mutate group_by summarise arrange
+#' @importFrom dplyr mutate group_by summarise arrange
 resource_waiting_times_by_replication <- function(reps) {
   # - WAITING TIMES FOR RESOURCES - #
   
@@ -112,7 +112,7 @@ resource_utilisation <- function(df, scheduled_time){
 #' @returns data.frame
 #' @importFrom simmer get_mon_arrivals 
 #' @importFrom tidyr spread
-#' @importFrom deplyr mutate group_by summarise
+#' @importFrom dplyr mutate group_by summarise
 #' 
 resource_utilisation_by_replication <- function(reps, exp, results_collection_period){
   
