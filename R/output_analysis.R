@@ -29,6 +29,18 @@ waiting_time <- function(df){
   return(df)
 }
 
+
+
+#' Waiting times for resources by replication 
+#' 
+#' @description
+#' Returns the mean waiting times for resourcse by replication as a data.frame
+#' 
+#' @param envs simmer environments from each replication of the model
+#' @returns data.frame
+#' @importFrom simmer get_mon_arrivals 
+#' @importFrom tidyr spread
+#' @importFrom deplyr mutate group_by summarise arrange
 resource_waiting_times_by_replication <- function(reps) {
   # - WAITING TIMES FOR RESOURCES - #
   
@@ -57,7 +69,6 @@ resource_waiting_times_by_replication <- function(reps) {
 }
 
 
-### 9.2. Resource utilisation KPIs
 
 get_resource_counts <- function(exp) {
   resource = c("triage_bay", 
@@ -86,7 +97,23 @@ resource_utilisation <- function(df, scheduled_time){
   return(df)
 }
 
-# calculate resource utilisation and return table (rows = reps and cols = resources)
+
+#' Resource utilisation by replication 
+#' 
+#' @description
+#' Returns the  utilisation of resource by replication as a data.frame
+#' calculation:
+#' total busy time / total scheduled resource time.
+#' where total scheduled time = n_resource * results collection period.
+#' 
+#' @param envs simmer environments
+#' @param exp list of parameters for experiment
+#' @param results_collection_period results collection simulation time
+#' @returns data.frame
+#' @importFrom simmer get_mon_arrivals 
+#' @importFrom tidyr spread
+#' @importFrom deplyr mutate group_by summarise
+#' 
 resource_utilisation_by_replication <- function(reps, exp, results_collection_period){
   
   # get results dataframe broken down by resource and replication.
@@ -121,9 +148,16 @@ resource_utilisation_by_replication <- function(reps, exp, results_collection_pe
 }
 
 
-### 9.3. Patient arrival numbers output
 
-# number of arrivals in each replication
+#' Number of arrivals in each replication
+#' 
+#' @description
+#' Returns the number of arrivals by replication as a data.frame
+#' 
+#' @param envs simmer environments
+#' @returns data.frame
+#' @importFrom simmer get_n_generated
+#' 
 arrivals_by_replication <- function(envs){
   results <- vector()
   for(env in envs){
@@ -137,8 +171,16 @@ arrivals_by_replication <- function(envs){
 }
 
 
-### 9.4 System level KPIs
-# mean time in the system and throughput
+#' System level KPIs
+#' 
+#' @description
+#' Calculates mean time in system and throughput for a replication
+#' 
+#' @param reps list of simmer environments
+#' @param rep_i replication for calculation
+#' @returns data.frame
+#' @importFrom simmer get_mon_attributes
+#' 
 system_kpi_for_rep_i <- function(reps, rep_i){
   
   # get attributes
