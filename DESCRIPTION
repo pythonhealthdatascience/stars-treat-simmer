@@ -1,0 +1,31 @@
+Package: treat.sim
+Type: Package
+Title: Nelson's Treatment Centre Simulation in Simmer
+Version: 0.1.0
+Author: Thomas Monks
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: A discrete-event simulation of a simple urgent care treatment 
+    centre simulation from Nelson (2013). Implemented in R Simmer.
+    The model is packaged to allow for easy experimentation, summary of results, and implementation
+    in other software such as a Shiny interface.
+License: MIT + file LICENSE
+Encoding: UTF-8
+URL: https://github.com/pythonhealthdatascience/stars-treat-simmer https://pythonhealthdatascience.github.io/stars-treat-simmer/
+BugReports: https://github.com/pythonhealthdatascience/stars-treat-simmer/issues
+LazyData: true
+RoxygenNote: 7.3.2
+Imports: 
+    assertthat (>= 0.2.1),
+    ggplot2 (>= 3.5.1),
+    simmer (>= 4.4.6.4),
+    simmer.bricks (>= 0.2.2),
+    RCurl (>=  1.98-1.16),
+    Rlab (>= 4.0),
+    magrittr (>= 2.0.3),
+    tidyselect (>= 1.2.1)
+Depends: 
+    R (>= 3.4.0)
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
