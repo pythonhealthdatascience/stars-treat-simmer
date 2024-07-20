@@ -25,3 +25,7 @@ Imports:
     tidyselect (>= 1.2.1)
 Depends: 
     R (>= 3.4.0)
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
