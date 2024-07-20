@@ -1,7 +1,7 @@
 Package: treat.sim
 Type: Package
 Title: Nelson's Treatment Centre Simulation in Simmer
-Version: 0.1.0
+Version: 0.1.1
 Author: Thomas Monks
 Maintainer: TomMonks 
 Description: A discrete-event simulation of a simple urgent care treatment 
