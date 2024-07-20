@@ -1,9 +1,9 @@
-library(simmer)
-library(simmer.bricks)
-library(tibble)
-library(ggplot2)
-suppressMessages(library(dplyr))
-suppressMessages(library(tidyr))
+# library(simmer)
+# library(simmer.bricks)
+# #library(tibble)
+# library(ggplot2)
+# suppressMessages(library(dplyr))
+# suppressMessages(library(tidyr))
 
 options(dplyr.summarise.inform = FALSE)
 
@@ -200,9 +200,21 @@ system_kpi_by_replication <- function(reps){
 }
 
 
-### 9.5. Function to create the replications table
-
-
+#' Function to create the replications table
+#' 
+#' @description
+#' Accepts a list of simmer environments and converts to a data,frame
+#' of replications (rows) x KPIs (cols).
+#' 
+#' @param reps list of simmer environments
+#' @param exp list of "experiment" contains all of the model 
+#'     parameters used to create the results
+#' @param results_collection_period the length of time results were collected.
+#' @returns data.frame
+#' @importFrom assertthat assert_that
+#' @importFrom tidyselect peek_vars
+#' 
+#' @export
 replication_results_table <- function(reps, exp, results_collection_period){
   # generate and merge all results tables on the replication column
   results_table <- arrivals_by_replication(reps) %>% 
@@ -218,8 +230,21 @@ replication_results_table <- function(reps, exp, results_collection_period){
 }
 
 
-### 9.6 Histogram of replications
-
+#' Histogram of replications for a selected KPI
+#' 
+#' @description
+#' Accepts a table of replication results and a ggplot histogram object
+#' for a selected column.
+#' 
+#' @param rep_table data.frame containing replications (rows) and KPIs (cols)
+#' @param column_name string name of the KPI to plot
+#' @param unit_label string of the x-axis label unit
+#' @param n_bins number of bins for the histogram
+#' 
+#' @returns plot
+#' @importFrom ggplot2 ggplot
+#' 
+#' @export
 histogram_of_replications <- function(rep_table, column_name, unit_label, n_bins=10){
   
   # Divide the x range for selected column into n_bins
