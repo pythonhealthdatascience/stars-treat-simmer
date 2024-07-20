@@ -206,6 +206,7 @@ system_kpi_by_replication <- function(reps){
 #' @returns data.frame
 #' @importFrom assertthat assert_that
 #' @importFrom tidyselect peek_vars
+#' @importFrom dplyr select
 #' 
 #' @export
 replication_results_table <- function(reps, exp, results_collection_period){
@@ -219,7 +220,7 @@ replication_results_table <- function(reps, exp, results_collection_period){
     # sort by column names to get "replication" followed by ordered 00_, 01a, 01b and so on...
     select(replication, sort(tidyselect::peek_vars()))
   
-  results_table 
+  return(results_table)
 }
 
 
