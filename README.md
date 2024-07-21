@@ -1,4 +1,5 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11546973.svg)](https://doi.org/10.5281/zenodo.11546973)
+[![treat.sim status badge](https://pythonhealthdatascience.r-universe.dev/badges/treat.sim)](https://pythonhealthdatascience.r-universe.dev/treat.sim)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Read the Docs](https://readthedocs.org/projects/pip/badge/?version=latest)](https://pythonhealthdatascience.github.io/stars-treat-simmer/)
 [![ORCID: Harper](https://img.shields.io/badge/Alison_Harper-0000--0001--5274--5037-brightgreen)](https://orcid.org/0000-0001-5274-5037)
@@ -15,7 +16,7 @@
 
 ## Overview
 
-  The materials and methods in this documentation support work towards developing the **STARS healthcare framework** (**S**haring **T**ools and **A**rtifacts for **R**eproducible **S**imulations in healthcare).  Long term S.T.A.R.S aims to support researchers share open simulation models regardless of language choice, improve the quality of sharing, and reduce the workload required to meet high standards of open science for the modelling and simulation community.
+  The materials and methods in this documentation support work towards developing the **STARS healthcare framework** (**S**haring **T**ools and **A**rtifacts for **R**eproducible **S**imulations in healthcare).  Long term STARS aims to support researchers share open simulation models regardless of language choice, improve the quality of sharing, and reduce the workload required to meet high standards of open science for the modelling and simulation community.
 
 > The code and written materials are a **work in progress** towards STARS version 2.0. It is not recommended to use these materials in simulation practice at the moment.
   
@@ -24,7 +25,8 @@ This repo demonstrates the application of sharing a discrete-event simulation mo
   * All artifacts in this repository are linked to study researchers via ORCIDs;
   * Model code is made available under the MIT license;
   * Project dependencies managed through `renv`
-  * The R code and simmer model are documented and explained in a quarto website served up by GitHub pages;
+  * The simulation model is deployed as an R package via [R Universe](https://pythonhealthdatascience.r-universe.dev/treat.sim)
+  * The R code, simmer model, (**to do** and package) are documented and explained in a quarto website served up by GitHub pages;
   * The materials are deposited and made citatable using Zenodo;
   * [**To do**: The models are sharable with other researchers and the NHS without the need to install software.]
 
@@ -97,6 +99,15 @@ We adapt a textbook example from Nelson (2013): a terminating discrete-event sim
 
 > We recommend the use of RStudio to run the code locally.
 
+### Installing the `treat.sim` package from R Universe
+
+We have made the model available as R package that can be installed from [R Universe](https://pythonhealthdatascience.r-universe.dev/treat.sim)
+
+If you use the model we recommend use of R studio and `renv` to isolate your project environment.  To install from the R console:
+
+```R
+install.packages("treat.sim", repos = c("https://pythonhealthdatascience.r-universe.dev", "https://cloud.r-project.org"))
+```
 ### Downloading the code
 
 Either clone the repository using git or click on the green "code" button and select "Download Zip".
@@ -122,6 +133,29 @@ renv::restore()
 ```
 
 > You may need to wait several minutes while the software environment is restored.
+
+### Running an experiment
+
+```R
+library(treat.sim)
+
+# create experiment and hide all logging
+default_exp <- create_experiment(log_level=0)
+
+# run 10 replications of the experiment (increase to improve histogram) 
+envs <- multiple_replications(default_exp, n_reps=10)
+
+# process simmer environments into simple data.frame of reps by KPIs
+rep_table <- replication_results_table(envs, default_exp, 60 * 19)
+
+# printout summary table
+create_summary_table(rep_table)
+
+## show histogram of patient throughput per day
+g <- histogram_of_replications(rep_table, "09_throughput", "patients")
+g
+
+```
 
 ## Online documentation produced by Quarto
 
