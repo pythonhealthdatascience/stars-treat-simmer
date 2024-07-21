@@ -11,3 +11,5 @@ rep_table <- replication_results_table(envs, default_exp, 60 * 19)
 
 # printout summary table
 create_summary_table(rep_table)
+
+histogram_of_replications(rep_table, "09_throughput", "patients")

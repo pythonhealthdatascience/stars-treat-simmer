@@ -112,7 +112,7 @@ resource_utilisation <- function(df, scheduled_time){
 #' @returns data.frame
 #' @importFrom simmer get_mon_arrivals 
 #' @importFrom tidyr spread
-#' @importFrom dplyr mutate group_by summarise
+#' @importFrom dplyr mutate group_by summarise recode across
 #' 
 resource_utilisation_by_replication <- function(reps, exp, results_collection_period){
   
@@ -278,7 +278,8 @@ replication_results_table <- function(reps, exp, results_collection_period){
 #' @param n_bins number of bins for the histogram
 #' 
 #' @returns plot
-#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 ggplot geom_histogram xlab ylab aes
+#' @importFrom tidyselect all_of
 #' 
 #' @export
 histogram_of_replications <- function(rep_table, column_name, unit_label, n_bins=10){
