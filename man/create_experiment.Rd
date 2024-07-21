@@ -19,7 +19,7 @@ create_experiment(
   prob_non_trauma_treat = DEFAULT_NON_TRAUMA_TREAT_P,
   nontrauma_treat_params = DEFAULT_NON_TRAUMA_TREATMENT_PARAMS,
   prob_trauma = DEFAULT_PROB_TRAUMA,
-  arrival_data_path = nelson_arrivals(),
+  arrival_profile = nelson_arrivals(),
   log_level = LOG_LEVEL
 )
 }
@@ -29,6 +29,37 @@ create_experiment(
 \item{n_reg_clerks}{Number of booking clerks}
 
 \item{n_exam_rooms}{Number of exam rooms}
+
+\item{n_trauma_rooms}{Number of trauma rooms for stabilisation}
+
+\item{n_non_trauma_cubicles}{Number of non-trauma treatment cubicles}
+
+\item{n_trauma_cubicles}{Number of trauma treatment cubicles}
+
+\item{triage_mean}{Mean triage duration (exponential distribution)}
+
+\item{stabilisation_mean}{Mean trauma stabilisation time (exponential distribution)}
+
+\item{trauma_treat_params}{list - mu and sigma for trauma treatment (lognormal)}
+
+\item{reg_params}{list - mu and signma for registration (lognormal)}
+
+\item{exam_params}{list mu and sigma for examination time (normal)}
+
+\item{prob_non_trauma_treat}{probability trauma patient requires treatment}
+
+\item{nontrauma_treat_params}{list - mu and signma for non trauma cubicle treatment (lognormal)}
+
+\item{prob_trauma}{probability arrival has trauma injuries}
+
+\item{arrival_profile}{time dependent arrival profile
+The default value used is the package internal datset `nelson_arrivals`. 
+A new dataset should include three columns: 
+1. period (equally spaced 60 min intervals 0 to 1020)
+2. arrival_rate (per hour)
+3. arrival_rate2 (per minute)}
+
+\item{log_level}{simmer log level. Set to 0 to hide all debug info as model runs.}
 }
 \value{
 A list
@@ -47,4 +78,7 @@ the corresponding parameters in the function.
 \examples{
 # sample from Nelson arrivals at time 20.0
 default_experiment <- create_experiment()
+
+# set number of triage bays to 3
+default_experiment <- create_experiment(n_triage_bays=3)
 }

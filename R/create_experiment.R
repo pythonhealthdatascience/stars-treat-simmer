@@ -87,11 +87,34 @@ DEFAULT_TRAUMA_CUBICLES <- 1
 #' @param n_triage_bays Number of triage bays
 #' @param n_reg_clerks Number of booking clerks
 #' @param n_exam_rooms Number of exam rooms
+#' @param n_trauma_rooms Number of trauma rooms for stabilisation 
+#' @param n_non_trauma_cubicles Number of non-trauma treatment cubicles
+#' @param n_trauma_cubicles Number of trauma treatment cubicles
+#' @param triage_mean Mean triage duration (exponential distribution)
+#' @param stabilisation_mean Mean trauma stabilisation time (exponential distribution)
+#' @param trauma_treat_params list - mu and sigma for trauma treatment (lognormal)
+#' @param reg_params list - mu and signma for registration (lognormal)
+#' @param exam_params list mu and sigma for examination time (normal)
+#' @param prob_non_trauma_treat probability trauma patient requires treatment
+#' @param nontrauma_treat_params list - mu and signma for non trauma cubicle treatment (lognormal)
+#' @param prob_trauma probability arrival has trauma injuries
+#' @param arrival_profile time dependent arrival profile
+#'    The default value used is the package internal datset `nelson_arrivals`. 
+#'    A new dataset should include three columns: 
+#'    1. period (equally spaced 60 min intervals 0 to 1020)
+#'    2. arrival_rate (per hour)
+#'    3. arrival_rate2 (per minute)
+#'  
+#' @param log_level simmer log level. Set to 0 to hide all debug info as model runs.
+#' 
 #' @returns A list
 #' @export
 #' @examples
 #' # sample from Nelson arrivals at time 20.0
 #' default_experiment <- create_experiment()
+#' 
+#' # set number of triage bays to 3
+#' default_experiment <- create_experiment(n_triage_bays=3)
 create_experiment <- function(n_triage_bays=DEFAULT_N_TRIAGE,
                               n_reg_clerks=DEFAULT_N_REG,
                               n_exam_rooms=DEFAULT_N_EXAM,
@@ -106,12 +129,9 @@ create_experiment <- function(n_triage_bays=DEFAULT_N_TRIAGE,
                               prob_non_trauma_treat=DEFAULT_NON_TRAUMA_TREAT_P,
                               nontrauma_treat_params=DEFAULT_NON_TRAUMA_TREATMENT_PARAMS,
                               prob_trauma=DEFAULT_PROB_TRAUMA,
-                              arrival_data_path=nelson_arrivals(),
+                              arrival_profile=nelson_arrivals(),
                               log_level=LOG_LEVEL) {
   
-  # load arrival data
-  #arrival_data <- load_arrival_data(path=arrival_data_path)
-  arrival_data <- arrival_data_path
   # create list of parameters
   experiment <- list(n_triage_bays=n_triage_bays,
                      n_reg_clerks=n_reg_clerks,
@@ -127,7 +147,7 @@ create_experiment <- function(n_triage_bays=DEFAULT_N_TRIAGE,
                      prob_non_trauma_treat=prob_non_trauma_treat,
                      nontrauma_treat_params=nontrauma_treat_params,
                      prob_trauma=prob_trauma,
-                     arrival_data=arrival_data,
+                     arrival_data=arrival_profile,
                      log_level=log_level)
   
   return(experiment)
