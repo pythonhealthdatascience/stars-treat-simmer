@@ -252,7 +252,7 @@ system_kpi_by_replication <- function(reps){
 #' @importFrom dplyr select
 #' 
 #' @export
-replication_results_table <- function(reps, exp, results_collection_period){
+replication_results_table <- function(reps, exp, results_collection_period=DEFAULT_RESULTS_COLLECTION_PERIOD){
   # generate and merge all results tables on the replication column
   results_table <- arrivals_by_replication(reps) %>% 
     merge(resource_waiting_times_by_replication(reps), by="replication", all=TRUE) %>% 
