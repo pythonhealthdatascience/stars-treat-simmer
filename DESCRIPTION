@@ -1,7 +1,7 @@
 Package: treat.sim
 Type: Package
 Title: Nelson's Treatment Centre Simulation in Simmer
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: 
     person(given = "Thomas",
            family = "Monks",

@@ -46,22 +46,19 @@ print(extra_faster_triage$triage_mean)
 
 ## Run the model and view a log of events
 
-To run the model pass a simmer environment and experiment list to the `single_run` function. To see a log of events set the environments log level to 1.
+To run the model pass an experiment list to the `single_run` function. To see a log of events set the environments log level to 1.
 
 > To reduce the printed log we se the `run_length` of the model to 100 time units (minutes). The default run length of the model is 1020 minutes.
 
 ```{r}
 default_experiment <- create_experiment()
-
-env <- simmer("TreatSimmer", log_level=1)
-env <- single_run(env, default_experiment, run_length=100.0)
+env <- single_run(default_experiment, run_length=100.0)
 ```
 
-To run the model and suppress the log exclude the `log_level`
+To run the model and suppress set `log_level=0`
 
 ```{r}
-default_experiment <- create_experiment()
-
-env <- simmer("TreatSimmer")
-env <- single_run(env, default_experiment, run_length=100.0)
+default_experiment <- create_experiment(log_level=0)
+env <- single_run(default_experiment, run_length=100.0)#
+print("Simulation complete.")
 ```

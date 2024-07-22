@@ -5,7 +5,6 @@
 \title{Perform a single replication of the model}
 \usage{
 single_run(
-  env,
   exp,
   rep_number = 1,
   run_length = DEFAULT_RESULTS_COLLECTION_PERIOD,
@@ -13,19 +12,17 @@ single_run(
 )
 }
 \arguments{
-\item{env}{simmer:environment}
-
 \item{exp}{An experiment in list form - contains all model parameters.}
 
 \item{rep_number}{the replication number (default=1)}
 
-\item{run_length}{run length of the simulation}
+\item{run_length}{run length of the simulation (default=1020 minutes)}
 
 \item{debug_arrivals}{boolean flag to show debug info for the thinning process
 Use treat.sim::create_experiment() to generate an experiment list.}
 }
 \value{
-a simmer environment
+a simmer environment with a completed model run.
 }
 \description{
 The function adds treat.sim resources to an environment.
@@ -35,8 +32,7 @@ returned for use in results analysis.
 \examples{
 set.seed(42)
 exp <- create_experiment(log_level=0)
-treat_sim <- simmer::simmer("TreatSim", log_level=exp$log_level)
-treat_sim <- single_run(treat_sim, exp)
+treat_sim <- single_run(exp)
 print("Simulation Complete.")
 }
 \seealso{
