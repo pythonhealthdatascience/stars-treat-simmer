@@ -19,7 +19,7 @@ create_experiment(
   prob_non_trauma_treat = DEFAULT_NON_TRAUMA_TREAT_P,
   nontrauma_treat_params = DEFAULT_NON_TRAUMA_TREATMENT_PARAMS,
   prob_trauma = DEFAULT_PROB_TRAUMA,
-  arrival_profile = nelson_arrivals(),
+  arrival_profile = nelson_arrivals,
   log_level = LOG_LEVEL
 )
 }
