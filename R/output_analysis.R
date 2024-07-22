@@ -112,7 +112,8 @@ resource_utilisation <- function(df, scheduled_time){
 #' @returns data.frame
 #' @importFrom simmer get_mon_arrivals 
 #' @importFrom tidyr spread
-#' @importFrom dplyr mutate group_by summarise recode across
+#' @importFrom dplyr mutate group_by summarise recode across arrange
+#' @importFrom tidyselect all_of
 #' 
 resource_utilisation_by_replication <- function(reps, exp, results_collection_period){
   
@@ -122,10 +123,10 @@ resource_utilisation_by_replication <- function(reps, exp, results_collection_pe
   # utilisation calculation:
   # simple calculation of total busy time / total scheduled resource time.
   # where total scheduled time = n_resource * results collection period.
-  util_wide <- get_mon_arrivals(reps, per_resource=TRUE) %>%
+  util_wide <- simmer::get_mon_arrivals(reps, per_resource=TRUE) %>%
     # total activity time in each replication per resource (long format)
-    group_by(across(all_of(cols))) %>%
-    summarise(in_use=sum(activity_time)) %>% 
+    dplyr::group_by(dplyr::across(tidyselect::all_of(cols))) %>%
+    dplyr::summarise(in_use=sum(activity_time)) %>% 
     # merge with the number of resources available
     merge(get_resource_counts(exp), by="resource", all=TRUE) %>% 
     # calculate the utilisation using scheduled resource availability
@@ -133,16 +134,16 @@ resource_utilisation_by_replication <- function(reps, exp, results_collection_pe
     # drop total activity time and count of resources
     subset(select = c(replication, resource, util)) %>% 
     # recode names
-    mutate(resource=recode(resource,
+    dplyr::mutate(resource=dplyr::recode(resource,
                            'triage_bay'='01b_triage_util',
                            'registration_clerk'='02b_registration_util',
                            'examination_room'='03b_examination_util',
                            'nontrauma_treat_cubicle'='04b_treatment_util(non_trauma)',
                            'trauma_room'='06b_stabilisation_util',
                            'trauma_treat_cubicle'='07b_treatment_util(trauma)')) %>%
-    arrange(resource) %>% 
+    dplyr::arrange(resource) %>% 
     # long to wide format...
-    spread(resource, util)
+    tidyr::spread(resource, util)
   
   return(util_wide)
 }
@@ -161,7 +162,7 @@ resource_utilisation_by_replication <- function(reps, exp, results_collection_pe
 arrivals_by_replication <- function(envs){
   results <- vector()
   for(env in envs){
-    results <- c(results, get_n_generated(env, "Patient"))
+    results <- c(results, simmer::get_n_generated(env, "Patient"))
   }
   
   results <- data.frame(replication = c(1:length(results)), 
@@ -184,7 +185,7 @@ arrivals_by_replication <- function(envs){
 system_kpi_for_rep_i <- function(reps, rep_i){
   
   # get attributes
-  att <- get_mon_attributes(reps)
+  att <- simmer::get_mon_attributes(reps)
   
   # for speed - limit to replication number.
   data_wide <- subset(att[att$replication == rep_i,], select = c(name, key, value)) %>% 
@@ -260,7 +261,7 @@ replication_results_table <- function(reps, exp, results_collection_period){
           by="replication", all=TRUE) %>% 
     merge(system_kpi_by_replication(reps), by="replication", all=TRUE) %>% 
     # sort by column names to get "replication" followed by ordered 00_, 01a, 01b and so on...
-    select(replication, sort(tidyselect::peek_vars()))
+    dplyr::select(replication, sort(tidyselect::peek_vars()))
   
   return(results_table)
 }
@@ -287,10 +288,10 @@ histogram_of_replications <- function(rep_table, column_name, unit_label, n_bins
   # Divide the x range for selected column into n_bins
   binwidth <- diff(range(select(rep_table, all_of(column_name))))/n_bins
   
-  g <- ggplot(rep_table, aes(.data[[column_name]])) +
-    geom_histogram(binwidth = binwidth, fill="steelblue", colour = "black") + 
-    xlab(paste(column_name, " (", unit_label, ")")) + 
-    ylab("Replications")
+  g <- ggplot2::ggplot(rep_table, ggplot2::aes(.data[[column_name]])) +
+    ggplot2::geom_histogram(binwidth = binwidth, fill="steelblue", colour = "black") + 
+    ggplot2::xlab(paste(column_name, " (", unit_label, ")")) + 
+    ggplot2::ylab("Replications")
   
   return(g)
 }
