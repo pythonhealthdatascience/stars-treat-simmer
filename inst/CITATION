@@ -4,9 +4,8 @@ bibentry(
   author   = "Thomas Monks, Alison Harper and Navonil Mustafee",
   journal  = "Journal of Simulation",
   year     = "2024",
-  volume   = ,
-  number   = ,
+  volume   = "",
+  number   = "",
   pages    = "1-20",
-  doi      = "10.1080/17477778.2024.2347882",
-  url      = "https://doi.org/10.1080/17477778.2024.2347882"
+  doi      = "10.1080/17477778.2024.2347882"
 )
