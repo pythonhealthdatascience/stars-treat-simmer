@@ -1,0 +1,64 @@
+---
+title: "Running multiple replications"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Running multiple replications}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(treat.sim)
+```
+
+To obtain the distribution a key performance measure from `treat.sim` you should run multiple replications. This runs the model $n$ times each time using different pseudo random numbers. 
+
+The first step is to create an experiment. When creating the experiment we recommend setting `log_level=0`. The mulitple replication functionality of `treat.sim` uses this parameter to suppress log output.
+
+> Use logging within a single run of the model rather than mulitple replications.
+
+```{r}
+default_experiment <- create_experiment(log_level=0)
+print(default_experiment$n_triage_bays)
+print(default_experiment$triage_mean)
+```
+
+Multiple replications of the model is achieved using the `multiple_replications` functions.  A user must pass an experiment and the number of replications.  
+
+```{r}
+envs <- multiple_replications(default_experiment, n_reps=5)
+```
+
+The multiple replications function returns a list of simmer environments rather than a neat table of key performance measures.  
+
+> We return the simmer environments as this allows you to do your own analysis of KPIs if desired.
+
+To obtain a table of replications versus KPIs use the `replication_results_table` function.
+
+> Note `replication_results_table` assumes that you have used the default simulation run length in its calculation of resource utilisation.  If you have run the model for a different run length from default please set the `results_collection_period` parameter.
+
+```{r}
+rep_table <- replication_results_table(envs, default_experiment)
+rep_table
+```
+
+## Full script
+
+```{r}
+# create default experiment - turn off event logging
+default_experiment <- create_experiment(log_level=0)
+
+# run 5 replications of the model (return is list of simmer envs)
+envs <- multiple_replications(default_experiment, n_reps=5)
+
+# convert envs into a data.table of KPIs by replication.
+rep_table <- replication_results_table(envs, default_experiment)
+rep_table
+```

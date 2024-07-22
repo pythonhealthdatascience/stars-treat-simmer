@@ -1,0 +1,54 @@
+---
+title: "Create a results summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Create a results summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(treat.sim)
+```
+
+## A quick summary of KPIs
+
+Use the `create_summary_table` function to calculate mean results for each performance measure across replications.
+
+First we run 10 replications of the model:
+
+```{r}
+# create default experiment - turn off event logging
+default_experiment <- create_experiment(log_level=0)
+
+# run 5 replications of the model (return is list of simmer envs)
+envs <- multiple_replications(default_experiment, n_reps=10)
+
+# convert envs into a data.table of KPIs by replication.
+rep_table <- replication_results_table(envs, default_experiment)
+```
+ 
+Then we pass the `data.frame` containing the replications to the `create_summary_table` function.
+
+```{r}
+summary_table <- create_summary_table(rep_table)
+summary_table
+```
+## A histogram of a selected KPI
+
+To quickly create a histogram use the `histogram_of_replications` function.  Set the `column_name` parameter to one of the KPI names listed in the summary table above. E.g.
+
+```{r}
+throughput <- histogram_of_replications(rep_table, "09_throughput", "patients")
+arrivals  <- histogram_of_replications(rep_table, "00_arrivals", "patients")
+
+throughput
+arrivals
+```

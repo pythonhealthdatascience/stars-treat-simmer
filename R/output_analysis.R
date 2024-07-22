@@ -40,20 +40,20 @@ waiting_time <- function(df){
 #' @returns data.frame
 #' @importFrom simmer get_mon_arrivals 
 #' @importFrom tidyr spread
-#' @importFrom dplyr mutate group_by summarise arrange
+#' @importFrom dplyr mutate group_by summarise arrange all_of across recode
 resource_waiting_times_by_replication <- function(reps) {
   # - WAITING TIMES FOR RESOURCES - #
   
   cols <- c("resource", "replication")
-  waiting_times_wide <- get_mon_arrivals(reps, per_resource=TRUE) %>%
+  waiting_times_wide <- simmer::get_mon_arrivals(reps, per_resource=TRUE) %>%
     # waiting time = end time - start time - activity time
     waiting_time() %>% 
     # mean waiting time in each replication
-    group_by(across(all_of(cols))) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(cols))) %>%
     # mean for each replication
-    summarise(rep_waiting_time=mean(waiting_time)) %>% 
+    dplyr::summarise(rep_waiting_time=mean(waiting_time)) %>% 
     # recode kpi names
-    mutate(resource=recode(resource,
+    dplyr::mutate(resource=dplyr::recode(resource,
                            'triage_bay'='01a_triage_wait',
                            'registration_clerk'='02a_registration_wait',
                            'examination_room'='03a_examination_wait',
@@ -61,9 +61,9 @@ resource_waiting_times_by_replication <- function(reps) {
                            'trauma_room'='06a_stabilisation_wait',
                            'trauma_treat_cubicle'='07a_treatment_wait(trauma)')) %>%
     # organise
-    arrange(resource) %>% 
+    dplyr::arrange(resource) %>% 
     # long to wide format ...
-    spread(resource, rep_waiting_time)
+    tidyr::spread(resource, rep_waiting_time)
   
   return(waiting_times_wide)
 }
@@ -112,7 +112,8 @@ resource_utilisation <- function(df, scheduled_time){
 #' @returns data.frame
 #' @importFrom simmer get_mon_arrivals 
 #' @importFrom tidyr spread
-#' @importFrom dplyr mutate group_by summarise recode across
+#' @importFrom dplyr mutate group_by summarise recode across arrange
+#' @importFrom tidyselect all_of
 #' 
 resource_utilisation_by_replication <- function(reps, exp, results_collection_period){
   
@@ -122,27 +123,27 @@ resource_utilisation_by_replication <- function(reps, exp, results_collection_pe
   # utilisation calculation:
   # simple calculation of total busy time / total scheduled resource time.
   # where total scheduled time = n_resource * results collection period.
-  util_wide <- get_mon_arrivals(reps, per_resource=TRUE) %>%
+  util_wide <- simmer::get_mon_arrivals(reps, per_resource=TRUE) %>%
     # total activity time in each replication per resource (long format)
-    group_by(across(all_of(cols))) %>%
-    summarise(in_use=sum(activity_time)) %>% 
+    dplyr::group_by(dplyr::across(tidyselect::all_of(cols))) %>%
+    dplyr::summarise(in_use=sum(activity_time)) %>% 
     # merge with the number of resources available
     merge(get_resource_counts(exp), by="resource", all=TRUE) %>% 
     # calculate the utilisation using scheduled resource availability
     resource_utilisation(results_collection_period) %>% 
     # drop total activity time and count of resources
-    subset(select = c(replication, resource, util)) %>% 
+    subset(select = c('replication', 'resource', 'util')) %>% 
     # recode names
-    mutate(resource=recode(resource,
+    dplyr::mutate(resource=dplyr::recode(resource,
                            'triage_bay'='01b_triage_util',
                            'registration_clerk'='02b_registration_util',
                            'examination_room'='03b_examination_util',
                            'nontrauma_treat_cubicle'='04b_treatment_util(non_trauma)',
                            'trauma_room'='06b_stabilisation_util',
                            'trauma_treat_cubicle'='07b_treatment_util(trauma)')) %>%
-    arrange(resource) %>% 
+    dplyr::arrange(resource) %>% 
     # long to wide format...
-    spread(resource, util)
+    tidyr::spread(resource, util)
   
   return(util_wide)
 }
@@ -161,7 +162,7 @@ resource_utilisation_by_replication <- function(reps, exp, results_collection_pe
 arrivals_by_replication <- function(envs){
   results <- vector()
   for(env in envs){
-    results <- c(results, get_n_generated(env, "Patient"))
+    results <- c(results, simmer::get_n_generated(env, "Patient"))
   }
   
   results <- data.frame(replication = c(1:length(results)), 
@@ -184,7 +185,7 @@ arrivals_by_replication <- function(envs){
 system_kpi_for_rep_i <- function(reps, rep_i){
   
   # get attributes
-  att <- get_mon_attributes(reps)
+  att <- simmer::get_mon_attributes(reps)
   
   # for speed - limit to replication number.
   data_wide <- subset(att[att$replication == rep_i,], select = c(name, key, value)) %>% 
@@ -251,7 +252,7 @@ system_kpi_by_replication <- function(reps){
 #' @importFrom dplyr select
 #' 
 #' @export
-replication_results_table <- function(reps, exp, results_collection_period){
+replication_results_table <- function(reps, exp, results_collection_period=DEFAULT_RESULTS_COLLECTION_PERIOD){
   # generate and merge all results tables on the replication column
   results_table <- arrivals_by_replication(reps) %>% 
     merge(resource_waiting_times_by_replication(reps), by="replication", all=TRUE) %>% 
@@ -260,41 +261,10 @@ replication_results_table <- function(reps, exp, results_collection_period){
           by="replication", all=TRUE) %>% 
     merge(system_kpi_by_replication(reps), by="replication", all=TRUE) %>% 
     # sort by column names to get "replication" followed by ordered 00_, 01a, 01b and so on...
-    select(replication, sort(tidyselect::peek_vars()))
+    dplyr::select(replication, sort(tidyselect::peek_vars()))
   
   return(results_table)
 }
-
-
-#' Histogram of replications for a selected KPI
-#' 
-#' @description
-#' Accepts a table of replication results and a ggplot histogram object
-#' for a selected column.
-#' 
-#' @param rep_table data.frame containing replications (rows) and KPIs (cols)
-#' @param column_name string name of the KPI to plot
-#' @param unit_label string of the x-axis label unit
-#' @param n_bins number of bins for the histogram
-#' 
-#' @returns plot
-#' @importFrom ggplot2 ggplot geom_histogram xlab ylab aes
-#' @importFrom tidyselect all_of
-#' 
-#' @export
-histogram_of_replications <- function(rep_table, column_name, unit_label, n_bins=10){
-  
-  # Divide the x range for selected column into n_bins
-  binwidth <- diff(range(select(rep_table, all_of(column_name))))/n_bins
-  
-  g <- ggplot(rep_table, aes(.data[[column_name]])) +
-    geom_histogram(binwidth = binwidth, fill="steelblue", colour = "black") + 
-    xlab(paste(column_name, " (", unit_label, ")")) + 
-    ylab("Replications")
-  
-  return(g)
-}
-
 
 #' Create a summary table of multiple replications data
 #' 

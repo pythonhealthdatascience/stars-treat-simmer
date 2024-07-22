@@ -1,8 +1,8 @@
 ---
-title: "treat_sim"
+title: "Running an experiment"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{treat_sim}
+  %\VignetteIndexEntry{Running an experiment}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,4 +16,52 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(treat.sim)
+library(simmer)
+```
+
+## Creating an experiment for the model
+
+In `treat.sim` all experimental parameters are held in a `list`. You can use the convenience function `create_experiment` to create a pre-populated list with all the correct parameter names and default values.
+
+> use help('create_experiment') to see the full list of parameters available. 
+
+```{r}
+default_experiment <- create_experiment()
+print(default_experiment$n_triage_bays)
+print(default_experiment$triage_mean)
+```
+
+The above example creates a default experiment. To vary parameters simply set the corresponding argument in the `create_experiment` function.
+
+```{r}
+extra_triage <- create_experiment(n_triage_bays=2)
+print(extra_triage$n_triage_bays)
+
+extra_faster_triage <- create_experiment(n_triage_bays=2,
+                                         triage_mean=2.75)
+
+print(extra_faster_triage$n_triage_bays)
+print(extra_faster_triage$triage_mean)
+```
+
+## Run the model and view a log of events
+
+To run the model pass a simmer environment and experiment list to the `single_run` function. To see a log of events set the environments log level to 1.
+
+> To reduce the printed log we se the `run_length` of the model to 100 time units (minutes). The default run length of the model is 1020 minutes.
+
+```{r}
+default_experiment <- create_experiment()
+
+env <- simmer("TreatSimmer", log_level=1)
+env <- single_run(env, default_experiment, run_length=100.0)
+```
+
+To run the model and suppress the log exclude the `log_level`
+
+```{r}
+default_experiment <- create_experiment()
+
+env <- simmer("TreatSimmer")
+env <- single_run(env, default_experiment, run_length=100.0)
 ```

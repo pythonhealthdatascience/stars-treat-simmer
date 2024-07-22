@@ -4,7 +4,11 @@
 \alias{replication_results_table}
 \title{Function to create the replications table}
 \usage{
-replication_results_table(reps, exp, results_collection_period)
+replication_results_table(
+  reps,
+  exp,
+  results_collection_period = DEFAULT_RESULTS_COLLECTION_PERIOD
+)
 }
 \arguments{
 \item{reps}{list of simmer environments}
